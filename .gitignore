@@ -1,4 +1,5 @@
 /build/
+/build-conan/
 /out/
 /.vs/
 /.idea/
