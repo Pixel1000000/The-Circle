@@ -1,0 +1,11 @@
+{
+  "window": {
+    "title": "The Circle",
+    "width": 1280,
+    "height": 720,
+    "framerate_limit": 60
+  },
+  "player": {
+    "speed": 280
+  }
+}
