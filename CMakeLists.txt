@@ -9,10 +9,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(SFML REQUIRED COMPONENTS Graphics Window System)
+find_package(SFML REQUIRED COMPONENTS Graphics Window System Audio)
+find_package(EnTT REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
-add_executable(${PROJECT_NAME}
-    src/main.cpp
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        src
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -20,6 +27,9 @@ target_link_libraries(${PROJECT_NAME}
         sfml-graphics
         sfml-window
         sfml-system
+        sfml-audio
+        EnTT::EnTT
+        nlohmann_json::nlohmann_json
 )
 
 target_compile_features(${PROJECT_NAME}

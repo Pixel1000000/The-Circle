@@ -1,0 +1,33 @@
+{
+  "menu.newgame": "New Game",
+  "menu.quit": "Quit",
+
+  "hud.health": "Health",
+  "hud.fragments": "Key Fragments",
+  "hud.potion": "Potion",
+
+  "meta.title": "Upgrade Your Hero",
+  "meta.points": "Points",
+  "meta.strength": "Strength",
+  "meta.endurance": "Endurance",
+  "meta.health": "Health",
+  "meta.continue": "Continue",
+
+  "death.victory": "Victory!",
+  "death.defeat": "You Died",
+  "death.kills": "Enemies Defeated",
+  "death.biomes": "Biomes Cleared",
+  "death.fragments": "Key Fragments Collected",
+  "death.boss": "Boss Defeated",
+  "death.points": "Points Earned",
+  "death.continue": "Continue",
+
+  "common.yes": "Yes",
+  "common.no": "No",
+
+  "tutorial.title": "Controls",
+  "tutorial.move": "WASD / Arrows - Move",
+  "tutorial.combat": "Auto-attack near enemies",
+  "tutorial.potion": "E / Space - Use Potion",
+  "tutorial.menu": "Esc - Main Menu"
+}

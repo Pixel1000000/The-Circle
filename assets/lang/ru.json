@@ -1,0 +1,33 @@
+{
+  "menu.newgame": "Новая игра",
+  "menu.quit": "Выход",
+
+  "hud.health": "Здоровье",
+  "hud.fragments": "Фрагменты ключа",
+  "hud.potion": "Зелье",
+
+  "meta.title": "Улучшение героя",
+  "meta.points": "Очки",
+  "meta.strength": "Сила",
+  "meta.endurance": "Выносливость",
+  "meta.health": "Здоровье",
+  "meta.continue": "Продолжить",
+
+  "death.victory": "Победа!",
+  "death.defeat": "Вы погибли",
+  "death.kills": "Враги уничтожены",
+  "death.biomes": "Биомы пройдены",
+  "death.fragments": "Собрано фрагментов",
+  "death.boss": "Босс побеждён",
+  "death.points": "Получено очков",
+  "death.continue": "Продолжить",
+
+  "common.yes": "Да",
+  "common.no": "Нет",
+
+  "tutorial.title": "Управление",
+  "tutorial.move": "WASD / Стрелки - движение",
+  "tutorial.combat": "Автоатака рядом с врагами",
+  "tutorial.potion": "E / Пробел - зелье",
+  "tutorial.menu": "Esc - в меню"
+}

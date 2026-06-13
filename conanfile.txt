@@ -1,5 +1,7 @@
 [requires]
 sfml/2.6.2
+entt/3.13.2
+nlohmann_json/3.11.3
 
 [generators]
 CMakeDeps

@@ -1,0 +1,17 @@
+{
+  "baseSpeed": 200,
+  "baseHealth": 100,
+
+  "meleeRange": 40,
+  "meleeCooldown": 0.6,
+  "meleeOffset": 20,
+  "baseDamage": 8,
+
+  "rangedRange": 300,
+  "rangedCooldown": 1.0,
+  "rangedProjectileSpeed": 400,
+
+  "potionHealAmount": 50,
+  "potionMaxCharges": 3,
+  "potionKillsPerCharge": 5
+}
