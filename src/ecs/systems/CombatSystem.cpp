@@ -10,6 +10,8 @@ namespace tc {
 
 namespace {
 constexpr float PROJECTILE_HIT_RADIUS = 20.0f;
+constexpr float WORLD_WIDTH = 1280.0f;
+constexpr float WORLD_HEIGHT = 720.0f;
 }
 
 void CombatSystem::update(entt::registry& registry, float dt)
@@ -38,37 +40,51 @@ void CombatSystem::updateMelee(entt::registry& registry, float dt)
             }
         }
 
-        entt::entity target = entt::null;
-        float bestDistSq = melee.range * melee.range;
-
-        auto tryTarget = [&](entt::entity candidate, const Position& tpos) {
-            const float dx = tpos.x - origin.x;
-            const float dy = tpos.y - origin.y;
-            const float distSq = dx * dx + dy * dy;
-            if (distSq <= bestDistSq) {
-                bestDistSq = distSq;
-                target = candidate;
-            }
-        };
+        const float rangeSq = melee.range * melee.range;
+        const int damage = view.get<Damage>(entity).value;
 
         if (isPlayer) {
+            // The player's melee attack hits every enemy within range, not
+            // just the nearest one.
+            bool hitAny = false;
             for (auto candidate : registry.view<EnemyTag, Position, Health>()) {
-                tryTarget(candidate, registry.get<Position>(candidate));
+                const auto& tpos = registry.get<Position>(candidate);
+                const float dx = tpos.x - origin.x;
+                const float dy = tpos.y - origin.y;
+                if (dx * dx + dy * dy > rangeSq) continue;
+
+                applyDamage(registry, entity, candidate, damage);
+                if (const auto* effect = registry.try_get<StatusEffect>(entity)) {
+                    registry.emplace_or_replace<StatusEffect>(candidate, effect->type, effect->dps, effect->duration, effect->duration);
+                }
+                hitAny = true;
             }
+
+            if (!hitAny) continue;
         } else {
+            entt::entity target = entt::null;
+            float bestDistSq = rangeSq;
+
             for (auto candidate : registry.view<PlayerTag, Position, Health>()) {
-                tryTarget(candidate, registry.get<Position>(candidate));
+                const auto& tpos = registry.get<Position>(candidate);
+                const float dx = tpos.x - origin.x;
+                const float dy = tpos.y - origin.y;
+                const float distSq = dx * dx + dy * dy;
+                if (distSq <= bestDistSq) {
+                    bestDistSq = distSq;
+                    target = candidate;
+                }
+            }
+
+            if (target == entt::null) continue;
+
+            applyDamage(registry, entity, target, damage);
+            if (const auto* effect = registry.try_get<StatusEffect>(entity)) {
+                registry.emplace_or_replace<StatusEffect>(target, effect->type, effect->dps, effect->duration, effect->duration);
             }
         }
 
-        if (target == entt::null) continue;
-
-        applyDamage(registry, entity, target, view.get<Damage>(entity).value);
         melee.timer = melee.cooldown;
-
-        if (const auto* effect = registry.try_get<StatusEffect>(entity)) {
-            registry.emplace_or_replace<StatusEffect>(target, effect->type, effect->dps, effect->duration, effect->duration);
-        }
     }
 }
 
@@ -128,6 +144,12 @@ void CombatSystem::updateProjectiles(entt::registry& registry)
     auto view = registry.view<ProjectileTag, Position, Damage>();
     for (auto entity : view) {
         const auto& pos = view.get<Position>(entity);
+
+        if (pos.x < 0.0f || pos.x > WORLD_WIDTH || pos.y < 0.0f || pos.y > WORLD_HEIGHT) {
+            toDestroy.push_back(entity);
+            continue;
+        }
+
         const int ownerBiome = view.get<ProjectileTag>(entity).ownerBiome;
         const int damage = view.get<Damage>(entity).value;
 

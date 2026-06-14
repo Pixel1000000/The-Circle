@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <SFML/Graphics.hpp>
 
 namespace tc {
@@ -51,6 +53,12 @@ struct PlayerTag {};
 // Tag: enemy, tied to the biome it spawned in
 struct EnemyTag {
     int biome = 1;
+};
+
+// Display name shown on the nameplate above an enemy's HP bar. `id` is the
+// enemy/boss template id and is looked up as localization key "enemy.<id>".
+struct Name {
+    std::string id;
 };
 
 // Tag: projectile
@@ -109,12 +117,21 @@ struct StatusEffect {
     float dps = 0.0f;
     float duration = 0.0f;
     float timer = 0.0f;
+    float damageAccumulator = 0.0f;
 };
 
 // Key fragment drop chance, attached to enemies
 struct KeyFragmentDrop {
     float chance = 0.0f;
 };
+
+// Equipment drop chance, attached to enemies
+struct EquipmentDrop {
+    float chance = 0.0f;
+};
+
+// Marks an entity as a boss
+struct BossTag {};
 
 // Key fragment counter, attached to the player
 struct KeyFragmentHolder {
@@ -140,6 +157,15 @@ struct AIBehavior {
         BOSS_ELEMENTAL,
         BOSS_LICH
     } type = CHASE;
+};
+
+// Boss-specific AI state: phase timing/cycling and the boss's base movement
+// speed (before per-phase multipliers are applied)
+struct BossAI {
+    float phaseTimer = 0.0f;
+    int phaseIndex = 0;
+    float baseSpeed = 0.0f;
+    bool rangedMode = false;
 };
 
 // Player equipment - tiers correspond to biome difficulty (1-4, 0 = none)

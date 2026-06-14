@@ -55,6 +55,7 @@ int MetaProgression::computePointsEarned(const RunSummary& summary) const
     if (summary.bossDefeated) {
         points += POINTS_FOR_BOSS;
     }
+    points += summary.keyFragments * POINTS_PER_FRAGMENT;
     return points;
 }
 

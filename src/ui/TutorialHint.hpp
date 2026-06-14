@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include <SFML/Graphics.hpp>
 
 #include "core/FontManager.hpp"
@@ -25,6 +27,11 @@ private:
 
     sf::RectangleShape panel;
     sf::RectangleShape tab;
+
+    sf::Text arrowText;
+    sf::Text titleText;
+    std::array<sf::Text, 4> lineTexts;
+    bool textInitialized = false;
 };
 
 } // namespace tc

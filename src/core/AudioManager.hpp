@@ -1,8 +1,8 @@
 #pragma once
 
+#include <list>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 #include <SFML/Audio.hpp>
 
@@ -23,7 +23,7 @@ private:
     std::string currentTrack;
 
     std::unordered_map<std::string, sf::SoundBuffer> sfxBuffers;
-    std::vector<sf::Sound> activeSounds;
+    std::list<sf::Sound> activeSounds;
 };
 
 } // namespace tc

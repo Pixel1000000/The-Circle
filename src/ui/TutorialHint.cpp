@@ -55,15 +55,29 @@ void TutorialHint::render(sf::RenderWindow& window, const Localization& localiza
     if (fontManager.isLoaded()) {
         const sf::Font& font = fontManager.getFont(localization.getCurrentLanguage());
 
-        sf::Text arrow;
-        arrow.setFont(font);
-        arrow.setCharacterSize(20);
-        arrow.setFillColor(sf::Color::White);
-        arrow.setString(visible ? ">" : "<");
-        const sf::FloatRect bounds = arrow.getLocalBounds();
-        arrow.setOrigin(bounds.left + bounds.width / 2.0f, bounds.top + bounds.height / 2.0f);
-        arrow.setPosition(tabRect.left + tabRect.width / 2.0f, tabRect.top + tabRect.height / 2.0f);
-        window.draw(arrow);
+        if (!textInitialized) {
+            arrowText.setFont(font);
+            arrowText.setCharacterSize(20);
+            arrowText.setFillColor(sf::Color::White);
+
+            titleText.setFont(font);
+            titleText.setCharacterSize(20);
+            titleText.setFillColor(sf::Color(220, 200, 120));
+
+            for (auto& line : lineTexts) {
+                line.setFont(font);
+                line.setCharacterSize(15);
+                line.setFillColor(sf::Color::White);
+            }
+
+            textInitialized = true;
+        }
+
+        arrowText.setString(visible ? ">" : "<");
+        const sf::FloatRect bounds = arrowText.getLocalBounds();
+        arrowText.setOrigin(bounds.left + bounds.width / 2.0f, bounds.top + bounds.height / 2.0f);
+        arrowText.setPosition(tabRect.left + tabRect.width / 2.0f, tabRect.top + tabRect.height / 2.0f);
+        window.draw(arrowText);
     }
 
     if (!visible) {
@@ -76,17 +90,12 @@ void TutorialHint::render(sf::RenderWindow& window, const Localization& localiza
         return;
     }
 
-    const sf::Font& font = fontManager.getFont(localization.getCurrentLanguage());
     const float textX = panel.getPosition().x + 14.0f;
     float y = panel.getPosition().y + 12.0f;
 
-    sf::Text title;
-    title.setFont(font);
-    title.setCharacterSize(20);
-    title.setFillColor(sf::Color(220, 200, 120));
-    title.setString(toSfString(localization.get("tutorial.title")));
-    title.setPosition(textX, y);
-    window.draw(title);
+    titleText.setString(toSfString(localization.get("tutorial.title")));
+    titleText.setPosition(textX, y);
+    window.draw(titleText);
     y += 36.0f;
 
     const char* lineKeys[] = {
@@ -96,14 +105,10 @@ void TutorialHint::render(sf::RenderWindow& window, const Localization& localiza
         "tutorial.menu",
     };
 
-    for (const char* key : lineKeys) {
-        sf::Text line;
-        line.setFont(font);
-        line.setCharacterSize(15);
-        line.setFillColor(sf::Color::White);
-        line.setString(toSfString(localization.get(key)));
-        line.setPosition(textX, y);
-        window.draw(line);
+    for (size_t i = 0; i < lineTexts.size(); ++i) {
+        lineTexts[i].setString(toSfString(localization.get(lineKeys[i])));
+        lineTexts[i].setPosition(textX, y);
+        window.draw(lineTexts[i]);
         y += 30.0f;
     }
 }

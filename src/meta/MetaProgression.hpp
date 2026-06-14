@@ -20,6 +20,7 @@ public:
     static constexpr int POINTS_PER_10_KILLS = 1;
     static constexpr int POINTS_PER_BIOME = 2;
     static constexpr int POINTS_FOR_BOSS = 5;
+    static constexpr int POINTS_PER_FRAGMENT = 0; // easy to change
 
     void load(const std::string& path = "meta_save.json");
     void save(const std::string& path = "meta_save.json") const;

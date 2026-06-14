@@ -1,6 +1,5 @@
 #include "core/AudioManager.hpp"
 
-#include <algorithm>
 #include <iostream>
 
 namespace tc {
@@ -41,10 +40,7 @@ void AudioManager::playSfx(const std::string& name)
         it = sfxBuffers.emplace(name, std::move(buffer)).first;
     }
 
-    activeSounds.erase(
-        std::remove_if(activeSounds.begin(), activeSounds.end(),
-            [](const sf::Sound& sound) { return sound.getStatus() != sf::Sound::Playing; }),
-        activeSounds.end());
+    activeSounds.remove_if([](const sf::Sound& sound) { return sound.getStatus() != sf::Sound::Playing; });
 
     activeSounds.emplace_back(it->second);
     activeSounds.back().play();

@@ -58,6 +58,7 @@ entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTem
     entt::entity entity = registry.create();
 
     registry.emplace<EnemyTag>(entity, biomeTier(tmpl.biome));
+    registry.emplace<Name>(entity, tmpl.id);
     registry.emplace<Position>(entity, position.x, position.y);
     registry.emplace<Velocity>(entity, 0.0f, 0.0f);
     registry.emplace<Speed>(entity, tmpl.speed);
@@ -67,6 +68,7 @@ entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTem
     registry.emplace<AIBehavior>(entity, tmpl.behavior);
     registry.emplace<Renderable>(entity, tmpl.color, tmpl.size);
     registry.emplace<KeyFragmentDrop>(entity, tmpl.keyFragmentDropChance);
+    registry.emplace<EquipmentDrop>(entity, tmpl.equipmentDropChance);
 
     if (tmpl.isRanged) {
         registry.emplace<RangedCombat>(entity, tmpl.range, tmpl.projectileSpeed, tmpl.cooldown, 0.0f);
@@ -94,6 +96,7 @@ entt::entity EntityFactory::createBoss(entt::registry& registry, const BossTempl
     entt::entity entity = registry.create();
 
     registry.emplace<EnemyTag>(entity, biomeTier(tmpl.theme));
+    registry.emplace<Name>(entity, tmpl.id);
     registry.emplace<Position>(entity, position.x, position.y);
     registry.emplace<Velocity>(entity, 0.0f, 0.0f);
     registry.emplace<Speed>(entity, tmpl.speed);
@@ -102,7 +105,19 @@ entt::entity EntityFactory::createBoss(entt::registry& registry, const BossTempl
     registry.emplace<Damage>(entity, tmpl.damage);
     registry.emplace<AIBehavior>(entity, tmpl.behavior);
     registry.emplace<Renderable>(entity, tmpl.color, tmpl.size);
-    registry.emplace<MeleeCombat>(entity, std::max(tmpl.size.x, tmpl.size.y), 1.0f, 0.0f);
+    registry.emplace<BossAI>(entity, 0.0f, 0, tmpl.speed, false);
+    registry.emplace<BossTag>(entity);
+
+    switch (tmpl.behavior) {
+    case AIBehavior::BOSS_ELEMENTAL:
+        registry.emplace<RangedCombat>(entity, 260.0f, 320.0f, 1.2f, 0.0f);
+        break;
+    case AIBehavior::BOSS_LICH:
+        break;
+    default:
+        registry.emplace<MeleeCombat>(entity, std::max(tmpl.size.x, tmpl.size.y), 1.0f, 0.0f);
+        break;
+    }
 
     return entity;
 }

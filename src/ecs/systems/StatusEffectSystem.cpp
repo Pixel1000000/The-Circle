@@ -17,8 +17,12 @@ void StatusEffectSystem::update(entt::registry& registry, float dt)
         auto& health = view.get<Health>(entity);
 
         if (effect.type == StatusEffect::POISON) {
-            const int tick = static_cast<int>(effect.dps * dt);
-            health.current = std::max(health.current - tick, 0);
+            effect.damageAccumulator += effect.dps * dt;
+            const int tick = static_cast<int>(effect.damageAccumulator);
+            if (tick > 0) {
+                effect.damageAccumulator -= static_cast<float>(tick);
+                health.current = std::max(health.current - tick, 0);
+            }
         }
 
         effect.timer -= dt;

@@ -35,6 +35,7 @@ struct EnemyTemplate {
     bool explodesOnDeath = false;
 
     float keyFragmentDropChance = 0.0f;
+    float equipmentDropChance = 0.1f;
 
     sf::Color color = sf::Color::Red;
     sf::Vector2f size = {32.0f, 32.0f};

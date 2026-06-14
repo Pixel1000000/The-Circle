@@ -81,13 +81,28 @@ void PlayState::spawnBiomeEnemies()
     std::uniform_real_distribution<float> yDist(64.0f, static_cast<float>(Game::LOGICAL_HEIGHT) - 64.0f);
 
     constexpr int ENEMIES_PER_TEMPLATE = 3;
+    constexpr float MIN_SPAWN_DIST_SQ = 200.0f * 200.0f;
+    constexpr int MAX_SPAWN_ATTEMPTS = 20;
+
+    const auto& playerPosition = registry.get<Position>(player);
+    const sf::Vector2f playerPos{playerPosition.x, playerPosition.y};
 
     auto& biome = world.getCurrentBiome();
     const auto templates = ConfigLoader::get().getEnemyConfig().getEnemiesForBiome(biome.getType());
 
     for (const auto& tmpl : templates) {
         for (int i = 0; i < ENEMIES_PER_TEMPLATE; ++i) {
-            const sf::Vector2f position{xDist(rng), yDist(rng)};
+            sf::Vector2f position;
+            int attempts = 0;
+            do {
+                position = {xDist(rng), yDist(rng)};
+                const float dx = position.x - playerPos.x;
+                const float dy = position.y - playerPos.y;
+                if (dx * dx + dy * dy >= MIN_SPAWN_DIST_SQ) {
+                    break;
+                }
+            } while (++attempts < MAX_SPAWN_ATTEMPTS);
+
             const entt::entity entity = EntityFactory::createEnemy(registry, tmpl, position);
             biome.getEnemies().push_back(entity);
         }
@@ -166,6 +181,10 @@ void PlayState::handleInput(const sf::Event& event)
         game.changeState(std::make_unique<MainMenuState>(game));
     } else if (event.key.code == sf::Keyboard::E || event.key.code == sf::Keyboard::Space) {
         combatSystem.usePotion(registry, player);
+    } else if (event.key.code == sf::Keyboard::F) {
+        if (!inBossRoom && world.getCurrentBiome().isUnlocked()) {
+            advanceToNextBiome();
+        }
     }
 }
 
@@ -185,6 +204,7 @@ void PlayState::update(float dt)
     }
 
     movementSystem.update(registry, dt);
+    collisionSystem.update(registry);
 
     auto& playerPos = registry.get<Position>(player);
     const auto& playerSize = registry.get<Renderable>(player).size;
@@ -195,13 +215,27 @@ void PlayState::update(float dt)
     combatSystem.update(registry, dt);
     statusEffectSystem.update(registry, dt);
 
-    const LootResult lootResult = lootSystem.update(registry, player);
+    const LootResult lootResult = lootSystem.update(registry, player, world.getCurrentBiome().getEnemies());
     runSummary.kills += lootResult.kills;
     if (lootResult.fragmentsCollected > 0) {
         for (int i = 0; i < lootResult.fragmentsCollected; ++i) {
             world.getCurrentBiome().addKeyFragment();
         }
         runSummary.keyFragments += lootResult.fragmentsCollected;
+    }
+    if (lootResult.equipmentDropped) {
+        EntityFactory::applyEquipmentStats(registry, player, ConfigLoader::get().getPlayerConfig(),
+            ConfigLoader::get().getEquipmentConfig(), game.getMetaProgression().getStats());
+        hud.showEquipmentDrop(lootResult.droppedSlot, lootResult.droppedTier);
+    }
+
+    if (!inBossRoom) {
+        auto& enemies = world.getCurrentBiome().getEnemies();
+        enemies.erase(std::remove_if(enemies.begin(), enemies.end(),
+            [this](entt::entity e) { return !registry.valid(e); }), enemies.end());
+        if (enemies.empty()) {
+            spawnBiomeEnemies();
+        }
     }
 
     const auto& playerHealth = registry.get<Health>(player);
@@ -211,12 +245,17 @@ void PlayState::update(float dt)
     }
 
     if (inBossRoom) {
-        if (lootResult.kills > 0) {
+        bool bossAlive = false;
+        for (auto entity : registry.view<BossTag, Health>()) {
+            if (registry.get<Health>(entity).current > 0) {
+                bossAlive = true;
+                break;
+            }
+        }
+        if (!bossAlive) {
             finishRun(true);
             return;
         }
-    } else if (world.getCurrentBiome().isUnlocked()) {
-        advanceToNextBiome();
     }
 }
 
@@ -225,8 +264,11 @@ void PlayState::render(sf::RenderWindow& window)
     const BiomeType displayedBiome = inBossRoom ? world.getBossRoomTheme() : world.getCurrentBiome().getType();
     window.clear(backgroundColorFor(displayedBiome));
 
-    renderSystem.update(registry, window, lastDt);
-    hud.render(window, registry, player, game.getLocalization(), game.getFontManager(), Biome::KEY_FRAGMENTS_REQUIRED);
+    const bool showNextBiomeHint = !inBossRoom && world.getCurrentBiome().isUnlocked();
+
+    renderSystem.update(registry, window, game.getLocalization(), game.getFontManager(), lastDt);
+    hud.render(window, registry, player, game.getLocalization(), game.getFontManager(), Biome::KEY_FRAGMENTS_REQUIRED,
+        showNextBiomeHint, lastDt);
     tutorialHint.render(window, game.getLocalization(), game.getFontManager());
 }
 

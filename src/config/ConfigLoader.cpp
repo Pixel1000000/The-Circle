@@ -204,6 +204,7 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
             tmpl.phaseThrough = entry.value("phaseThrough", tmpl.phaseThrough);
             tmpl.explodesOnDeath = entry.value("explodesOnDeath", tmpl.explodesOnDeath);
             tmpl.keyFragmentDropChance = entry.value("keyFragmentDropChance", tmpl.keyFragmentDropChance);
+            tmpl.equipmentDropChance = entry.value("equipmentDropChance", tmpl.equipmentDropChance);
 
             tmpl.color = colorFromJson(entry.value("color", nlohmann::json::array()), tmpl.color);
             tmpl.size = vec2FromJson(entry.value("size", nlohmann::json::array()), tmpl.size);

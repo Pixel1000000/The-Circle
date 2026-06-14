@@ -84,11 +84,11 @@ void DeathState::render(sf::RenderWindow& window)
     };
 
     float y = 200.0f;
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(24);
+    text.setFillColor(sf::Color::White);
     for (const auto& line : lines) {
-        sf::Text text;
-        text.setFont(font);
-        text.setCharacterSize(24);
-        text.setFillColor(sf::Color::White);
         text.setString(toSfString(line));
         text.setPosition(PANEL_X, y);
         window.draw(text);

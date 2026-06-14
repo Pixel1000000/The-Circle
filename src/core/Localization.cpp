@@ -27,6 +27,7 @@ std::string Localization::get(const std::string& key) const
     if (strings.contains(key)) {
         return strings.at(key).get<std::string>();
     }
+    std::cerr << "[Localization] Missing key: " << key << "\n";
     return key;
 }
 

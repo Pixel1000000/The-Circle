@@ -23,15 +23,16 @@ void MetaUpgradeState::handleInput(const sf::Event& event)
 
     switch (button) {
     case MetaUpgradeScreen::Button::STRENGTH:
-        if (meta.spendPointOnStrength()) meta.save();
+        meta.spendPointOnStrength();
         break;
     case MetaUpgradeScreen::Button::ENDURANCE:
-        if (meta.spendPointOnEndurance()) meta.save();
+        meta.spendPointOnEndurance();
         break;
     case MetaUpgradeScreen::Button::HEALTH:
-        if (meta.spendPointOnHealth()) meta.save();
+        meta.spendPointOnHealth();
         break;
     case MetaUpgradeScreen::Button::CONTINUE:
+        meta.save();
         game.changeState(std::make_unique<MainMenuState>(game));
         break;
     case MetaUpgradeScreen::Button::NONE:

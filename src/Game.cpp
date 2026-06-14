@@ -18,6 +18,8 @@ Game::Game()
     fontManager.load();
 
     states.push(std::make_unique<MainMenuState>(*this));
+
+    applyLetterboxView();
 }
 
 void Game::run()

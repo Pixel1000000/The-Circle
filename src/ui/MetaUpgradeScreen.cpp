@@ -72,20 +72,22 @@ void MetaUpgradeScreen::render(sf::RenderWindow& window, const Localization& loc
     const char* rowKeys[3] = {"meta.strength", "meta.endurance", "meta.health"};
     const int rowValues[3] = {stats.strength, stats.endurance, stats.health};
 
+    sf::Text label;
+    label.setFont(font);
+    label.setCharacterSize(22);
+    label.setFillColor(sf::Color::White);
+
+    sf::Text plus;
+    plus.setFont(font);
+    plus.setCharacterSize(28);
+    plus.setFillColor(sf::Color::White);
+    plus.setString("+");
+
     for (int i = 0; i < 3; ++i) {
-        sf::Text label;
-        label.setFont(font);
-        label.setCharacterSize(22);
-        label.setFillColor(sf::Color::White);
         label.setString(toSfString(localization.get(rowKeys[i]) + ": " + std::to_string(rowValues[i])));
         label.setPosition(PANEL_X, ROW_Y[i] + 12.0f);
         window.draw(label);
 
-        sf::Text plus;
-        plus.setFont(font);
-        plus.setCharacterSize(28);
-        plus.setFillColor(sf::Color::White);
-        plus.setString("+");
         plus.setPosition(BUTTON_X + BUTTON_SIZE * 0.5f - 8.0f, ROW_Y[i] + 6.0f);
         window.draw(plus);
     }

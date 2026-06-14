@@ -1,8 +1,8 @@
 {
-  "baseSpeed": 200,
+  "baseSpeed": 220,
   "baseHealth": 100,
 
-  "meleeRange": 40,
+  "meleeRange": 55,
   "meleeCooldown": 0.6,
   "meleeOffset": 20,
   "baseDamage": 8,

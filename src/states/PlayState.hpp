@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "ecs/systems/AISystem.hpp"
+#include "ecs/systems/CollisionSystem.hpp"
 #include "ecs/systems/CombatSystem.hpp"
 #include "ecs/systems/LootSystem.hpp"
 #include "ecs/systems/MovementSystem.hpp"
@@ -42,6 +43,7 @@ private:
     entt::entity player;
 
     MovementSystem movementSystem;
+    CollisionSystem collisionSystem;
     AISystem aiSystem;
     CombatSystem combatSystem;
     StatusEffectSystem statusEffectSystem;
