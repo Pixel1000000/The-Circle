@@ -61,6 +61,16 @@ void RenderSystem::update(entt::registry& registry, sf::RenderWindow& window, co
 
         window.draw(shape);
 
+        if (registry.all_of<Invulnerable>(entity)) {
+            sf::RectangleShape shield(renderable.size + sf::Vector2f(16.0f, 16.0f));
+            shield.setOrigin(shield.getSize().x * 0.5f, shield.getSize().y * 0.5f);
+            shield.setPosition(pos.x, pos.y);
+            shield.setFillColor(sf::Color(180, 70, 255, 90));
+            shield.setOutlineColor(sf::Color(220, 140, 255, 220));
+            shield.setOutlineThickness(2.0f);
+            window.draw(shield);
+        }
+
         const auto* health = registry.try_get<Health>(entity);
         if (!health || !registry.all_of<EnemyTag>(entity)) continue;
 

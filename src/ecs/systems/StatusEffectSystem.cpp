@@ -16,7 +16,7 @@ void StatusEffectSystem::update(entt::registry& registry, float dt)
         auto& effect = view.get<StatusEffect>(entity);
         auto& health = view.get<Health>(entity);
 
-        if (effect.type == StatusEffect::POISON) {
+        if (effect.type == StatusEffect::POISON && !registry.all_of<Invulnerable>(entity)) {
             effect.damageAccumulator += effect.dps * dt;
             const int tick = static_cast<int>(effect.damageAccumulator);
             if (tick > 0) {

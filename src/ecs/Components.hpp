@@ -1,8 +1,10 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
+#include <entt/entt.hpp>
 
 namespace tc {
 
@@ -32,9 +34,11 @@ struct Health {
     int max = 1;
 };
 
-// Flat damage reduction applied before incoming damage
+// Flat damage reduction applied before incoming damage, plus a percentage
+// reduction applied after (meta-progression Endurance bonus)
 struct Armor {
     int value = 0;
+    float damageReductionPercent = 0.0f;
 };
 
 // Damage dealt by an attack or projectile
@@ -146,6 +150,9 @@ struct ReviveOnce {
 // Marks an entity that ignores wall collisions (ghosts)
 struct PhaseThrough {};
 
+// Marks an entity that takes no damage from any source (boss shield phases)
+struct Invulnerable {};
+
 // AI behavior driving the AISystem
 struct AIBehavior {
     enum Type {
@@ -166,6 +173,12 @@ struct BossAI {
     int phaseIndex = 0;
     float baseSpeed = 0.0f;
     bool rangedMode = false;
+
+    // BOSS_LICH: index of the next HP-percentage threshold (75/50/25) that
+    // will trigger a summon wave + shield, and the minions spawned by the
+    // most recent wave (shield drops once all of them are dead).
+    int nextSummonThreshold = 0;
+    std::vector<entt::entity> summonedMinions;
 };
 
 // Player equipment - tiers correspond to biome difficulty (1-4, 0 = none)

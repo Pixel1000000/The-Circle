@@ -12,6 +12,7 @@ namespace {
 constexpr float PROJECTILE_HIT_RADIUS = 20.0f;
 constexpr float WORLD_WIDTH = 1280.0f;
 constexpr float WORLD_HEIGHT = 720.0f;
+constexpr float MAX_DAMAGE_REDUCTION = 0.9f;
 }
 
 void CombatSystem::update(entt::registry& registry, float dt)
@@ -190,17 +191,21 @@ void CombatSystem::updateProjectiles(entt::registry& registry)
 
 void CombatSystem::applyDamage(entt::registry& registry, entt::entity attacker, entt::entity target, int rawDamage)
 {
+    if (registry.all_of<Invulnerable>(target)) return;
+
     int armor = 0;
+    float reduction = 0.0f;
     if (const auto* a = registry.try_get<Armor>(target)) {
         armor = a->value;
+        reduction += a->damageReductionPercent;
     }
 
-    float reduction = 0.0f;
     if (const auto* block = registry.try_get<BlockAbility>(target)) {
         if (block->isBlocking) {
-            reduction = block->reductionPercent;
+            reduction += block->reductionPercent;
         }
     }
+    reduction = std::min(reduction, MAX_DAMAGE_REDUCTION);
 
     int mitigated = static_cast<int>(static_cast<float>(rawDamage - armor) * (1.0f - reduction));
     mitigated = std::max(mitigated, 1);

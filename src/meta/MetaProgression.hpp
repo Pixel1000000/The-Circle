@@ -22,6 +22,12 @@ public:
     static constexpr int POINTS_FOR_BOSS = 5;
     static constexpr int POINTS_PER_FRAGMENT = 0; // easy to change
 
+    // Each meta-progression point grants a percentage bonus rather than a
+    // flat amount, so equipment upgrades remain meaningful at every tier.
+    static constexpr float DAMAGE_PERCENT_PER_STRENGTH = 0.02f;
+    static constexpr float DAMAGE_REDUCTION_PERCENT_PER_ENDURANCE = 0.02f;
+    static constexpr float HEALTH_PERCENT_PER_LEVEL = 0.02f;
+
     void load(const std::string& path = "meta_save.json");
     void save(const std::string& path = "meta_save.json") const;
 

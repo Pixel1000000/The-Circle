@@ -13,6 +13,7 @@
 #include "meta/MetaProgression.hpp"
 #include "states/IGameState.hpp"
 #include "ui/HUD.hpp"
+#include "ui/PauseScreen.hpp"
 #include "ui/TutorialHint.hpp"
 #include "world/World.hpp"
 
@@ -52,9 +53,11 @@ private:
 
     HUD hud;
     TutorialHint tutorialHint;
+    PauseScreen pauseScreen;
 
     RunSummary runSummary;
     bool inBossRoom = false;
+    bool paused = false;
     float lastDt = 0.0f;
 };
 

@@ -52,5 +52,9 @@
   "tutorial.move": "WASD / Arrows - Move",
   "tutorial.combat": "Auto-attack near enemies",
   "tutorial.potion": "E / Space - Use Potion",
-  "tutorial.menu": "Esc - Main Menu"
+  "tutorial.menu": "Esc - Pause",
+
+  "pause.title": "Paused",
+  "pause.resume": "Resume",
+  "pause.mainmenu": "Main Menu"
 }

@@ -3,13 +3,11 @@
 #include <algorithm>
 #include <cmath>
 
+#include "meta/MetaProgression.hpp"
+
 namespace tc {
 
 namespace {
-
-constexpr int HEALTH_PER_META_LEVEL = 10;
-constexpr int ARMOR_PER_ENDURANCE = 1;
-constexpr int DAMAGE_PER_STRENGTH = 1;
 
 const ArmorPieceStats& pieceStats(const std::array<ArmorPieceStats, TIER_COUNT>& tiers, int tier)
 {
@@ -45,8 +43,7 @@ entt::entity EntityFactory::createPlayer(entt::registry& registry, sf::Vector2f 
     registry.emplace<Potion>(entity, playerConfig.potionHealAmount, 0, playerConfig.potionMaxCharges,
         playerConfig.potionKillsPerCharge, 0);
 
-    const int maxHealth = playerConfig.baseHealth + metaStats.health * HEALTH_PER_META_LEVEL;
-    registry.emplace<Health>(entity, maxHealth, maxHealth);
+    registry.emplace<Health>(entity, playerConfig.baseHealth, playerConfig.baseHealth);
 
     applyEquipmentStats(registry, entity, playerConfig, EquipmentConfig{}, metaStats);
 
@@ -112,8 +109,6 @@ entt::entity EntityFactory::createBoss(entt::registry& registry, const BossTempl
     case AIBehavior::BOSS_ELEMENTAL:
         registry.emplace<RangedCombat>(entity, 260.0f, 320.0f, 1.2f, 0.0f);
         break;
-    case AIBehavior::BOSS_LICH:
-        break;
     default:
         registry.emplace<MeleeCombat>(entity, std::max(tmpl.size.x, tmpl.size.y), 1.0f, 0.0f);
         break;
@@ -155,12 +150,13 @@ void EntityFactory::applyEquipmentStats(entt::registry& registry, entt::entity p
     const ArmorPieceStats& chest = pieceStats(equipmentConfig.chest, equipment.chestTier);
     const ArmorPieceStats& leggings = pieceStats(equipmentConfig.leggings, equipment.leggingsTier);
 
-    const int armorValue = helmet.armor + chest.armor + leggings.armor + metaStats.endurance * ARMOR_PER_ENDURANCE;
-    registry.get<Armor>(player).value = armorValue;
+    auto& armor = registry.get<Armor>(player);
+    armor.value = helmet.armor + chest.armor + leggings.armor;
+    armor.damageReductionPercent = metaStats.endurance * MetaProgression::DAMAGE_REDUCTION_PERCENT_PER_ENDURANCE;
 
-    const int healthBonus = helmet.healthBonus + chest.healthBonus + leggings.healthBonus
-        + metaStats.health * HEALTH_PER_META_LEVEL;
-    const int newMax = playerConfig.baseHealth + healthBonus;
+    const int healthBonus = helmet.healthBonus + chest.healthBonus + leggings.healthBonus;
+    const float healthMultiplier = 1.0f + metaStats.health * MetaProgression::HEALTH_PERCENT_PER_LEVEL;
+    const int newMax = static_cast<int>(std::round((playerConfig.baseHealth + healthBonus) * healthMultiplier));
 
     auto& health = registry.get<Health>(player);
     const int delta = newMax - health.max;
@@ -170,13 +166,13 @@ void EntityFactory::applyEquipmentStats(entt::registry& registry, entt::entity p
     const float speedBonus = helmet.speedBonus + leggings.speedBonus;
     registry.get<Speed>(player).value = playerConfig.baseSpeed + speedBonus;
 
-    const int strengthDamage = metaStats.strength * DAMAGE_PER_STRENGTH;
+    const float damageMultiplier = 1.0f + metaStats.strength * MetaProgression::DAMAGE_PERCENT_PER_STRENGTH;
 
     if (equipment.weaponType == Equipment::BOW) {
         const WeaponStats& bow = weaponStats(equipmentConfig.bow, equipment.weaponTier);
 
         const int baseDamage = bow.damage > 0 ? bow.damage : playerConfig.baseDamage;
-        registry.get<Damage>(player).value = baseDamage + strengthDamage;
+        registry.get<Damage>(player).value = static_cast<int>(std::round(baseDamage * damageMultiplier));
 
         const float cooldown = bow.attackSpeed > 0.0f ? 1.0f / bow.attackSpeed : playerConfig.rangedCooldown;
         const float range = bow.range > 0.0f ? bow.range : playerConfig.rangedRange;
@@ -188,7 +184,7 @@ void EntityFactory::applyEquipmentStats(entt::registry& registry, entt::entity p
         const WeaponStats& sword = weaponStats(equipmentConfig.sword, equipment.weaponTier);
 
         const int baseDamage = sword.damage > 0 ? sword.damage : playerConfig.baseDamage;
-        registry.get<Damage>(player).value = baseDamage + strengthDamage;
+        registry.get<Damage>(player).value = static_cast<int>(std::round(baseDamage * damageMultiplier));
 
         const float cooldown = sword.attackSpeed > 0.0f ? 1.0f / sword.attackSpeed : playerConfig.meleeCooldown;
         const float range = sword.range > 0.0f ? sword.range : playerConfig.meleeRange;

@@ -52,5 +52,9 @@
   "tutorial.move": "WASD / Стрелки - движение",
   "tutorial.combat": "Автоатака рядом с врагами",
   "tutorial.potion": "E / Пробел - зелье",
-  "tutorial.menu": "Esc - в меню"
+  "tutorial.menu": "Esc - пауза",
+
+  "pause.title": "Пауза",
+  "pause.resume": "Продолжить",
+  "pause.mainmenu": "Главное меню"
 }

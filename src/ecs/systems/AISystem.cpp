@@ -20,11 +20,15 @@ constexpr float DRUID_PHASE_DURATION = 3.0f;
 constexpr float NAGA_PHASE_DURATION = 4.0f;
 constexpr float ELEMENTAL_SLOW_INTERVAL = 4.0f;
 constexpr float ELEMENTAL_SLOW_DURATION = 2.0f;
-constexpr float LICH_SUMMON_INTERVAL = 5.0f;
+
+// HP fractions (of max) at which the Lich raises its shield and summons a
+// wave of minions. The shield drops once that wave is fully dead.
+constexpr float LICH_SUMMON_THRESHOLDS[] = {0.75f, 0.50f, 0.25f};
 
 struct PendingSpawn {
     EnemyTemplate tmpl;
     sf::Vector2f position;
+    entt::entity ownerBoss = entt::null;
 };
 
 // Distance a RANGED_KEEP_DISTANCE-style entity tries to maintain from the player
@@ -130,20 +134,40 @@ void AISystem::update(entt::registry& registry, float dt)
                 break;
             }
             case AIBehavior::BOSS_LICH: {
-                bossAI->phaseTimer += dt;
-                if (bossAI->phaseTimer >= LICH_SUMMON_INTERVAL) {
-                    bossAI->phaseTimer = 0.0f;
+                if (registry.all_of<Invulnerable>(entity)) {
+                    // Shield stays up until every minion from the triggering
+                    // wave has been killed.
+                    const bool allMinionsDead = std::none_of(
+                        bossAI->summonedMinions.begin(), bossAI->summonedMinions.end(),
+                        [&registry](entt::entity minion) { return registry.valid(minion); });
+                    if (allMinionsDead) {
+                        registry.remove<Invulnerable>(entity);
+                        bossAI->summonedMinions.clear();
+                    }
+                    break;
+                }
 
-                    const auto templates = ConfigLoader::get().getEnemyConfig().getEnemiesForBiome(BiomeType::DEADLANDS);
-                    if (!templates.empty()) {
-                        const int count = summonCountDist(rng);
-                        std::uniform_int_distribution<std::size_t> templateDist(0, templates.size() - 1);
-                        for (int i = 0; i < count; ++i) {
-                            const sf::Vector2f spawnPos{
-                                std::clamp(pos.x + offsetDist(rng), 40.0f, WORLD_WIDTH - 40.0f),
-                                std::clamp(pos.y + offsetDist(rng), 40.0f, WORLD_HEIGHT - 40.0f)};
-                            pendingSpawns.push_back({templates[templateDist(rng)], spawnPos});
-                        }
+                constexpr int thresholdCount = sizeof(LICH_SUMMON_THRESHOLDS) / sizeof(LICH_SUMMON_THRESHOLDS[0]);
+                if (bossAI->nextSummonThreshold >= thresholdCount) break;
+
+                const auto& health = registry.get<Health>(entity);
+                const float hpFraction = health.max > 0
+                    ? static_cast<float>(health.current) / static_cast<float>(health.max)
+                    : 0.0f;
+                if (hpFraction > LICH_SUMMON_THRESHOLDS[bossAI->nextSummonThreshold]) break;
+
+                ++bossAI->nextSummonThreshold;
+                registry.emplace<Invulnerable>(entity);
+
+                const auto templates = ConfigLoader::get().getEnemyConfig().getEnemiesForBiome(BiomeType::DEADLANDS);
+                if (!templates.empty()) {
+                    const int count = summonCountDist(rng);
+                    std::uniform_int_distribution<std::size_t> templateDist(0, templates.size() - 1);
+                    for (int i = 0; i < count; ++i) {
+                        const sf::Vector2f spawnPos{
+                            std::clamp(pos.x + offsetDist(rng), 40.0f, WORLD_WIDTH - 40.0f),
+                            std::clamp(pos.y + offsetDist(rng), 40.0f, WORLD_HEIGHT - 40.0f)};
+                        pendingSpawns.push_back({templates[templateDist(rng)], spawnPos, entity});
                     }
                 }
                 break;
@@ -186,11 +210,8 @@ void AISystem::update(entt::registry& registry, float dt)
             }
             break;
         }
-        case AIBehavior::BOSS_LICH:
-            velocity.dx = 0.0f;
-            velocity.dy = 0.0f;
-            break;
         case AIBehavior::CHASE:
+        case AIBehavior::BOSS_LICH:
         case AIBehavior::BOSS_DRUID:
         default:
             velocity.dx = nx;
@@ -200,7 +221,10 @@ void AISystem::update(entt::registry& registry, float dt)
     }
 
     for (const auto& spawn : pendingSpawns) {
-        EntityFactory::createEnemy(registry, spawn.tmpl, spawn.position);
+        const entt::entity minion = EntityFactory::createEnemy(registry, spawn.tmpl, spawn.position);
+        if (spawn.ownerBoss != entt::null) {
+            registry.get<BossAI>(spawn.ownerBoss).summonedMinions.push_back(minion);
+        }
     }
 }
 

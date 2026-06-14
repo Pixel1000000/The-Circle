@@ -169,6 +169,21 @@ void PlayState::handleInput(const sf::Event& event)
 {
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
         const sf::Vector2f point = game.getWindow().mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
+
+        if (paused) {
+            switch (pauseScreen.getButtonAt(point)) {
+            case PauseScreen::Button::RESUME:
+                paused = false;
+                break;
+            case PauseScreen::Button::MAIN_MENU:
+                game.changeState(std::make_unique<MainMenuState>(game));
+                break;
+            default:
+                break;
+            }
+            return;
+        }
+
         tutorialHint.handleClick(point);
         return;
     }
@@ -178,8 +193,15 @@ void PlayState::handleInput(const sf::Event& event)
     }
 
     if (event.key.code == sf::Keyboard::Escape) {
-        game.changeState(std::make_unique<MainMenuState>(game));
-    } else if (event.key.code == sf::Keyboard::E || event.key.code == sf::Keyboard::Space) {
+        paused = !paused;
+        return;
+    }
+
+    if (paused) {
+        return;
+    }
+
+    if (event.key.code == sf::Keyboard::E || event.key.code == sf::Keyboard::Space) {
         combatSystem.usePotion(registry, player);
     } else if (event.key.code == sf::Keyboard::F) {
         if (!inBossRoom && world.getCurrentBiome().isUnlocked()) {
@@ -190,6 +212,11 @@ void PlayState::handleInput(const sf::Event& event)
 
 void PlayState::update(float dt)
 {
+    if (paused) {
+        lastDt = 0.0f;
+        return;
+    }
+
     lastDt = dt;
 
     const sf::Vector2f moveDir = readMovementInput();
@@ -210,6 +237,13 @@ void PlayState::update(float dt)
     const auto& playerSize = registry.get<Renderable>(player).size;
     playerPos.x = std::clamp(playerPos.x, playerSize.x / 2.0f, static_cast<float>(Game::LOGICAL_WIDTH) - playerSize.x / 2.0f);
     playerPos.y = std::clamp(playerPos.y, playerSize.y / 2.0f, static_cast<float>(Game::LOGICAL_HEIGHT) - playerSize.y / 2.0f);
+
+    for (auto entity : registry.view<EnemyTag, Position, Renderable>()) {
+        auto& enemyPos = registry.get<Position>(entity);
+        const auto& enemySize = registry.get<Renderable>(entity).size;
+        enemyPos.x = std::clamp(enemyPos.x, enemySize.x / 2.0f, static_cast<float>(Game::LOGICAL_WIDTH) - enemySize.x / 2.0f);
+        enemyPos.y = std::clamp(enemyPos.y, enemySize.y / 2.0f, static_cast<float>(Game::LOGICAL_HEIGHT) - enemySize.y / 2.0f);
+    }
 
     aiSystem.update(registry, dt);
     combatSystem.update(registry, dt);
@@ -270,6 +304,10 @@ void PlayState::render(sf::RenderWindow& window)
     hud.render(window, registry, player, game.getLocalization(), game.getFontManager(), Biome::KEY_FRAGMENTS_REQUIRED,
         showNextBiomeHint, lastDt);
     tutorialHint.render(window, game.getLocalization(), game.getFontManager());
+
+    if (paused) {
+        pauseScreen.render(window, game.getLocalization(), game.getFontManager());
+    }
 }
 
 } // namespace tc
