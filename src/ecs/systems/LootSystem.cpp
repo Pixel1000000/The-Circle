@@ -4,9 +4,27 @@
 #include <random>
 #include <vector>
 
+#include "config/ConfigLoader.hpp"
 #include "ecs/Components.hpp"
 
 namespace tc {
+
+namespace {
+
+// Element rolled for an equipment drop, based on the biome the enemy died in
+// (EnemyTag::biome, 1-4 == Forest/Desert/Winter/Deadlands).
+Element elementForBiomeTier(int tier)
+{
+    switch (tier) {
+    case 1: return Element::NATURE;
+    case 2: return Element::FIRE;
+    case 3: return Element::ICE;
+    case 4: return Element::DECAY;
+    default: return Element::NONE;
+    }
+}
+
+} // namespace
 
 LootResult LootSystem::update(entt::registry& registry, entt::entity player, const std::vector<entt::entity>& waveEnemies)
 {
@@ -80,22 +98,20 @@ LootResult LootSystem::update(entt::registry& registry, entt::entity player, con
                     droppedSlots[tierIndex][slot] = true;
                 }
 
-                auto& equipment = registry.get<Equipment>(player);
-                switch (slot) {
-                case 0: equipment.helmetTier = std::max(equipment.helmetTier, tier); break;
-                case 1: equipment.chestTier = std::max(equipment.chestTier, tier); break;
-                case 2: equipment.leggingsTier = std::max(equipment.leggingsTier, tier); break;
-                default:
-                    equipment.weaponTier = std::max(equipment.weaponTier, tier);
-                    if (equipment.weaponType == Equipment::NONE) {
-                        equipment.weaponType = Equipment::SWORD;
-                    }
-                    break;
+                Element element = Element::NONE;
+                float percent = 0.0f;
+                if (tierIndex >= 0 && tierIndex < TIER_COUNT) {
+                    element = elementForBiomeTier(tier);
+                    const auto& range = ConfigLoader::get().getElementalConfig().dropPercentRanges[tierIndex];
+                    std::uniform_real_distribution<float> percentDist(range.minPercent, range.maxPercent);
+                    percent = percentDist(rng);
                 }
 
                 result.equipmentDropped = true;
                 result.droppedSlot = slot;
                 result.droppedTier = tier;
+                result.droppedElement = element;
+                result.droppedPercent = percent;
             }
         }
 

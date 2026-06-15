@@ -170,6 +170,38 @@ void PlayState::handleInput(const sf::Event& event)
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
         const sf::Vector2f point = game.getWindow().mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
 
+        if (itemChoiceOpen) {
+            auto& equipment = registry.get<Equipment>(player);
+            switch (itemChoiceScreen.getButtonAt(point)) {
+            case ItemChoiceScreen::Button::TAKE_NEW:
+                ItemUpgrader::takeNew(equipment, pendingDrop.slot, pendingDrop.tier, pendingDrop.element, pendingDrop.percent);
+                if (itemChoiceScreen.isDontAskAgain()) {
+                    ItemUpgrader::setAutoUpgrade(equipment, pendingDrop.slot, false);
+                }
+                EntityFactory::applyEquipmentStats(registry, player, ConfigLoader::get().getPlayerConfig(),
+                    ConfigLoader::get().getEquipmentConfig(), game.getMetaProgression().getStats());
+                hud.showEquipmentDrop(pendingDrop.slot, ItemUpgrader::getTier(equipment, pendingDrop.slot));
+                itemChoiceOpen = false;
+                break;
+            case ItemChoiceScreen::Button::UPGRADE_CURRENT:
+                ItemUpgrader::upgradeCurrent(equipment, pendingDrop.slot, pendingDrop.tier, pendingDrop.element, pendingDrop.percent);
+                if (itemChoiceScreen.isDontAskAgain()) {
+                    ItemUpgrader::setAutoUpgrade(equipment, pendingDrop.slot, true);
+                }
+                EntityFactory::applyEquipmentStats(registry, player, ConfigLoader::get().getPlayerConfig(),
+                    ConfigLoader::get().getEquipmentConfig(), game.getMetaProgression().getStats());
+                hud.showEquipmentDrop(pendingDrop.slot, ItemUpgrader::getTier(equipment, pendingDrop.slot));
+                itemChoiceOpen = false;
+                break;
+            case ItemChoiceScreen::Button::CHECKBOX:
+                itemChoiceScreen.toggleDontAskAgain();
+                break;
+            default:
+                break;
+            }
+            return;
+        }
+
         if (paused) {
             switch (pauseScreen.getButtonAt(point)) {
             case PauseScreen::Button::RESUME:
@@ -193,6 +225,9 @@ void PlayState::handleInput(const sf::Event& event)
     }
 
     if (event.key.code == sf::Keyboard::Escape) {
+        if (itemChoiceOpen) {
+            return;
+        }
         paused = !paused;
         return;
     }
@@ -212,7 +247,7 @@ void PlayState::handleInput(const sf::Event& event)
 
 void PlayState::update(float dt)
 {
-    if (paused) {
+    if (paused || itemChoiceOpen) {
         lastDt = 0.0f;
         return;
     }
@@ -258,9 +293,24 @@ void PlayState::update(float dt)
         runSummary.keyFragments += lootResult.fragmentsCollected;
     }
     if (lootResult.equipmentDropped) {
-        EntityFactory::applyEquipmentStats(registry, player, ConfigLoader::get().getPlayerConfig(),
-            ConfigLoader::get().getEquipmentConfig(), game.getMetaProgression().getStats());
-        hud.showEquipmentDrop(lootResult.droppedSlot, lootResult.droppedTier);
+        auto& equipment = registry.get<Equipment>(player);
+        const int slot = lootResult.droppedSlot;
+
+        if (ItemUpgrader::getTier(equipment, slot) == 0) {
+            ItemUpgrader::takeNew(equipment, slot, lootResult.droppedTier, lootResult.droppedElement, lootResult.droppedPercent);
+            EntityFactory::applyEquipmentStats(registry, player, ConfigLoader::get().getPlayerConfig(),
+                ConfigLoader::get().getEquipmentConfig(), game.getMetaProgression().getStats());
+            hud.showEquipmentDrop(slot, lootResult.droppedTier);
+        } else if (ItemUpgrader::getAutoUpgrade(equipment, slot)) {
+            ItemUpgrader::upgradeCurrent(equipment, slot, lootResult.droppedTier, lootResult.droppedElement, lootResult.droppedPercent);
+            EntityFactory::applyEquipmentStats(registry, player, ConfigLoader::get().getPlayerConfig(),
+                ConfigLoader::get().getEquipmentConfig(), game.getMetaProgression().getStats());
+            hud.showEquipmentDrop(slot, ItemUpgrader::getTier(equipment, slot));
+        } else {
+            pendingDrop = {slot, lootResult.droppedTier, lootResult.droppedElement, lootResult.droppedPercent};
+            itemChoiceScreen.open();
+            itemChoiceOpen = true;
+        }
     }
 
     if (!inBossRoom) {
@@ -307,6 +357,14 @@ void PlayState::render(sf::RenderWindow& window)
 
     if (paused) {
         pauseScreen.render(window, game.getLocalization(), game.getFontManager());
+    }
+
+    if (itemChoiceOpen) {
+        const auto& equipment = registry.get<Equipment>(player);
+        const auto [currentElement, currentPercent] = ItemUpgrader::getElement(equipment, pendingDrop.slot);
+        itemChoiceScreen.render(window, game.getLocalization(), game.getFontManager(),
+            pendingDrop.slot, pendingDrop.tier, pendingDrop.element, pendingDrop.percent,
+            ItemUpgrader::getTier(equipment, pendingDrop.slot), currentElement, currentPercent);
     }
 }
 

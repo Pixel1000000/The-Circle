@@ -1,0 +1,25 @@
+{
+  "dropPercentRanges": [
+    { "min": 0.05, "max": 0.10 },
+    { "min": 0.10, "max": 0.20 },
+    { "min": 0.20, "max": 0.35 },
+    { "min": 0.35, "max": 0.50 }
+  ],
+
+  "nature": { "baseDps": 5, "duration": 4.0 },
+  "fire": { "baseDps": 6, "duration": 3.0 },
+  "ice": { "slowDuration": 2.0 },
+  "decay": { "duration": 5.0 },
+
+  "blizzard": {
+    "interval": 8.0,
+    "bigSize": [150, 150],
+    "smallSize": [60, 60],
+    "smallCountMin": 3,
+    "smallCountMax": 6,
+    "driftSpeed": 20.0,
+    "driftChangeMin": 3.0,
+    "driftChangeMax": 5.0,
+    "slowDuration": 0.2
+  }
+}

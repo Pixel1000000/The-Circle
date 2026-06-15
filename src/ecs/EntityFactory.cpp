@@ -23,6 +23,37 @@ const WeaponStats& weaponStats(const std::array<WeaponStats, TIER_COUNT>& tiers,
     return tiers[static_cast<std::size_t>(tier - 1)];
 }
 
+// Helmet/chest elemental bonuses grant resistances against the *opposing*
+// element's debuffs; leggings ICE grants full SLOW immunity.
+ElementalResist computeElementalResist(const Equipment& equipment)
+{
+    ElementalResist resist;
+
+    auto applyArmorElement = [&resist](Element element, float percent) {
+        switch (element) {
+        case Element::NATURE: resist.fireResist += percent; break;
+        case Element::FIRE: resist.natureResist += percent; break;
+        case Element::ICE: resist.slowResist += percent; break;
+        case Element::DECAY: resist.decayResist += percent; break;
+        default: break;
+        }
+    };
+
+    applyArmorElement(equipment.helmetElement, equipment.helmetElementPercent);
+    applyArmorElement(equipment.chestElement, equipment.chestElementPercent);
+
+    if (equipment.leggingsElement == Element::ICE) {
+        resist.slowResist = 1.0f;
+    }
+
+    resist.fireResist = std::clamp(resist.fireResist, 0.0f, 1.0f);
+    resist.natureResist = std::clamp(resist.natureResist, 0.0f, 1.0f);
+    resist.slowResist = std::clamp(resist.slowResist, 0.0f, 1.0f);
+    resist.decayResist = std::clamp(resist.decayResist, 0.0f, 1.0f);
+
+    return resist;
+}
+
 } // namespace
 
 entt::entity EntityFactory::createPlayer(entt::registry& registry, sf::Vector2f position,
@@ -40,6 +71,7 @@ entt::entity EntityFactory::createPlayer(entt::registry& registry, sf::Vector2f 
     registry.emplace<Renderable>(entity, sf::Color(80, 220, 160), sf::Vector2f(32.0f, 32.0f));
     registry.emplace<KeyFragmentHolder>(entity, 0);
     registry.emplace<Equipment>(entity);
+    registry.emplace<Lifesteal>(entity);
     registry.emplace<Potion>(entity, playerConfig.potionHealAmount, 0, playerConfig.potionMaxCharges,
         playerConfig.potionKillsPerCharge, 0);
 
@@ -118,7 +150,7 @@ entt::entity EntityFactory::createBoss(entt::registry& registry, const BossTempl
 }
 
 entt::entity EntityFactory::createProjectile(entt::registry& registry, sf::Vector2f position,
-    sf::Vector2f direction, float speed, int damage, int ownerBiome)
+    sf::Vector2f direction, float speed, int damage, int ownerBiome, ElementalEffect element)
 {
     entt::entity entity = registry.create();
 
@@ -134,6 +166,10 @@ entt::entity EntityFactory::createProjectile(entt::registry& registry, sf::Vecto
     registry.emplace<Speed>(entity, speed);
     registry.emplace<Damage>(entity, damage);
     registry.emplace<ProjectileTag>(entity, ownerBiome);
+
+    if (element.element != Element::NONE) {
+        registry.emplace<ElementalEffect>(entity, element);
+    }
 
     const sf::Color color = ownerBiome == 0 ? sf::Color(120, 220, 255) : sf::Color(220, 80, 80);
     registry.emplace<Renderable>(entity, color, sf::Vector2f(8.0f, 8.0f));
@@ -163,8 +199,19 @@ void EntityFactory::applyEquipmentStats(entt::registry& registry, entt::entity p
     health.max = newMax;
     health.current = std::clamp(health.current + std::max(delta, 0), 0, health.max);
 
-    const float speedBonus = helmet.speedBonus + leggings.speedBonus;
+    float speedBonus = helmet.speedBonus + leggings.speedBonus;
+    if (equipment.leggingsElement == Element::FIRE) {
+        speedBonus += playerConfig.baseSpeed * equipment.leggingsElementPercent;
+    }
     registry.get<Speed>(player).value = playerConfig.baseSpeed + speedBonus;
+
+    auto& potion = registry.get<Potion>(player);
+    potion.healAmount = playerConfig.potionHealAmount;
+    if (equipment.leggingsElement == Element::DECAY) {
+        potion.healAmount = static_cast<int>(std::round(playerConfig.potionHealAmount * (1.0f + equipment.leggingsElementPercent)));
+    }
+
+    registry.emplace_or_replace<ElementalResist>(player, computeElementalResist(equipment));
 
     const float damageMultiplier = 1.0f + metaStats.strength * MetaProgression::DAMAGE_PERCENT_PER_STRENGTH;
 

@@ -13,8 +13,22 @@
   "equipment.helmet": "Helmet",
   "equipment.chest": "Chest",
   "equipment.legs": "Legs",
+  "equipment.weapon": "Weapon",
   "equipment.damage": "DMG",
   "equipment.armor": "ARM",
+
+  "element.none": "None",
+  "element.nature": "Nature",
+  "element.fire": "Fire",
+  "element.ice": "Ice",
+  "element.decay": "Decay",
+
+  "itemchoice.title": "New Item Found!",
+  "itemchoice.current": "Current",
+  "itemchoice.new": "New",
+  "itemchoice.take": "Take New Item",
+  "itemchoice.upgrade": "Upgrade Current",
+  "itemchoice.dontask": "Always do this for this slot",
 
   "enemy.forest_wolf": "Wolf",
   "enemy.forest_archer": "Archer",

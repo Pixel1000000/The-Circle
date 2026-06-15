@@ -6,6 +6,7 @@
 #include <entt/entt.hpp>
 
 #include "config/EquipmentConfig.hpp"
+#include "ecs/Components.hpp"
 
 namespace tc {
 
@@ -18,6 +19,11 @@ struct LootResult {
     bool equipmentDropped = false;
     int droppedSlot = 0;
     int droppedTier = 0;
+
+    // Elemental affinity rolled for the dropped item (determined by the
+    // dying enemy's biome) and its effect strength (5-50% depending on tier).
+    Element droppedElement = Element::NONE;
+    float droppedPercent = 0.0f;
 };
 
 // Removes dead enemies, handling ReviveOnce and rolling KeyFragmentDrop onto

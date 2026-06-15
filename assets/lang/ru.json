@@ -13,8 +13,22 @@
   "equipment.helmet": "Шлем",
   "equipment.chest": "Доспех",
   "equipment.legs": "Поножи",
+  "equipment.weapon": "Оружие",
   "equipment.damage": "УРН",
   "equipment.armor": "БРН",
+
+  "element.none": "Нет",
+  "element.nature": "Природа",
+  "element.fire": "Огонь",
+  "element.ice": "Лёд",
+  "element.decay": "Тлен",
+
+  "itemchoice.title": "Найден новый предмет!",
+  "itemchoice.current": "Текущий",
+  "itemchoice.new": "Новый",
+  "itemchoice.take": "Взять новый предмет",
+  "itemchoice.upgrade": "Улучшить текущий",
+  "itemchoice.dontask": "Всегда так для этого слота",
 
   "enemy.forest_wolf": "Волк",
   "enemy.forest_archer": "Лучник",
