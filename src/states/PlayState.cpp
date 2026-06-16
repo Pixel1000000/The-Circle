@@ -170,6 +170,17 @@ void PlayState::handleInput(const sf::Event& event)
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
         const sf::Vector2f point = game.getWindow().mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
 
+        if (inventoryOpen) {
+            switch (inventoryScreen.getButtonAt(point)) {
+            case InventoryScreen::Button::HELP:
+                inventoryScreen.toggleHelp();
+                break;
+            default:
+                break;
+            }
+            return;
+        }
+
         if (itemChoiceOpen) {
             auto& equipment = registry.get<Equipment>(player);
             switch (itemChoiceScreen.getButtonAt(point)) {
@@ -224,7 +235,20 @@ void PlayState::handleInput(const sf::Event& event)
         return;
     }
 
+    if (event.key.code == sf::Keyboard::Tab) {
+        if (!paused && !itemChoiceOpen) {
+            inventoryOpen = !inventoryOpen;
+            if (!inventoryOpen) inventoryScreen.resetHelp();
+        }
+        return;
+    }
+
     if (event.key.code == sf::Keyboard::Escape) {
+        if (inventoryOpen) {
+            inventoryOpen = false;
+            inventoryScreen.resetHelp();
+            return;
+        }
         if (itemChoiceOpen) {
             return;
         }
@@ -232,7 +256,7 @@ void PlayState::handleInput(const sf::Event& event)
         return;
     }
 
-    if (paused) {
+    if (paused || inventoryOpen) {
         return;
     }
 
@@ -247,7 +271,7 @@ void PlayState::handleInput(const sf::Event& event)
 
 void PlayState::update(float dt)
 {
-    if (paused || itemChoiceOpen) {
+    if (paused || inventoryOpen || itemChoiceOpen) {
         lastDt = 0.0f;
         return;
     }
@@ -358,6 +382,10 @@ void PlayState::render(sf::RenderWindow& window)
 
     if (paused) {
         pauseScreen.render(window, game.getLocalization(), game.getFontManager());
+    }
+
+    if (inventoryOpen) {
+        inventoryScreen.render(window, game.getLocalization(), game.getFontManager(), registry, player);
     }
 
     if (itemChoiceOpen) {

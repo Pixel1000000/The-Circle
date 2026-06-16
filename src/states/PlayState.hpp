@@ -14,6 +14,7 @@
 #include "meta/MetaProgression.hpp"
 #include "states/IGameState.hpp"
 #include "ui/HUD.hpp"
+#include "ui/InventoryScreen.hpp"
 #include "ui/ItemChoiceScreen.hpp"
 #include "ui/PauseScreen.hpp"
 #include "ui/TutorialHint.hpp"
@@ -56,11 +57,13 @@ private:
     HUD hud;
     TutorialHint tutorialHint;
     PauseScreen pauseScreen;
+    InventoryScreen inventoryScreen;
     ItemChoiceScreen itemChoiceScreen;
 
     RunSummary runSummary;
     bool inBossRoom = false;
     bool paused = false;
+    bool inventoryOpen = false;
     bool itemChoiceOpen = false;
     float lastDt = 0.0f;
 

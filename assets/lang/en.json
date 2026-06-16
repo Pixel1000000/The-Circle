@@ -70,5 +70,26 @@
 
   "pause.title": "Paused",
   "pause.resume": "Resume",
-  "pause.mainmenu": "Main Menu"
+  "pause.mainmenu": "Main Menu",
+
+  "inventory.title": "Inventory",
+  "inventory.empty": "Empty",
+
+  "bonus.weapon.nature": "Stacking poison DoT",
+  "bonus.weapon.fire": "Burning DoT (refreshes on hit)",
+  "bonus.weapon.ice": "Bonus damage + Slow",
+  "bonus.weapon.decay": "Reduces enemy max HP",
+  "bonus.armor.nature": "Fire resistance",
+  "bonus.armor.fire": "Poison resistance",
+  "bonus.armor.ice": "Slow resistance",
+  "bonus.armor.decay": "Decay resistance",
+  "bonus.leggings.nature": "HP regen while moving",
+  "bonus.leggings.fire": "Movement speed bonus",
+  "bonus.leggings.ice": "Slow immunity",
+  "bonus.leggings.decay": "Bonus potion healing",
+
+  "help.title": "Elemental Effects",
+  "help.weapon": "Weapon",
+  "help.armor": "Armor (Helmet / Chest)",
+  "help.leggings": "Leggings"
 }

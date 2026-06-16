@@ -70,5 +70,26 @@
 
   "pause.title": "Пауза",
   "pause.resume": "Продолжить",
-  "pause.mainmenu": "Главное меню"
+  "pause.mainmenu": "Главное меню",
+
+  "inventory.title": "Инвентарь",
+  "inventory.empty": "Пусто",
+
+  "bonus.weapon.nature": "Накапливаемый яд",
+  "bonus.weapon.fire": "Горение (продлевается)",
+  "bonus.weapon.ice": "Бонус урон + замедление",
+  "bonus.weapon.decay": "Снижает макс. HP врага",
+  "bonus.armor.nature": "Сопротивление огню",
+  "bonus.armor.fire": "Сопротивление яду",
+  "bonus.armor.ice": "Сопротивление замедлению",
+  "bonus.armor.decay": "Сопротивление тлению",
+  "bonus.leggings.nature": "Реген HP при движении",
+  "bonus.leggings.fire": "Бонус к скорости",
+  "bonus.leggings.ice": "Иммунитет к замедлению",
+  "bonus.leggings.decay": "Усиление зелья",
+
+  "help.title": "Элементальные эффекты",
+  "help.weapon": "Оружие",
+  "help.armor": "Броня (шлем / кираса)",
+  "help.leggings": "Поножи"
 }
