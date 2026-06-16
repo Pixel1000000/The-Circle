@@ -96,66 +96,69 @@ int armorForSlot(const EquipmentConfig& cfg, int slot, int tier)
 }
 
 // ── help panel ───────────────────────────────────────────────────────────────
+// Vertical list layout: 3 sections (weapon / armor / leggings), each listing
+// all 4 elements on separate lines. Fits within screen bounds at any language.
 
 void drawHelpPanel(sf::RenderWindow& window, const Localization& loc, const sf::Font& font)
 {
-    sf::RectangleShape bg({HP_W, HP_H});
-    bg.setPosition(HP_X, HP_Y);
-    bg.setFillColor(sf::Color(15, 15, 25, 245));
+    // Overlay the whole inventory panel area
+    sf::RectangleShape bg({PANEL_W, PANEL_H});
+    bg.setPosition(PANEL_X, PANEL_Y);
+    bg.setFillColor(sf::Color(8, 8, 18, 248));
     bg.setOutlineThickness(2.0f);
-    bg.setOutlineColor(sf::Color(100, 100, 140));
+    bg.setOutlineColor(sf::Color(100, 100, 160));
     window.draw(bg);
 
-    auto drawLine = [&](const std::string& text, float x, float y, unsigned int size,
-                        sf::Color color = sf::Color::White) {
+    const float PAD = 28.0f;
+    const float ELEM_COL = PANEL_X + PAD + 220.0f; // where element name starts
+    const float DESC_COL = ELEM_COL + 160.0f;       // where description starts
+    float curY = PANEL_Y + 16.0f;
+
+    auto text = [&](const std::string& str, float x, float y, unsigned int sz, sf::Color col) {
         sf::Text t;
         t.setFont(font);
-        t.setCharacterSize(size);
-        t.setFillColor(color);
-        t.setString(toSfString(text));
+        t.setCharacterSize(sz);
+        t.setFillColor(col);
+        t.setString(toSfString(str));
         t.setPosition(x, y);
         window.draw(t);
     };
 
-    drawLine(loc.get("help.title"), HP_X + 20.0f, HP_Y + 14.0f, 26);
+    text(loc.get("help.title"), PANEL_X + PAD, curY, 26, sf::Color::White);
+    curY += 42.0f;
 
-    // Column headers (elements)
-    const float colX[4] = { HP_X + 260.0f, HP_X + 440.0f, HP_X + 610.0f, HP_X + 760.0f };
-    drawLine(loc.get("element.nature"), colX[0], HP_Y + 56.0f, 18, elementColor(Element::NATURE));
-    drawLine(loc.get("element.fire"),   colX[1], HP_Y + 56.0f, 18, elementColor(Element::FIRE));
-    drawLine(loc.get("element.ice"),    colX[2], HP_Y + 56.0f, 18, elementColor(Element::ICE));
-    drawLine(loc.get("element.decay"),  colX[3], HP_Y + 56.0f, 18, elementColor(Element::DECAY));
-
-    // Row headers and descriptions
-    struct Row { const char* headerKey; const char* bKeys[4]; };
-    const Row rows[3] = {
-        { "help.weapon",   { "bonus.weapon.nature",   "bonus.weapon.fire",   "bonus.weapon.ice",   "bonus.weapon.decay"   } },
-        { "help.armor",    { "bonus.armor.nature",    "bonus.armor.fire",    "bonus.armor.ice",    "bonus.armor.decay"    } },
-        { "help.leggings", { "bonus.leggings.nature", "bonus.leggings.fire", "bonus.leggings.ice", "bonus.leggings.decay" } },
+    struct Section {
+        const char* headerKey;
+        const char* bonusKeys[4];
+    };
+    const Section sections[3] = {
+        { "help.weapon",
+          { "bonus.weapon.nature", "bonus.weapon.fire", "bonus.weapon.ice", "bonus.weapon.decay" } },
+        { "help.armor",
+          { "bonus.armor.nature",  "bonus.armor.fire",  "bonus.armor.ice",  "bonus.armor.decay"  } },
+        { "help.leggings",
+          { "bonus.leggings.nature", "bonus.leggings.fire", "bonus.leggings.ice", "bonus.leggings.decay" } },
     };
 
-    const float rowYs[3] = { HP_Y + 100.0f, HP_Y + 250.0f, HP_Y + 390.0f };
+    const Element elems[4]    = { Element::NATURE, Element::FIRE, Element::ICE, Element::DECAY };
+    const char*  elemKeys[4]  = { "element.nature", "element.fire", "element.ice", "element.decay" };
 
-    for (int r = 0; r < 3; ++r) {
-        drawLine(loc.get(rows[r].headerKey), HP_X + 20.0f, rowYs[r], 20, sf::Color(220, 220, 140));
+    for (const auto& sec : sections) {
+        // Section header
+        sf::RectangleShape hdrLine({PANEL_W - PAD * 2.0f, 1.0f});
+        hdrLine.setPosition(PANEL_X + PAD, curY - 4.0f);
+        hdrLine.setFillColor(sf::Color(70, 70, 100));
+        window.draw(hdrLine);
 
-        for (int c = 0; c < 4; ++c) {
-            // Word-wrap: split at 22 chars naively by inserting newlines in the text
-            const std::string desc = loc.get(rows[r].bKeys[c]);
-            // Draw at most 2 lines (split at space near char 22)
-            std::string line1 = desc, line2;
-            if (desc.size() > 22) {
-                const std::size_t split = desc.rfind(' ', 22);
-                if (split != std::string::npos) {
-                    line1 = desc.substr(0, split);
-                    line2 = desc.substr(split + 1);
-                }
-            }
-            drawLine(line1, colX[c], rowYs[r], 16, sf::Color(210, 210, 210));
-            if (!line2.empty()) {
-                drawLine(line2, colX[c], rowYs[r] + 20.0f, 16, sf::Color(210, 210, 210));
-            }
+        text(loc.get(sec.headerKey), PANEL_X + PAD, curY, 20, sf::Color(220, 220, 130));
+        curY += 28.0f;
+
+        for (int i = 0; i < 4; ++i) {
+            text(loc.get(elemKeys[i]), ELEM_COL, curY, 17, elementColor(elems[i]));
+            text(loc.get(sec.bonusKeys[i]), DESC_COL, curY, 17, sf::Color(210, 210, 210));
+            curY += 24.0f;
         }
+        curY += 16.0f; // gap between sections
     }
 }
 
