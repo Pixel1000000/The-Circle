@@ -103,6 +103,7 @@ void ConfigLoader::loadAll(const std::string& configDir)
     playerConfig = loadPlayer(configDir + "/player.json");
     equipmentConfig = loadEquipment(configDir + "/equipment.json");
     enemyConfig = loadEnemies(configDir + "/enemies.json", configDir + "/bosses.json");
+    elementalConfig = loadElemental(configDir + "/elements.json");
 }
 
 const PlayerConfig& ConfigLoader::getPlayerConfig() const
@@ -118,6 +119,11 @@ const EquipmentConfig& ConfigLoader::getEquipmentConfig() const
 const EnemyConfig& ConfigLoader::getEnemyConfig() const
 {
     return enemyConfig;
+}
+
+const ElementalConfig& ConfigLoader::getElementalConfig() const
+{
+    return elementalConfig;
 }
 
 PlayerConfig ConfigLoader::loadPlayer(const std::string& path) const
@@ -229,6 +235,55 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
 
             config.bosses.push_back(tmpl);
         }
+    }
+
+    return config;
+}
+
+ElementalConfig ConfigLoader::loadElemental(const std::string& path) const
+{
+    ElementalConfig config;
+    nlohmann::json json = loadJson(path);
+
+    if (json.contains("dropPercentRanges")) {
+        const auto& arr = json.at("dropPercentRanges");
+        for (std::size_t i = 0; i < TIER_COUNT && i < arr.size(); ++i) {
+            config.dropPercentRanges[i].minPercent = arr.at(i).value("min", 0.0f);
+            config.dropPercentRanges[i].maxPercent = arr.at(i).value("max", 0.0f);
+        }
+    }
+
+    if (json.contains("nature")) {
+        const auto& nature = json.at("nature");
+        config.natureBaseDps = nature.value("baseDps", config.natureBaseDps);
+        config.natureDuration = nature.value("duration", config.natureDuration);
+    }
+
+    if (json.contains("fire")) {
+        const auto& fire = json.at("fire");
+        config.fireBaseDps = fire.value("baseDps", config.fireBaseDps);
+        config.fireDuration = fire.value("duration", config.fireDuration);
+    }
+
+    if (json.contains("ice")) {
+        config.iceSlowDuration = json.at("ice").value("slowDuration", config.iceSlowDuration);
+    }
+
+    if (json.contains("decay")) {
+        config.decayDuration = json.at("decay").value("duration", config.decayDuration);
+    }
+
+    if (json.contains("blizzard")) {
+        const auto& blizzard = json.at("blizzard");
+        config.blizzard.interval = blizzard.value("interval", config.blizzard.interval);
+        config.blizzard.bigSize = vec2FromJson(blizzard.value("bigSize", nlohmann::json::array()), config.blizzard.bigSize);
+        config.blizzard.smallSize = vec2FromJson(blizzard.value("smallSize", nlohmann::json::array()), config.blizzard.smallSize);
+        config.blizzard.smallCountMin = blizzard.value("smallCountMin", config.blizzard.smallCountMin);
+        config.blizzard.smallCountMax = blizzard.value("smallCountMax", config.blizzard.smallCountMax);
+        config.blizzard.driftSpeed = blizzard.value("driftSpeed", config.blizzard.driftSpeed);
+        config.blizzard.driftChangeMin = blizzard.value("driftChangeMin", config.blizzard.driftChangeMin);
+        config.blizzard.driftChangeMax = blizzard.value("driftChangeMax", config.blizzard.driftChangeMax);
+        config.blizzard.slowDuration = blizzard.value("slowDuration", config.blizzard.slowDuration);
     }
 
     return config;

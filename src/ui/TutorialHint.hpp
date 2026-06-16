@@ -30,7 +30,7 @@ private:
 
     sf::Text arrowText;
     sf::Text titleText;
-    std::array<sf::Text, 4> lineTexts;
+    std::array<sf::Text, 5> lineTexts;
     bool textInitialized = false;
 };
 

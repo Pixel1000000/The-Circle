@@ -23,8 +23,10 @@ public:
 
     // ownerBiome == 0 means the projectile was fired by the player and damages enemies;
     // any other value means it was fired by an enemy from that biome and damages the player.
+    // `element` carries the firing player's weapon element/percent (if any) so
+    // CombatSystem can apply the on-hit elemental effect when the projectile lands.
     static entt::entity createProjectile(entt::registry& registry, sf::Vector2f position,
-        sf::Vector2f direction, float speed, int damage, int ownerBiome);
+        sf::Vector2f direction, float speed, int damage, int ownerBiome, ElementalEffect element = {});
 
     // Recomputes Armor, Damage, Health, Speed, MeleeCombat/RangedCombat and
     // BlockAbility for the player from their current Equipment, MetaStats and

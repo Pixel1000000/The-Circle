@@ -13,8 +13,22 @@
   "equipment.helmet": "Шлем",
   "equipment.chest": "Доспех",
   "equipment.legs": "Поножи",
+  "equipment.weapon": "Оружие",
   "equipment.damage": "УРН",
   "equipment.armor": "БРН",
+
+  "element.none": "Нет",
+  "element.nature": "Природа",
+  "element.fire": "Огонь",
+  "element.ice": "Лёд",
+  "element.decay": "Тлен",
+
+  "itemchoice.title": "Найден новый предмет!",
+  "itemchoice.current": "Текущий",
+  "itemchoice.new": "Новый",
+  "itemchoice.take": "Взять новый предмет",
+  "itemchoice.upgrade": "Улучшить текущий",
+  "itemchoice.dontask": "Всегда так для этого слота",
 
   "enemy.forest_wolf": "Волк",
   "enemy.forest_archer": "Лучник",
@@ -49,12 +63,42 @@
   "common.no": "Нет",
 
   "tutorial.title": "Управление",
-  "tutorial.move": "WASD / Стрелки - движение",
-  "tutorial.combat": "Автоатака рядом с врагами",
-  "tutorial.potion": "E / Пробел - зелье",
-  "tutorial.menu": "Esc - пауза",
+  "tutorial.move": "WASD / Стрелки — движение",
+  "tutorial.combat": "Автоатака вблизи врагов",
+  "tutorial.potion": "E / Пробел — зелье",
+  "tutorial.menu": "Esc — пауза",
+  "tutorial.inventory": "Tab — инвентарь",
 
   "pause.title": "Пауза",
   "pause.resume": "Продолжить",
-  "pause.mainmenu": "Главное меню"
+  "pause.mainmenu": "Главное меню",
+
+  "inventory.title": "Инвентарь",
+  "inventory.empty": "Пусто",
+
+  "bonus.weapon.nature": "Накапливаемый яд",
+  "bonus.weapon.fire": "Горение (продлевается)",
+  "bonus.weapon.ice": "Бонус урон + замедление",
+  "bonus.weapon.decay": "Снижает макс. HP врага",
+  "bonus.armor.nature": "Сопротивление огню",
+  "bonus.armor.fire": "Сопротивление яду",
+  "bonus.armor.ice": "Сопротивление замедлению",
+  "bonus.armor.decay": "Сопротивление тлению",
+  "bonus.leggings.nature": "Реген HP при движении",
+  "bonus.leggings.fire": "Бонус к скорости",
+  "bonus.leggings.ice": "Иммунитет к замедлению",
+  "bonus.leggings.decay": "Усиление зелья",
+
+  "help.title": "Элементальные эффекты",
+  "help.weapon": "Оружие",
+  "help.armor": "Броня (шлем / кираса)",
+  "help.leggings": "Поножи",
+
+  "help.dmgps": "ур/с",
+  "help.sec": "с",
+  "help.stacks": "×стаки",
+  "help.refreshes": "обновл.",
+  "help.bonusdmg": "доп. урон",
+  "help.maxhp": "-% макс. HP",
+  "help.slow": "замедл."
 }

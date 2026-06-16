@@ -181,6 +181,15 @@ struct BossAI {
     std::vector<entt::entity> summonedMinions;
 };
 
+// Elemental bonus types for weapons and armor
+enum class Element { NONE, NATURE, FIRE, ICE, DECAY };
+
+// Describes an elemental bonus: which element and how strong its effect is
+struct ElementalEffect {
+    Element element = Element::NONE;
+    float percent = 0.0f;
+};
+
 // Player equipment - tiers correspond to biome difficulty (1-4, 0 = none)
 struct Equipment {
     int helmetTier = 0;
@@ -189,6 +198,72 @@ struct Equipment {
     int weaponTier = 0;
 
     enum WeaponType { NONE, SWORD, BOW } weaponType = NONE;
+
+    Element weaponElement = Element::NONE;
+    float weaponElementPercent = 0.0f;
+
+    Element helmetElement = Element::NONE;
+    float helmetElementPercent = 0.0f;
+
+    Element chestElement = Element::NONE;
+    float chestElementPercent = 0.0f;
+
+    Element leggingsElement = Element::NONE;
+    float leggingsElementPercent = 0.0f;
+
+    bool autoUpgradeWeapon = false;
+    bool autoUpgradeHelmet = false;
+    bool autoUpgradeChest = false;
+    bool autoUpgradeLeggings = false;
+};
+
+// Stacking nature DoT applied by a NATURE-element weapon. Each hit multiplies
+// dpsMultiplier and refreshes the duration.
+struct NatureStack {
+    float dpsMultiplier = 1.0f;
+    float duration = 0.0f;
+    float timer = 0.0f;
+    int stacks = 0;
+    float damageAccumulator = 0.0f;
+};
+
+// Burning DoT applied by a FIRE-element weapon. Re-hitting refreshes the
+// timer instead of stacking.
+struct FireBurn {
+    float dps = 0.0f;
+    float duration = 0.0f;
+    float timer = 0.0f;
+    float damageAccumulator = 0.0f;
+};
+
+// Marks a target chilled by an ICE-element hit. Tracks the SLOW duration that
+// was applied alongside the bonus damage so it can be cleared together with
+// the SLOW status effect.
+struct IceChill {
+    float slowDuration = 0.0f;
+};
+
+// Temporary max-HP reduction applied by a DECAY-element weapon. Health.max is
+// restored by maxHpReduction when the effect expires.
+struct DecayEffect {
+    int maxHpReduction = 0;
+    float duration = 0.0f;
+    float timer = 0.0f;
+};
+
+// Elemental resistances granted by armor (helmet/chest element bonuses) and
+// leggings ICE immunity. slowResist == 1.0 means full immunity to SLOW.
+struct ElementalResist {
+    float fireResist = 0.0f;
+    float natureResist = 0.0f;
+    float slowResist = 0.0f;
+    float decayResist = 0.0f;
+};
+
+// Fractional HP accumulator for the leggings NATURE lifesteal effect, since
+// Speed * percent * dt is usually well under 1 HP per frame.
+struct Lifesteal {
+    float accumulator = 0.0f;
 };
 
 // Meta-progression, persists across runs via meta_save.json

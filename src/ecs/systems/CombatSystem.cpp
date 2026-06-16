@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ecs/Components.hpp"
+#include "ecs/ElementalUtils.hpp"
 #include "ecs/EntityFactory.hpp"
 
 namespace tc {
@@ -130,8 +131,14 @@ void CombatSystem::updateRanged(entt::registry& registry, float dt)
         const sf::Vector2f direction{targetPos.x - pos.x, targetPos.y - pos.y};
         const int ownerBiome = isPlayer ? 0 : registry.get<EnemyTag>(entity).biome;
 
+        ElementalEffect projectileElement{};
+        if (const auto* equip = registry.try_get<Equipment>(entity)) {
+            projectileElement.element = equip->weaponElement;
+            projectileElement.percent = equip->weaponElementPercent;
+        }
+
         EntityFactory::createProjectile(registry, {pos.x, pos.y}, direction,
-            ranged.projectileSpeed, view.get<Damage>(entity).value, ownerBiome);
+            ranged.projectileSpeed, view.get<Damage>(entity).value, ownerBiome, projectileElement);
 
         ranged.timer = ranged.cooldown;
     }
@@ -223,6 +230,21 @@ void CombatSystem::applyDamage(entt::registry& registry, entt::entity attacker, 
                 potion->charges = std::min(potion->charges + 1, potion->maxCharges);
             }
         }
+        return;
+    }
+
+    Element element = Element::NONE;
+    float percent = 0.0f;
+    if (const auto* equip = registry.try_get<Equipment>(attacker)) {
+        element = equip->weaponElement;
+        percent = equip->weaponElementPercent;
+    } else if (const auto* effect = registry.try_get<ElementalEffect>(attacker)) {
+        element = effect->element;
+        percent = effect->percent;
+    }
+
+    if (element != Element::NONE) {
+        ElementalUtils::applyOnHit(registry, target, element, percent, rawDamage);
     }
 }
 

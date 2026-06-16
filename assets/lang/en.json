@@ -13,8 +13,22 @@
   "equipment.helmet": "Helmet",
   "equipment.chest": "Chest",
   "equipment.legs": "Legs",
+  "equipment.weapon": "Weapon",
   "equipment.damage": "DMG",
   "equipment.armor": "ARM",
+
+  "element.none": "None",
+  "element.nature": "Nature",
+  "element.fire": "Fire",
+  "element.ice": "Ice",
+  "element.decay": "Decay",
+
+  "itemchoice.title": "New Item Found!",
+  "itemchoice.current": "Current",
+  "itemchoice.new": "New",
+  "itemchoice.take": "Take New Item",
+  "itemchoice.upgrade": "Upgrade Current",
+  "itemchoice.dontask": "Always do this for this slot",
 
   "enemy.forest_wolf": "Wolf",
   "enemy.forest_archer": "Archer",
@@ -53,8 +67,38 @@
   "tutorial.combat": "Auto-attack near enemies",
   "tutorial.potion": "E / Space - Use Potion",
   "tutorial.menu": "Esc - Pause",
+  "tutorial.inventory": "Tab - Inventory",
 
   "pause.title": "Paused",
   "pause.resume": "Resume",
-  "pause.mainmenu": "Main Menu"
+  "pause.mainmenu": "Main Menu",
+
+  "inventory.title": "Inventory",
+  "inventory.empty": "Empty",
+
+  "bonus.weapon.nature": "Stacking poison DoT",
+  "bonus.weapon.fire": "Burning DoT (refreshes on hit)",
+  "bonus.weapon.ice": "Bonus damage + Slow",
+  "bonus.weapon.decay": "Reduces enemy max HP",
+  "bonus.armor.nature": "Fire resistance",
+  "bonus.armor.fire": "Poison resistance",
+  "bonus.armor.ice": "Slow resistance",
+  "bonus.armor.decay": "Decay resistance",
+  "bonus.leggings.nature": "HP regen while moving",
+  "bonus.leggings.fire": "Movement speed bonus",
+  "bonus.leggings.ice": "Slow immunity",
+  "bonus.leggings.decay": "Bonus potion healing",
+
+  "help.title": "Elemental Effects",
+  "help.weapon": "Weapon",
+  "help.armor": "Armor (Helmet / Chest)",
+  "help.leggings": "Leggings",
+
+  "help.dmgps": "dmg/s",
+  "help.sec": "s",
+  "help.stacks": "×stacks",
+  "help.refreshes": "refreshes",
+  "help.bonusdmg": "bonus dmg",
+  "help.maxhp": "-% max HP",
+  "help.slow": "slow"
 }

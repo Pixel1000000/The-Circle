@@ -3,6 +3,7 @@
 #include <entt/entt.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "ecs/ItemUpgrader.hpp"
 #include "ecs/systems/AISystem.hpp"
 #include "ecs/systems/CollisionSystem.hpp"
 #include "ecs/systems/CombatSystem.hpp"
@@ -13,6 +14,8 @@
 #include "meta/MetaProgression.hpp"
 #include "states/IGameState.hpp"
 #include "ui/HUD.hpp"
+#include "ui/InventoryScreen.hpp"
+#include "ui/ItemChoiceScreen.hpp"
 #include "ui/PauseScreen.hpp"
 #include "ui/TutorialHint.hpp"
 #include "world/World.hpp"
@@ -54,11 +57,24 @@ private:
     HUD hud;
     TutorialHint tutorialHint;
     PauseScreen pauseScreen;
+    InventoryScreen inventoryScreen;
+    ItemChoiceScreen itemChoiceScreen;
 
     RunSummary runSummary;
     bool inBossRoom = false;
     bool paused = false;
+    bool inventoryOpen = false;
+    bool itemChoiceOpen = false;
     float lastDt = 0.0f;
+
+    // Equipment drop awaiting an ItemChoiceScreen decision (slot indices:
+    // 0 = helmet, 1 = chest, 2 = leggings, 3 = weapon).
+    struct PendingDrop {
+        int slot = 0;
+        int tier = 0;
+        Element element = Element::NONE;
+        float percent = 0.0f;
+    } pendingDrop;
 };
 
 } // namespace tc

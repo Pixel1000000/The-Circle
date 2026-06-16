@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "config/ElementalConfig.hpp"
 #include "config/EnemyConfig.hpp"
 #include "config/EquipmentConfig.hpp"
 #include "config/PlayerConfig.hpp"
@@ -20,6 +21,7 @@ public:
     const PlayerConfig& getPlayerConfig() const;
     const EquipmentConfig& getEquipmentConfig() const;
     const EnemyConfig& getEnemyConfig() const;
+    const ElementalConfig& getElementalConfig() const;
 
 private:
     ConfigLoader() = default;
@@ -27,10 +29,12 @@ private:
     PlayerConfig loadPlayer(const std::string& path) const;
     EquipmentConfig loadEquipment(const std::string& path) const;
     EnemyConfig loadEnemies(const std::string& enemiesPath, const std::string& bossesPath) const;
+    ElementalConfig loadElemental(const std::string& path) const;
 
     PlayerConfig playerConfig;
     EquipmentConfig equipmentConfig;
     EnemyConfig enemyConfig;
+    ElementalConfig elementalConfig;
 };
 
 } // namespace tc
