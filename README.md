@@ -2,6 +2,15 @@
 
 2D roguelite prototype on SFML.
 
+## Запуск готовой сборки
+
+Скачайте и установите **Visual C++ Redistributable 2015–2022 (x64)**:
+https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+Затем запустите `TheCircle.exe`. Рядом с ним должна лежать папка `assets/`.
+
+---
+
 ## Быстрый старт (Windows)
 
 Запустите из обычного PowerShell (не нужен "x64 Native Tools Command Prompt"):
