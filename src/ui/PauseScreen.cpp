@@ -11,8 +11,9 @@ constexpr float SCREEN_H = 720.0f;
 constexpr float BUTTON_W = 320.0f;
 constexpr float BUTTON_H = 60.0f;
 constexpr float BUTTON_X = (SCREEN_W - BUTTON_W) / 2.0f;
-constexpr float RESUME_Y = 340.0f;
-constexpr float MAIN_MENU_Y = 420.0f;
+constexpr float RESUME_Y   = 310.0f;
+constexpr float SETTINGS_Y = 390.0f;
+constexpr float MAIN_MENU_Y = 470.0f;
 
 void centerTextInRect(sf::Text& text, const sf::RectangleShape& rect)
 {
@@ -31,6 +32,10 @@ PauseScreen::PauseScreen()
     resumeButton.setPosition(BUTTON_X, RESUME_Y);
     resumeButton.setFillColor(sf::Color(90, 160, 90));
 
+    settingsButton.setSize({BUTTON_W, BUTTON_H});
+    settingsButton.setPosition(BUTTON_X, SETTINGS_Y);
+    settingsButton.setFillColor(sf::Color(80, 80, 140));
+
     mainMenuButton.setSize({BUTTON_W, BUTTON_H});
     mainMenuButton.setPosition(BUTTON_X, MAIN_MENU_Y);
     mainMenuButton.setFillColor(sf::Color(160, 90, 90));
@@ -40,6 +45,7 @@ void PauseScreen::render(sf::RenderWindow& window, const Localization& localizat
 {
     window.draw(overlay);
     window.draw(resumeButton);
+    window.draw(settingsButton);
     window.draw(mainMenuButton);
 
     if (!fontManager.isLoaded()) {
@@ -66,6 +72,14 @@ void PauseScreen::render(sf::RenderWindow& window, const Localization& localizat
     centerTextInRect(resumeText, resumeButton);
     window.draw(resumeText);
 
+    sf::Text settingsText;
+    settingsText.setFont(font);
+    settingsText.setCharacterSize(24);
+    settingsText.setFillColor(sf::Color::White);
+    settingsText.setString(toSfString(localization.get("settings.title")));
+    centerTextInRect(settingsText, settingsButton);
+    window.draw(settingsText);
+
     sf::Text mainMenuText;
     mainMenuText.setFont(font);
     mainMenuText.setCharacterSize(24);
@@ -77,8 +91,9 @@ void PauseScreen::render(sf::RenderWindow& window, const Localization& localizat
 
 PauseScreen::Button PauseScreen::getButtonAt(sf::Vector2f point) const
 {
-    if (resumeButton.getGlobalBounds().contains(point)) return Button::RESUME;
-    if (mainMenuButton.getGlobalBounds().contains(point)) return Button::MAIN_MENU;
+    if (resumeButton.getGlobalBounds().contains(point))   return Button::RESUME;
+    if (settingsButton.getGlobalBounds().contains(point))  return Button::SETTINGS;
+    if (mainMenuButton.getGlobalBounds().contains(point))  return Button::MAIN_MENU;
     return Button::NONE;
 }
 

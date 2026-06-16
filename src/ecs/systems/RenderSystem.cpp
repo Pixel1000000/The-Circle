@@ -61,6 +61,30 @@ void RenderSystem::update(entt::registry& registry, sf::RenderWindow& window, co
 
         window.draw(shape);
 
+        // Elemental status overlays — semi-transparent tint on the sprite.
+        {
+            const auto* se = registry.try_get<StatusEffect>(entity);
+            sf::Color tint(0, 0, 0, 0);
+            if (registry.all_of<NatureStack>(entity) ||
+                    (se && se->type == StatusEffect::POISON)) {
+                tint = sf::Color(100, 255, 100, 90);
+            } else if (registry.all_of<FireBurn>(entity)) {
+                tint = sf::Color(255, 100, 30, 90);
+            } else if (registry.all_of<IceChill>(entity) ||
+                    (se && se->type == StatusEffect::SLOW)) {
+                tint = sf::Color(0, 220, 255, 90);
+            } else if (registry.all_of<DecayEffect>(entity)) {
+                tint = sf::Color(140, 140, 140, 90);
+            }
+            if (tint.a > 0) {
+                sf::RectangleShape tintShape(renderable.size);
+                tintShape.setOrigin(renderable.size.x * 0.5f, renderable.size.y * 0.5f);
+                tintShape.setPosition(pos.x, pos.y);
+                tintShape.setFillColor(tint);
+                window.draw(tintShape);
+            }
+        }
+
         if (registry.all_of<Invulnerable>(entity)) {
             sf::RectangleShape shield(renderable.size + sf::Vector2f(16.0f, 16.0f));
             shield.setOrigin(shield.getSize().x * 0.5f, shield.getSize().y * 0.5f);

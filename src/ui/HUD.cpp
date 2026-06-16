@@ -1,21 +1,24 @@
 #include "ui/HUD.hpp"
 
+#include <cmath>
 #include <string>
 
-#include "config/ConfigLoader.hpp"
-#include "config/EquipmentConfig.hpp"
 #include "core/TextUtils.hpp"
 #include "ecs/Components.hpp"
 
 namespace tc {
 
 namespace {
-constexpr float BAR_WIDTH = 300.0f;
+constexpr float BAR_WIDTH  = 300.0f;
 constexpr float BAR_HEIGHT = 24.0f;
-constexpr float MARGIN = 20.0f;
+constexpr float MARGIN     = 20.0f;
 constexpr float WORLD_WIDTH = 1280.0f;
 constexpr float DROP_NOTICE_DURATION = 2.5f;
-constexpr float STAT_LINE_OFFSET = 20.0f;
+
+// Status-effect icons sit to the right of the HP bar.
+constexpr float ICON_SIZE = BAR_HEIGHT + 4.0f;   // slightly taller than HP bar
+constexpr float ICON_GAP  = 4.0f;
+constexpr float ICONS_X   = MARGIN + BAR_WIDTH + 8.0f;
 
 std::string equipmentSlotName(const Localization& localization, const Equipment& equipment, int slot)
 {
@@ -29,22 +32,15 @@ std::string equipmentSlotName(const Localization& localization, const Equipment&
             : localization.get("equipment.sword");
     }
 }
-
-// Armor bonus granted by a single equipped piece at the given tier (0 = none equipped).
-int armorBonusFor(const std::array<ArmorPieceStats, TIER_COUNT>& tiers, int tier)
-{
-    if (tier < 1 || tier > TIER_COUNT) return 0;
-    return tiers[static_cast<std::size_t>(tier - 1)].armor;
-}
-}
+} // namespace
 
 void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entity player,
     const Localization& localization, const FontManager& fontManager, int keyFragmentsRequired,
     bool showNextBiomeHint, float dt)
 {
-    const auto& health = registry.get<Health>(player);
+    const auto& health    = registry.get<Health>(player);
     const auto& fragments = registry.get<KeyFragmentHolder>(player);
-    const auto& potion = registry.get<Potion>(player);
+    const auto& potion    = registry.get<Potion>(player);
     const auto& equipment = registry.get<Equipment>(player);
 
     if (dropNoticeTimer > 0.0f) {
@@ -91,10 +87,6 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
         equipmentText.setCharacterSize(16);
         equipmentText.setFillColor(sf::Color::White);
 
-        equipmentStatText.setFont(font);
-        equipmentStatText.setCharacterSize(13);
-        equipmentStatText.setFillColor(sf::Color::White);
-
         nextBiomeText.setFont(font);
         nextBiomeText.setCharacterSize(20);
         nextBiomeText.setFillColor(sf::Color::Yellow);
@@ -118,12 +110,10 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
         + std::to_string(potion.charges) + "/" + std::to_string(potion.maxCharges)));
     window.draw(potionText);
 
+    // ── Equipment bar: only name + tier (stats are in the inventory screen) ──
     const std::string weaponLabel = equipment.weaponType == Equipment::BOW
         ? localization.get("equipment.bow")
         : localization.get("equipment.sword");
-
-    const auto& equipmentConfig = ConfigLoader::get().getEquipmentConfig();
-    const int currentDamage = registry.get<Damage>(player).value;
 
     const sf::Color equippedColor(255, 255, 255);
     const sf::Color emptyColor(120, 120, 120);
@@ -131,22 +121,14 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
     float x = MARGIN;
     const float y = MARGIN + BAR_HEIGHT + 56.0f;
 
-    auto drawEquipmentSegment = [&](const std::string& str, int tier, const std::string& statStr) {
-        const float segmentX = x;
-        const sf::Color color = tier == 0 ? emptyColor : equippedColor;
-
+    auto drawSegment = [&](const std::string& str, int tier) {
         equipmentText.setString(toSfString(str));
-        equipmentText.setFillColor(color);
-        equipmentText.setPosition(segmentX, y);
+        equipmentText.setFillColor(tier == 0 ? emptyColor : equippedColor);
+        equipmentText.setPosition(x, y);
         window.draw(equipmentText);
         x = equipmentText.findCharacterPos(equipmentText.getString().getSize()).x;
-
-        equipmentStatText.setString(toSfString(statStr));
-        equipmentStatText.setFillColor(color);
-        equipmentStatText.setPosition(segmentX, y + STAT_LINE_OFFSET);
-        window.draw(equipmentStatText);
     };
-    auto drawSeparator = [&]() {
+    auto drawSep = [&]() {
         equipmentText.setString(toSfString(" | "));
         equipmentText.setFillColor(equippedColor);
         equipmentText.setPosition(x, y);
@@ -154,18 +136,65 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
         x = equipmentText.findCharacterPos(equipmentText.getString().getSize()).x;
     };
 
-    drawEquipmentSegment(weaponLabel + " T" + std::to_string(equipment.weaponTier), equipment.weaponTier,
-        localization.get("equipment.damage") + " " + std::to_string(currentDamage));
-    drawSeparator();
-    drawEquipmentSegment(localization.get("equipment.helmet") + " T" + std::to_string(equipment.helmetTier), equipment.helmetTier,
-        localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.helmet, equipment.helmetTier)));
-    drawSeparator();
-    drawEquipmentSegment(localization.get("equipment.chest") + " T" + std::to_string(equipment.chestTier), equipment.chestTier,
-        localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.chest, equipment.chestTier)));
-    drawSeparator();
-    drawEquipmentSegment(localization.get("equipment.legs") + " T" + std::to_string(equipment.leggingsTier), equipment.leggingsTier,
-        localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.leggings, equipment.leggingsTier)));
+    drawSegment(weaponLabel + " T" + std::to_string(equipment.weaponTier),   equipment.weaponTier);
+    drawSep();
+    drawSegment(localization.get("equipment.helmet") + " T" + std::to_string(equipment.helmetTier),   equipment.helmetTier);
+    drawSep();
+    drawSegment(localization.get("equipment.chest")  + " T" + std::to_string(equipment.chestTier),    equipment.chestTier);
+    drawSep();
+    drawSegment(localization.get("equipment.legs")   + " T" + std::to_string(equipment.leggingsTier), equipment.leggingsTier);
 
+    // ── Status-effect icons (right of HP bar) ────────────────────────────────
+    float iconX = ICONS_X;
+
+    auto drawStatusIcon = [&](sf::Color bgColor, const std::string& sym, float timer) {
+        // Background box
+        sf::RectangleShape box({ICON_SIZE, ICON_SIZE});
+        box.setPosition(iconX, MARGIN);
+        box.setFillColor(bgColor);
+        window.draw(box);
+
+        // Symbol (top portion of box)
+        sf::Text symTxt;
+        symTxt.setFont(font);
+        symTxt.setCharacterSize(13);
+        symTxt.setFillColor(sf::Color::White);
+        symTxt.setString(sym);
+        const auto sb = symTxt.getLocalBounds();
+        symTxt.setOrigin(sb.left + sb.width / 2.0f, 0.0f);
+        symTxt.setPosition(iconX + ICON_SIZE / 2.0f, MARGIN + 2.0f);
+        window.draw(symTxt);
+
+        // Timer (bottom portion of box)
+        const int secs = std::max(1, static_cast<int>(std::ceil(timer)));
+        sf::Text timerTxt;
+        timerTxt.setFont(font);
+        timerTxt.setCharacterSize(11);
+        timerTxt.setFillColor(sf::Color::White);
+        timerTxt.setString(std::to_string(secs) + "s");
+        const auto tb = timerTxt.getLocalBounds();
+        timerTxt.setOrigin(tb.left + tb.width / 2.0f, 0.0f);
+        timerTxt.setPosition(iconX + ICON_SIZE / 2.0f, MARGIN + ICON_SIZE - 14.0f);
+        window.draw(timerTxt);
+
+        iconX += ICON_SIZE + ICON_GAP;
+    };
+
+    const auto* se = registry.try_get<StatusEffect>(player);
+    if (se) {
+        if (se->type == StatusEffect::POISON)
+            drawStatusIcon(sf::Color(50, 160, 50, 220),   "P", se->timer);
+        else if (se->type == StatusEffect::SLOW)
+            drawStatusIcon(sf::Color(0, 160, 210, 220),   "S", se->timer);
+    }
+    if (const auto* ns = registry.try_get<NatureStack>(player))
+        drawStatusIcon(sf::Color(50, 200, 50, 220),       "N", ns->timer);
+    if (const auto* fb = registry.try_get<FireBurn>(player))
+        drawStatusIcon(sf::Color(220, 90, 20, 220),       "F", fb->timer);
+    if (const auto* de = registry.try_get<DecayEffect>(player))
+        drawStatusIcon(sf::Color(120, 120, 120, 220),     "D", de->timer);
+
+    // ── Misc HUD ─────────────────────────────────────────────────────────────
     if (showNextBiomeHint) {
         nextBiomeText.setString(toSfString(localization.get("hud.nextbiome")));
         const auto bounds = nextBiomeText.getLocalBounds();

@@ -80,32 +80,95 @@ void PlayState::spawnBiomeEnemies()
     std::uniform_real_distribution<float> xDist(64.0f, static_cast<float>(Game::LOGICAL_WIDTH) - 64.0f);
     std::uniform_real_distribution<float> yDist(64.0f, static_cast<float>(Game::LOGICAL_HEIGHT) - 64.0f);
 
-    constexpr int ENEMIES_PER_TEMPLATE = 3;
     constexpr float MIN_SPAWN_DIST_SQ = 200.0f * 200.0f;
     constexpr int MAX_SPAWN_ATTEMPTS = 20;
+    constexpr int BASE_WAVE_BANK = 20;
+    constexpr int BANK_PER_META_POINT = 2;
 
     const auto& playerPosition = registry.get<Position>(player);
     const sf::Vector2f playerPos{playerPosition.x, playerPosition.y};
 
     auto& biome = world.getCurrentBiome();
-    const auto templates = ConfigLoader::get().getEnemyConfig().getEnemiesForBiome(biome.getType());
+    auto pool = ConfigLoader::get().getEnemyConfig().getEnemiesForBiome(biome.getType());
+    std::shuffle(pool.begin(), pool.end(), rng);
 
-    for (const auto& tmpl : templates) {
-        for (int i = 0; i < ENEMIES_PER_TEMPLATE; ++i) {
-            sf::Vector2f position;
-            int attempts = 0;
-            do {
-                position = {xDist(rng), yDist(rng)};
-                const float dx = position.x - playerPos.x;
-                const float dy = position.y - playerPos.y;
-                if (dx * dx + dy * dy >= MIN_SPAWN_DIST_SQ) {
-                    break;
-                }
-            } while (++attempts < MAX_SPAWN_ATTEMPTS);
+    const auto& meta = game.getMetaProgression().getStats();
+    const int metaTotalPoints = meta.strength + meta.endurance + meta.health;
+    int bank = BASE_WAVE_BANK + metaTotalPoints * BANK_PER_META_POINT;
 
-            const entt::entity entity = EntityFactory::createEnemy(registry, tmpl, position);
-            biome.getEnemies().push_back(entity);
+    auto spawnOne = [&](const EnemyTemplate& tmpl) {
+        sf::Vector2f position;
+        int attempts = 0;
+        do {
+            position = {xDist(rng), yDist(rng)};
+            const float dx = position.x - playerPos.x;
+            const float dy = position.y - playerPos.y;
+            if (dx * dx + dy * dy >= MIN_SPAWN_DIST_SQ) break;
+        } while (++attempts < MAX_SPAWN_ATTEMPTS);
+        biome.getEnemies().push_back(EntityFactory::createEnemy(registry, tmpl, position));
+    };
+
+    while (bank > 0) {
+        std::vector<const EnemyTemplate*> affordable;
+        for (const auto& t : pool) {
+            if (t.cost <= bank) affordable.push_back(&t);
         }
+        if (affordable.empty()) {
+            const auto* cheapest = &pool[0];
+            for (const auto& t : pool) {
+                if (t.cost < cheapest->cost) cheapest = &t;
+            }
+            spawnOne(*cheapest);
+            break;
+        }
+        std::uniform_int_distribution<int> pick(0, static_cast<int>(affordable.size()) - 1);
+        const EnemyTemplate* chosen = affordable[pick(rng)];
+        spawnOne(*chosen);
+        bank -= chosen->cost;
+    }
+
+    spawnObstacles();
+}
+
+void PlayState::spawnObstacles()
+{
+    static std::mt19937 rng{std::random_device{}()};
+    std::uniform_real_distribution<float> xDist(80.0f, static_cast<float>(Game::LOGICAL_WIDTH) - 80.0f);
+    std::uniform_real_distribution<float> yDist(80.0f, static_cast<float>(Game::LOGICAL_HEIGHT) - 80.0f);
+    std::uniform_real_distribution<float> wDist(40.0f, 100.0f);
+    std::uniform_real_distribution<float> hDist(30.0f, 80.0f);
+    std::uniform_int_distribution<int> countDist(4, 8);
+
+    constexpr float SAFE_RADIUS_SQ = 160.0f * 160.0f;
+    const float cx = Game::LOGICAL_WIDTH / 2.0f;
+    const float cy = Game::LOGICAL_HEIGHT / 2.0f;
+
+    const sf::Color obstacleTints[] = {
+        sf::Color(40, 70, 40),    // FOREST
+        sf::Color(100, 80, 30),   // DESERT
+        sf::Color(60, 80, 100),   // WINTER
+        sf::Color(50, 30, 30),    // DEADLANDS
+    };
+    const int biomeIdx = static_cast<int>(world.getCurrentBiome().getType());
+    const sf::Color color = obstacleTints[std::clamp(biomeIdx, 0, 3)];
+
+    const int count = countDist(rng);
+    for (int i = 0; i < count; ++i) {
+        const float w = wDist(rng);
+        const float h = hDist(rng);
+        float x, y;
+        int attempts = 0;
+        do {
+            x = xDist(rng);
+            y = yDist(rng);
+            const float dx = x - cx, dy = y - cy;
+            if (dx * dx + dy * dy >= SAFE_RADIUS_SQ) break;
+        } while (++attempts < 20);
+
+        const entt::entity e = registry.create();
+        registry.emplace<Position>(e, x, y);
+        registry.emplace<Renderable>(e, color, sf::Vector2f{w, h});
+        registry.emplace<Obstacle>(e);
     }
 }
 
@@ -118,6 +181,14 @@ void PlayState::clearCurrentBiomeEnemies()
         }
     }
     enemies.clear();
+
+    for (auto entity : registry.view<Obstacle>()) {
+        registry.destroy(entity);
+    }
+
+    for (auto entity : registry.view<BlizzardZoneTag>()) {
+        registry.destroy(entity);
+    }
 }
 
 void PlayState::advanceToNextBiome()
@@ -170,6 +241,17 @@ void PlayState::handleInput(const sf::Event& event)
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
         const sf::Vector2f point = game.getWindow().mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
 
+        if (inventoryOpen) {
+            switch (inventoryScreen.getButtonAt(point)) {
+            case InventoryScreen::Button::HELP:
+                inventoryScreen.toggleHelp();
+                break;
+            default:
+                break;
+            }
+            return;
+        }
+
         if (itemChoiceOpen) {
             auto& equipment = registry.get<Equipment>(player);
             switch (itemChoiceScreen.getButtonAt(point)) {
@@ -202,10 +284,43 @@ void PlayState::handleInput(const sf::Event& event)
             return;
         }
 
+        if (settingsOpen) {
+            constexpr float VOLUME_STEP = 10.0f;
+            switch (settingsScreen.getButtonAt(point)) {
+            case SettingsScreen::Button::BACK:
+                settingsOpen = false;
+                break;
+            case SettingsScreen::Button::LANG_RU:
+                game.getLocalization().load("ru");
+                break;
+            case SettingsScreen::Button::LANG_EN:
+                game.getLocalization().load("en");
+                break;
+            case SettingsScreen::Button::MUSIC_MINUS:
+                game.getAudio().setMusicVolume(game.getAudio().getMusicVolume() - VOLUME_STEP);
+                break;
+            case SettingsScreen::Button::MUSIC_PLUS:
+                game.getAudio().setMusicVolume(game.getAudio().getMusicVolume() + VOLUME_STEP);
+                break;
+            case SettingsScreen::Button::SFX_MINUS:
+                game.getAudio().setSfxVolume(game.getAudio().getSfxVolume() - VOLUME_STEP);
+                break;
+            case SettingsScreen::Button::SFX_PLUS:
+                game.getAudio().setSfxVolume(game.getAudio().getSfxVolume() + VOLUME_STEP);
+                break;
+            default:
+                break;
+            }
+            return;
+        }
+
         if (paused) {
             switch (pauseScreen.getButtonAt(point)) {
             case PauseScreen::Button::RESUME:
                 paused = false;
+                break;
+            case PauseScreen::Button::SETTINGS:
+                settingsOpen = true;
                 break;
             case PauseScreen::Button::MAIN_MENU:
                 game.changeState(std::make_unique<MainMenuState>(game));
@@ -224,7 +339,24 @@ void PlayState::handleInput(const sf::Event& event)
         return;
     }
 
+    if (event.key.code == sf::Keyboard::Tab) {
+        if (!paused && !itemChoiceOpen) {
+            inventoryOpen = !inventoryOpen;
+            if (!inventoryOpen) inventoryScreen.resetHelp();
+        }
+        return;
+    }
+
     if (event.key.code == sf::Keyboard::Escape) {
+        if (settingsOpen) {
+            settingsOpen = false;
+            return;
+        }
+        if (inventoryOpen) {
+            inventoryOpen = false;
+            inventoryScreen.resetHelp();
+            return;
+        }
         if (itemChoiceOpen) {
             return;
         }
@@ -232,7 +364,7 @@ void PlayState::handleInput(const sf::Event& event)
         return;
     }
 
-    if (paused) {
+    if (paused || inventoryOpen) {
         return;
     }
 
@@ -247,7 +379,7 @@ void PlayState::handleInput(const sf::Event& event)
 
 void PlayState::update(float dt)
 {
-    if (paused || itemChoiceOpen) {
+    if (paused || settingsOpen || inventoryOpen || itemChoiceOpen) {
         lastDt = 0.0f;
         return;
     }
@@ -281,6 +413,7 @@ void PlayState::update(float dt)
     }
 
     aiSystem.update(registry, dt);
+    blizzardSystem.update(registry, player, dt);
     combatSystem.update(registry, dt);
     statusEffectSystem.update(registry, dt);
 
@@ -351,12 +484,21 @@ void PlayState::render(sf::RenderWindow& window)
     const bool showNextBiomeHint = !inBossRoom && world.getCurrentBiome().isUnlocked();
 
     renderSystem.update(registry, window, game.getLocalization(), game.getFontManager(), lastDt);
+
     hud.render(window, registry, player, game.getLocalization(), game.getFontManager(), Biome::KEY_FRAGMENTS_REQUIRED,
         showNextBiomeHint, lastDt);
     tutorialHint.render(window, game.getLocalization(), game.getFontManager());
 
     if (paused) {
         pauseScreen.render(window, game.getLocalization(), game.getFontManager());
+    }
+
+    if (settingsOpen) {
+        settingsScreen.render(window, game.getLocalization(), game.getFontManager(), game.getAudio());
+    }
+
+    if (inventoryOpen) {
+        inventoryScreen.render(window, game.getLocalization(), game.getFontManager(), registry, player);
     }
 
     if (itemChoiceOpen) {

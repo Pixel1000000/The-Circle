@@ -209,6 +209,7 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
             tmpl.revivesOnce = entry.value("revivesOnce", tmpl.revivesOnce);
             tmpl.phaseThrough = entry.value("phaseThrough", tmpl.phaseThrough);
             tmpl.explodesOnDeath = entry.value("explodesOnDeath", tmpl.explodesOnDeath);
+            tmpl.cost = entry.value("cost", tmpl.cost);
             tmpl.keyFragmentDropChance = entry.value("keyFragmentDropChance", tmpl.keyFragmentDropChance);
             tmpl.equipmentDropChance = entry.value("equipmentDropChance", tmpl.equipmentDropChance);
 

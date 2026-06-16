@@ -34,7 +34,7 @@ void MovementSystem::update(entt::registry& registry, float dt)
                 if (auto* health = registry.try_get<Health>(entity)) {
                     if (auto* lifesteal = registry.try_get<Lifesteal>(entity)) {
                         if (health->current < health->max) {
-                            lifesteal->accumulator += speed * equipment->leggingsElementPercent * dt;
+                            lifesteal->accumulator += speed * equipment->leggingsElementPercent * 0.03f * dt;
                             const int healAmount = static_cast<int>(lifesteal->accumulator);
                             if (healAmount > 0) {
                                 lifesteal->accumulator -= static_cast<float>(healAmount);
