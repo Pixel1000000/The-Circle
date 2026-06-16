@@ -92,5 +92,13 @@
   "help.title": "Элементальные эффекты",
   "help.weapon": "Оружие",
   "help.armor": "Броня (шлем / кираса)",
-  "help.leggings": "Поножи"
+  "help.leggings": "Поножи",
+
+  "help.dmgps": "ур/с",
+  "help.sec": "с",
+  "help.stacks": "×стаки",
+  "help.refreshes": "обновл.",
+  "help.bonusdmg": "доп. урон",
+  "help.maxhp": "-% макс. HP",
+  "help.slow": "замедл."
 }

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "config/ConfigLoader.hpp"
+#include "config/ElementalConfig.hpp"
 #include "config/EquipmentConfig.hpp"
 #include "core/TextUtils.hpp"
 #include "ecs/Components.hpp"
@@ -99,9 +100,9 @@ int armorForSlot(const EquipmentConfig& cfg, int slot, int tier)
 // Vertical list layout: 3 sections (weapon / armor / leggings), each listing
 // all 4 elements on separate lines. Fits within screen bounds at any language.
 
-void drawHelpPanel(sf::RenderWindow& window, const Localization& loc, const sf::Font& font)
+void drawHelpPanel(sf::RenderWindow& window, const Localization& loc, const sf::Font& font,
+                   const ElementalConfig& ecfg)
 {
-    // Overlay the whole inventory panel area
     sf::RectangleShape bg({PANEL_W, PANEL_H});
     bg.setPosition(PANEL_X, PANEL_Y);
     bg.setFillColor(sf::Color(8, 8, 18, 248));
@@ -110,8 +111,8 @@ void drawHelpPanel(sf::RenderWindow& window, const Localization& loc, const sf::
     window.draw(bg);
 
     const float PAD = 28.0f;
-    const float ELEM_COL = PANEL_X + PAD + 220.0f; // where element name starts
-    const float DESC_COL = ELEM_COL + 160.0f;       // where description starts
+    const float ELEM_COL = PANEL_X + PAD + 220.0f;
+    const float DESC_COL = ELEM_COL + 160.0f;
     float curY = PANEL_Y + 16.0f;
 
     auto text = [&](const std::string& str, float x, float y, unsigned int sz, sf::Color col) {
@@ -124,41 +125,60 @@ void drawHelpPanel(sf::RenderWindow& window, const Localization& loc, const sf::
         window.draw(t);
     };
 
+    auto istr = [](float v) { return std::to_string(static_cast<int>(std::round(v))); };
+
+    const std::string dps = loc.get("help.dmgps");
+    const std::string sec = loc.get("help.sec");
+
+    // Build per-element weapon descriptions from config
+    const std::string weaponDescs[4] = {
+        istr(ecfg.natureBaseDps) + " " + dps + " " + loc.get("help.stacks") +
+            ", " + istr(ecfg.natureDuration) + sec,
+        istr(ecfg.fireBaseDps) + "×(1+%) " + dps +
+            ", " + istr(ecfg.fireDuration) + sec + " (" + loc.get("help.refreshes") + ")",
+        loc.get("help.bonusdmg") + " +%, " + loc.get("help.slow") +
+            " " + istr(ecfg.iceSlowDuration) + sec,
+        loc.get("help.maxhp") + ", " + istr(ecfg.decayDuration) + sec,
+    };
+
+    const char* armorBonusKeys[4]    = { "bonus.armor.nature",    "bonus.armor.fire",    "bonus.armor.ice",    "bonus.armor.decay"    };
+    const char* leggingsBonusKeys[4] = { "bonus.leggings.nature", "bonus.leggings.fire", "bonus.leggings.ice", "bonus.leggings.decay" };
+
+    const Element elems[4]   = { Element::NATURE, Element::FIRE, Element::ICE, Element::DECAY };
+    const char* elemKeys[4]  = { "element.nature", "element.fire", "element.ice", "element.decay" };
+
     text(loc.get("help.title"), PANEL_X + PAD, curY, 26, sf::Color::White);
     curY += 42.0f;
 
     struct Section {
         const char* headerKey;
-        const char* bonusKeys[4];
+        const std::string* descs; // pointer to array[4]
     };
     const Section sections[3] = {
-        { "help.weapon",
-          { "bonus.weapon.nature", "bonus.weapon.fire", "bonus.weapon.ice", "bonus.weapon.decay" } },
-        { "help.armor",
-          { "bonus.armor.nature",  "bonus.armor.fire",  "bonus.armor.ice",  "bonus.armor.decay"  } },
-        { "help.leggings",
-          { "bonus.leggings.nature", "bonus.leggings.fire", "bonus.leggings.ice", "bonus.leggings.decay" } },
+        { "help.weapon",    weaponDescs        },
+        { "help.armor",     nullptr            },
+        { "help.leggings",  nullptr            },
     };
+    const char** bonusKeyArrays[3] = { nullptr, armorBonusKeys, leggingsBonusKeys };
 
-    const Element elems[4]    = { Element::NATURE, Element::FIRE, Element::ICE, Element::DECAY };
-    const char*  elemKeys[4]  = { "element.nature", "element.fire", "element.ice", "element.decay" };
-
-    for (const auto& sec : sections) {
-        // Section header
+    for (int si = 0; si < 3; ++si) {
         sf::RectangleShape hdrLine({PANEL_W - PAD * 2.0f, 1.0f});
         hdrLine.setPosition(PANEL_X + PAD, curY - 4.0f);
         hdrLine.setFillColor(sf::Color(70, 70, 100));
         window.draw(hdrLine);
 
-        text(loc.get(sec.headerKey), PANEL_X + PAD, curY, 20, sf::Color(220, 220, 130));
+        text(loc.get(sections[si].headerKey), PANEL_X + PAD, curY, 20, sf::Color(220, 220, 130));
         curY += 28.0f;
 
         for (int i = 0; i < 4; ++i) {
+            const std::string desc = sections[si].descs
+                ? sections[si].descs[i]
+                : loc.get(bonusKeyArrays[si][i]);
             text(loc.get(elemKeys[i]), ELEM_COL, curY, 17, elementColor(elems[i]));
-            text(loc.get(sec.bonusKeys[i]), DESC_COL, curY, 17, sf::Color(210, 210, 210));
+            text(desc, DESC_COL, curY, 17, sf::Color(210, 210, 210));
             curY += 24.0f;
         }
-        curY += 16.0f; // gap between sections
+        curY += 16.0f;
     }
 }
 
@@ -296,7 +316,7 @@ void InventoryScreen::render(sf::RenderWindow& window, const Localization& loc,
     }
 
     if (helpVisible) {
-        drawHelpPanel(window, loc, font);
+        drawHelpPanel(window, loc, font, ConfigLoader::get().getElementalConfig());
     }
 }
 

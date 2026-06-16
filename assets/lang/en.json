@@ -92,5 +92,13 @@
   "help.title": "Elemental Effects",
   "help.weapon": "Weapon",
   "help.armor": "Armor (Helmet / Chest)",
-  "help.leggings": "Leggings"
+  "help.leggings": "Leggings",
+
+  "help.dmgps": "dmg/s",
+  "help.sec": "s",
+  "help.stacks": "×stacks",
+  "help.refreshes": "refreshes",
+  "help.bonusdmg": "bonus dmg",
+  "help.maxhp": "-% max HP",
+  "help.slow": "slow"
 }
