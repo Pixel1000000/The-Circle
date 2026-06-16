@@ -1,5 +1,6 @@
 #include "ui/HUD.hpp"
 
+#include <cmath>
 #include <string>
 
 #include "config/ConfigLoader.hpp"
@@ -35,6 +36,20 @@ int armorBonusFor(const std::array<ArmorPieceStats, TIER_COUNT>& tiers, int tier
 {
     if (tier < 1 || tier > TIER_COUNT) return 0;
     return tiers[static_cast<std::size_t>(tier - 1)].armor;
+}
+
+// Returns "ElementName +X%" string for a slot, or "" if element is NONE.
+std::string elementStatStr(const Localization& localization, Element element, float percent)
+{
+    std::string key;
+    switch (element) {
+    case Element::NATURE: key = "element.nature"; break;
+    case Element::FIRE:   key = "element.fire";   break;
+    case Element::ICE:    key = "element.ice";     break;
+    case Element::DECAY:  key = "element.decay";   break;
+    default: return "";
+    }
+    return localization.get(key) + " +" + std::to_string(static_cast<int>(std::round(percent * 100.0f))) + "%";
 }
 }
 
@@ -128,6 +143,11 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
     const sf::Color equippedColor(255, 255, 255);
     const sf::Color emptyColor(120, 120, 120);
 
+    auto withElem = [&](std::string base, Element elem, float pct) -> std::string {
+        const std::string e = elementStatStr(localization, elem, pct);
+        return e.empty() ? base : base + " | " + e;
+    };
+
     float x = MARGIN;
     const float y = MARGIN + BAR_HEIGHT + 56.0f;
 
@@ -155,16 +175,20 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
     };
 
     drawEquipmentSegment(weaponLabel + " T" + std::to_string(equipment.weaponTier), equipment.weaponTier,
-        localization.get("equipment.damage") + " " + std::to_string(currentDamage));
+        withElem(localization.get("equipment.damage") + " " + std::to_string(currentDamage),
+            equipment.weaponElement, equipment.weaponElementPercent));
     drawSeparator();
     drawEquipmentSegment(localization.get("equipment.helmet") + " T" + std::to_string(equipment.helmetTier), equipment.helmetTier,
-        localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.helmet, equipment.helmetTier)));
+        withElem(localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.helmet, equipment.helmetTier)),
+            equipment.helmetElement, equipment.helmetElementPercent));
     drawSeparator();
     drawEquipmentSegment(localization.get("equipment.chest") + " T" + std::to_string(equipment.chestTier), equipment.chestTier,
-        localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.chest, equipment.chestTier)));
+        withElem(localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.chest, equipment.chestTier)),
+            equipment.chestElement, equipment.chestElementPercent));
     drawSeparator();
     drawEquipmentSegment(localization.get("equipment.legs") + " T" + std::to_string(equipment.leggingsTier), equipment.leggingsTier,
-        localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.leggings, equipment.leggingsTier)));
+        withElem(localization.get("equipment.armor") + " " + std::to_string(armorBonusFor(equipmentConfig.leggings, equipment.leggingsTier)),
+            equipment.leggingsElement, equipment.leggingsElementPercent));
 
     if (showNextBiomeHint) {
         nextBiomeText.setString(toSfString(localization.get("hud.nextbiome")));

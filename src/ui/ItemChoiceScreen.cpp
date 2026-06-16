@@ -151,6 +151,24 @@ void ItemChoiceScreen::render(sf::RenderWindow& window, const Localization& loca
     centerTextInRect(takeNewText, takeNewButton);
     window.draw(takeNewText);
 
+    // Show the elemental percent transition above the upgrade button.
+    {
+        const float resultPercent = currentPercent + newPercent * 0.5f;
+        const Element resultElement = (currentElement != Element::NONE) ? currentElement : newElement;
+        const std::string fromStr = elementLabel(localization, currentElement, currentPercent);
+        const std::string toStr = elementLabel(localization, resultElement, resultPercent);
+
+        sf::Text transitionText;
+        transitionText.setFont(font);
+        transitionText.setCharacterSize(18);
+        transitionText.setFillColor(sf::Color(180, 220, 255));
+        transitionText.setString(toSfString(fromStr + " → " + toStr));
+        const sf::FloatRect tb = transitionText.getLocalBounds();
+        transitionText.setOrigin(tb.left + tb.width / 2.0f, tb.top + tb.height / 2.0f);
+        transitionText.setPosition(RIGHT_X + BUTTON_W / 2.0f, BUTTONS_Y - 22.0f);
+        window.draw(transitionText);
+    }
+
     sf::Text upgradeText;
     upgradeText.setFont(font);
     upgradeText.setCharacterSize(22);

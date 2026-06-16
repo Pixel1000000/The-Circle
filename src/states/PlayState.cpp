@@ -351,6 +351,31 @@ void PlayState::render(sf::RenderWindow& window)
     const bool showNextBiomeHint = !inBossRoom && world.getCurrentBiome().isUnlocked();
 
     renderSystem.update(registry, window, game.getLocalization(), game.getFontManager(), lastDt);
+
+    // Semi-transparent full-screen overlays showing active elemental status effects on player.
+    {
+        sf::RectangleShape statusOverlay({static_cast<float>(Game::LOGICAL_WIDTH), static_cast<float>(Game::LOGICAL_HEIGHT)});
+        const auto* se = registry.try_get<StatusEffect>(player);
+        if (registry.all_of<NatureStack>(player) ||
+                (se && se->type == StatusEffect::POISON)) {
+            statusOverlay.setFillColor(sf::Color(100, 255, 100, 45));
+            window.draw(statusOverlay);
+        }
+        if (registry.all_of<FireBurn>(player)) {
+            statusOverlay.setFillColor(sf::Color(255, 100, 30, 45));
+            window.draw(statusOverlay);
+        }
+        if (registry.all_of<IceChill>(player) ||
+                (se && se->type == StatusEffect::SLOW)) {
+            statusOverlay.setFillColor(sf::Color(0, 220, 255, 45));
+            window.draw(statusOverlay);
+        }
+        if (registry.all_of<DecayEffect>(player)) {
+            statusOverlay.setFillColor(sf::Color(140, 140, 140, 45));
+            window.draw(statusOverlay);
+        }
+    }
+
     hud.render(window, registry, player, game.getLocalization(), game.getFontManager(), Biome::KEY_FRAGMENTS_REQUIRED,
         showNextBiomeHint, lastDt);
     tutorialHint.render(window, game.getLocalization(), game.getFontManager());
