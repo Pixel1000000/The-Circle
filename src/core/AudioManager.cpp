@@ -1,5 +1,6 @@
 #include "core/AudioManager.hpp"
 
+#include <algorithm>
 #include <iostream>
 
 namespace tc {
@@ -44,6 +45,17 @@ void AudioManager::playSfx(const std::string& name)
 
     activeSounds.emplace_back(it->second);
     activeSounds.back().play();
+}
+
+void AudioManager::setMusicVolume(float volume)
+{
+    musicVolume = std::clamp(volume, 0.0f, 100.0f);
+    music.setVolume(musicVolume);
+}
+
+void AudioManager::setSfxVolume(float volume)
+{
+    sfxVolume = std::clamp(volume, 0.0f, 100.0f);
 }
 
 } // namespace tc

@@ -18,9 +18,16 @@ public:
 
     void playSfx(const std::string& name);
 
+    void setMusicVolume(float volume); // 0–100
+    void setSfxVolume(float volume);   // 0–100
+    float getMusicVolume() const { return musicVolume; }
+    float getSfxVolume() const { return sfxVolume; }
+
 private:
     sf::Music music;
     std::string currentTrack;
+    float musicVolume = 100.0f;
+    float sfxVolume = 100.0f;
 
     std::unordered_map<std::string, sf::SoundBuffer> sfxBuffers;
     std::list<sf::Sound> activeSounds;

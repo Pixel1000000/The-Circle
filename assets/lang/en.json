@@ -94,6 +94,12 @@
   "help.armor": "Armor (Helmet / Chest)",
   "help.leggings": "Leggings",
 
+  "settings.title": "Settings",
+  "settings.language": "Language",
+  "settings.music": "Music Volume",
+  "settings.sfx": "SFX Volume",
+  "settings.back": "Back",
+
   "help.dmgps": "dmg/s",
   "help.sec": "s",
   "help.stacks": "×stacks",

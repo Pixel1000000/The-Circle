@@ -46,6 +46,31 @@ void CollisionSystem::update(entt::registry& registry)
             }
         }
     }
+
+    // Push units out of static obstacles (only move the unit, not the obstacle)
+    for (auto unit : entities) {
+        auto& posU = registry.get<Position>(unit);
+        const auto& sizeU = registry.get<Renderable>(unit).size;
+
+        for (auto obs : registry.view<Obstacle, Position, Renderable>()) {
+            const auto& posO = registry.get<Position>(obs);
+            const auto& sizeO = registry.get<Renderable>(obs).size;
+
+            const float dx = posU.x - posO.x;
+            const float dy = posU.y - posO.y;
+
+            const float overlapX = (sizeU.x + sizeO.x) * 0.5f - std::abs(dx);
+            const float overlapY = (sizeU.y + sizeO.y) * 0.5f - std::abs(dy);
+
+            if (overlapX <= 0.0f || overlapY <= 0.0f) continue;
+
+            if (overlapX < overlapY) {
+                posU.x += overlapX * (dx >= 0.0f ? 1.0f : -1.0f);
+            } else {
+                posU.y += overlapY * (dy >= 0.0f ? 1.0f : -1.0f);
+            }
+        }
+    }
 }
 
 } // namespace tc

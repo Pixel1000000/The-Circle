@@ -18,8 +18,7 @@ constexpr float WORLD_HEIGHT = 720.0f;
 
 constexpr float DRUID_PHASE_DURATION = 3.0f;
 constexpr float NAGA_PHASE_DURATION = 4.0f;
-constexpr float ELEMENTAL_SLOW_INTERVAL = 4.0f;
-constexpr float ELEMENTAL_SLOW_DURATION = 2.0f;
+constexpr float ELEMENTAL_BLIZZARD_INTERVAL = 8.0f;
 
 // HP fractions (of max) at which the Lich raises its shield and summons a
 // wave of minions. The shield drops once that wave is fully dead.
@@ -127,9 +126,42 @@ void AISystem::update(entt::registry& registry, float dt)
             }
             case AIBehavior::BOSS_ELEMENTAL: {
                 bossAI->phaseTimer += dt;
-                if (bossAI->phaseTimer >= ELEMENTAL_SLOW_INTERVAL) {
+                if (bossAI->phaseTimer >= ELEMENTAL_BLIZZARD_INTERVAL) {
                     bossAI->phaseTimer = 0.0f;
-                    registry.emplace_or_replace<StatusEffect>(player, StatusEffect::SLOW, 0.0f, ELEMENTAL_SLOW_DURATION, ELEMENTAL_SLOW_DURATION);
+
+                    // Destroy old blizzard zones
+                    for (auto zone : registry.view<BlizzardZoneTag>()) {
+                        registry.destroy(zone);
+                    }
+
+                    const auto& bcfg = ConfigLoader::get().getElementalConfig().blizzard;
+                    static std::mt19937 brng{std::random_device{}()};
+                    std::uniform_real_distribution<float> xd(80.0f, WORLD_WIDTH - 80.0f);
+                    std::uniform_real_distribution<float> yd(80.0f, WORLD_HEIGHT - 80.0f);
+                    std::uniform_real_distribution<float> dirAng(0.0f, 6.2832f);
+                    std::uniform_int_distribution<int> smallCount(bcfg.smallCountMin, bcfg.smallCountMax);
+                    std::uniform_real_distribution<float> changeDist(bcfg.driftChangeMin, bcfg.driftChangeMax);
+
+                    // 1 large drifting zone
+                    {
+                        const float a = dirAng(brng);
+                        const sf::Vector2f dir{std::cos(a), std::sin(a)};
+                        auto e = registry.create();
+                        registry.emplace<Position>(e, xd(brng), yd(brng));
+                        registry.emplace<Renderable>(e, sf::Color(80, 180, 255, 70), bcfg.bigSize);
+                        registry.emplace<BlizzardZoneTag>(e);
+                        registry.emplace<BlizzardZone>(e, true, dir, changeDist(brng));
+                    }
+
+                    // Small static zones
+                    const int sc = smallCount(brng);
+                    for (int i = 0; i < sc; ++i) {
+                        auto e = registry.create();
+                        registry.emplace<Position>(e, xd(brng), yd(brng));
+                        registry.emplace<Renderable>(e, sf::Color(80, 180, 255, 70), bcfg.smallSize);
+                        registry.emplace<BlizzardZoneTag>(e);
+                        registry.emplace<BlizzardZone>(e, false, sf::Vector2f{0.f, 0.f}, 0.f);
+                    }
                 }
                 break;
             }

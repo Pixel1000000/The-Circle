@@ -266,6 +266,19 @@ struct Lifesteal {
     float accumulator = 0.0f;
 };
 
+// Static impassable block placed in a biome for tactical cover.
+struct Obstacle {};
+
+// Tag for a blizzard slow-zone spawned by BOSS_ELEMENTAL.
+struct BlizzardZoneTag {};
+
+// Drift behaviour for a blizzard slow-zone (size lives in Renderable).
+struct BlizzardZone {
+    bool drifting = false;
+    sf::Vector2f driftDir = {0.f, 0.f};
+    float dirTimer = 0.f;
+};
+
 // Meta-progression, persists across runs via meta_save.json
 struct MetaStats {
     int strength = 0;
