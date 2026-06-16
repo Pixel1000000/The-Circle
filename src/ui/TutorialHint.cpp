@@ -5,8 +5,8 @@
 namespace tc {
 
 namespace {
-constexpr float PANEL_W = 280.0f;
-constexpr float PANEL_H = 190.0f;
+constexpr float PANEL_W = 320.0f;
+constexpr float PANEL_H = 230.0f;
 constexpr float PANEL_Y = 80.0f;
 constexpr float MARGIN = 16.0f;
 constexpr float TAB_W = 28.0f;
@@ -66,7 +66,7 @@ void TutorialHint::render(sf::RenderWindow& window, const Localization& localiza
 
             for (auto& line : lineTexts) {
                 line.setFont(font);
-                line.setCharacterSize(15);
+                line.setCharacterSize(14);
                 line.setFillColor(sf::Color::White);
             }
 
@@ -103,6 +103,7 @@ void TutorialHint::render(sf::RenderWindow& window, const Localization& localiza
         "tutorial.combat",
         "tutorial.potion",
         "tutorial.menu",
+        "tutorial.inventory",
     };
 
     for (size_t i = 0; i < lineTexts.size(); ++i) {

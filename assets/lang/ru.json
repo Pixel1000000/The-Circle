@@ -63,10 +63,11 @@
   "common.no": "Нет",
 
   "tutorial.title": "Управление",
-  "tutorial.move": "WASD / Стрелки - движение",
-  "tutorial.combat": "Автоатака рядом с врагами",
-  "tutorial.potion": "E / Пробел - зелье",
-  "tutorial.menu": "Esc - пауза",
+  "tutorial.move": "WASD / Стрелки — движение",
+  "tutorial.combat": "Автоатака вблизи врагов",
+  "tutorial.potion": "E / Пробел — зелье",
+  "tutorial.menu": "Esc — пауза",
+  "tutorial.inventory": "Tab — инвентарь",
 
   "pause.title": "Пауза",
   "pause.resume": "Продолжить",

@@ -67,6 +67,7 @@
   "tutorial.combat": "Auto-attack near enemies",
   "tutorial.potion": "E / Space - Use Potion",
   "tutorial.menu": "Esc - Pause",
+  "tutorial.inventory": "Tab - Inventory",
 
   "pause.title": "Paused",
   "pause.resume": "Resume",
