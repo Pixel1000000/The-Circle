@@ -82,18 +82,28 @@ entt::entity EntityFactory::createPlayer(entt::registry& registry, sf::Vector2f 
     return entity;
 }
 
-entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTemplate& tmpl, sf::Vector2f position)
+entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTemplate& tmpl, sf::Vector2f position,
+    int playerStrength, int playerEndurance, int playerHealth)
 {
     entt::entity entity = registry.create();
+
+    // sqrt curve: grows fast early, flattens at high values so player progression always feels meaningful.
+    // str=10 → +16% HP, str=100 → +50% HP (player deals 3x damage vs 1.5x HP = 2x faster kills)
+    const float sqrtPower    = std::sqrt(static_cast<float>(playerStrength));
+    const float sqrtTankiness = std::sqrt(static_cast<float>(playerEndurance + playerHealth));
+    const int   totalPoints   = playerStrength + playerEndurance + playerHealth;
+    const int scaledHealth = static_cast<int>(std::round(tmpl.health * (1.0f + sqrtPower    * 0.05f)));
+    const int scaledDamage = static_cast<int>(std::round(tmpl.damage * (1.0f + sqrtTankiness * 0.07f)));
+    const int scaledArmor  = tmpl.armor + static_cast<int>(std::sqrt(static_cast<float>(totalPoints)) * 0.5f);
 
     registry.emplace<EnemyTag>(entity, biomeTier(tmpl.biome));
     registry.emplace<Name>(entity, tmpl.id);
     registry.emplace<Position>(entity, position.x, position.y);
     registry.emplace<Velocity>(entity, 0.0f, 0.0f);
     registry.emplace<Speed>(entity, tmpl.speed);
-    registry.emplace<Health>(entity, tmpl.health, tmpl.health);
-    registry.emplace<Armor>(entity, tmpl.armor);
-    registry.emplace<Damage>(entity, tmpl.damage);
+    registry.emplace<Health>(entity, scaledHealth, scaledHealth);
+    registry.emplace<Armor>(entity, scaledArmor);
+    registry.emplace<Damage>(entity, scaledDamage);
     registry.emplace<AIBehavior>(entity, tmpl.behavior);
     registry.emplace<Renderable>(entity, tmpl.color, tmpl.size);
     registry.emplace<KeyFragmentDrop>(entity, tmpl.keyFragmentDropChance);

@@ -37,6 +37,18 @@ target_compile_features(${PROJECT_NAME}
         cxx_std_17
 )
 
+option(TC_DEBUG_LOG "Enable in-game debug logging to debug_log.txt" OFF)
+if(TC_DEBUG_LOG)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE TC_DEBUG_LOG)
+    message(STATUS "TheCircle: debug logging ENABLED (debug_log.txt)")
+endif()
+
+option(TC_DEV "Enable developer panel (F1 in-game)" OFF)
+if(TC_DEV)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE TC_DEV)
+    message(STATUS "TheCircle: developer panel ENABLED (F1)")
+endif()
+
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets

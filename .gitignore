@@ -5,3 +5,9 @@
 /.conan2/
 /TheCircle.lnk
 /meta_save.json
+crash_log.txt
+ps_debug.txt
+stderr_out.txt
+stdout_out.txt
+build_debuglog.ps1
+build_nodebuglog.ps1

@@ -15,6 +15,9 @@
 #include "meta/MetaProgression.hpp"
 #include "states/IGameState.hpp"
 #include "ui/HUD.hpp"
+#ifdef TC_DEV
+#include "ui/DevPanel.hpp"
+#endif
 #include "ui/InventoryScreen.hpp"
 #include "ui/ItemChoiceScreen.hpp"
 #include "ui/PauseScreen.hpp"
@@ -72,6 +75,11 @@ private:
     bool inventoryOpen = false;
     bool itemChoiceOpen = false;
     float lastDt = 0.0f;
+
+#ifdef TC_DEV
+    DevPanel devPanel;
+    bool devPanelOpen = false;
+#endif
 
     // Equipment drop awaiting an ItemChoiceScreen decision (slot indices:
     // 0 = helmet, 1 = chest, 2 = leggings, 3 = weapon).

@@ -17,7 +17,8 @@ public:
     static entt::entity createPlayer(entt::registry& registry, sf::Vector2f position,
         const PlayerConfig& playerConfig, const MetaStats& metaStats);
 
-    static entt::entity createEnemy(entt::registry& registry, const EnemyTemplate& tmpl, sf::Vector2f position);
+    static entt::entity createEnemy(entt::registry& registry, const EnemyTemplate& tmpl, sf::Vector2f position,
+        int playerStrength = 0, int playerEndurance = 0, int playerHealth = 0);
 
     static entt::entity createBoss(entt::registry& registry, const BossTemplate& tmpl, sf::Vector2f position);
 

@@ -1,4 +1,4 @@
-<#
+﻿<#
     Установка зависимостей и первая сборка The Circle.
 
     Скрипт сам проверяет, что на этом ПК установлено (Conan, CMake, Ninja,
@@ -146,6 +146,11 @@ function Get-SettingValue($content, $key) {
 $trackedProfilePath = "conan/profiles/windows-msvc"
 $profilePath = $trackedProfilePath
 
+if (-not (Test-Path (Join-Path $root $trackedProfilePath))) {
+    Write-Host "Не найден профиль Conan: $trackedProfilePath - репозиторий повреждён или клонирован неполностью." -ForegroundColor Red
+    exit 1
+}
+
 try {
     # ErrorActionPreference=Stop превращает любую строку, которую conan пишет
     # в stderr (например, информационную "Found msvc ..."), в завершающую
@@ -254,6 +259,14 @@ Write-Ok "Окружение MSVC подключено (cl.exe: $clPath)"
 # 8. CMake configure + build
 # ---------------------------------------------------------------------------
 $presetName = "conan-$($Configuration.ToLower())"
+
+# Delete stale CMake cache to avoid conflicts when switching configurations
+# or after a failed configure (e.g. after a Debug conan run).
+$cmakeCache = Join-Path $root "build\CMakeCache.txt"
+if (Test-Path $cmakeCache) {
+    Write-Info "Удаляю старый CMakeCache.txt (избегаю конфликта конфигураций)"
+    Remove-Item $cmakeCache -Force
+}
 
 Write-Step "cmake --preset $presetName"
 & cmake --preset $presetName

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "core/DebugLog.hpp"
 #include "ecs/Components.hpp"
 #include "ecs/ElementalUtils.hpp"
 #include "ecs/EntityFactory.hpp"
@@ -26,6 +27,7 @@ void CombatSystem::update(entt::registry& registry, float dt)
 void CombatSystem::updateMelee(entt::registry& registry, float dt)
 {
     auto view = registry.view<MeleeCombat, Position, Damage>();
+    TC_LOG("Melee", "begin view_size=%d", static_cast<int>(view.size_hint()));
     for (auto entity : view) {
         auto& melee = view.get<MeleeCombat>(entity);
         melee.timer -= dt;
@@ -92,13 +94,24 @@ void CombatSystem::updateMelee(entt::registry& registry, float dt)
 
 void CombatSystem::updateRanged(entt::registry& registry, float dt)
 {
+    struct PendingProjectile {
+        sf::Vector2f origin;
+        sf::Vector2f direction;
+        float speed;
+        int damage;
+        int ownerBiome;
+        ElementalEffect element;
+    };
+    std::vector<PendingProjectile> pending;
+
     auto view = registry.view<RangedCombat, Position, Damage>();
+    TC_LOG("Ranged", "begin view_size=%d", static_cast<int>(view.size_hint()));
     for (auto entity : view) {
         auto& ranged = view.get<RangedCombat>(entity);
         ranged.timer -= dt;
         if (ranged.timer > 0.0f) continue;
 
-        const auto& pos = view.get<Position>(entity);
+        const Position pos = view.get<Position>(entity);
         const bool isPlayer = registry.all_of<PlayerTag>(entity);
 
         entt::entity target = entt::null;
@@ -137,11 +150,18 @@ void CombatSystem::updateRanged(entt::registry& registry, float dt)
             projectileElement.percent = equip->weaponElementPercent;
         }
 
-        EntityFactory::createProjectile(registry, {pos.x, pos.y}, direction,
-            ranged.projectileSpeed, view.get<Damage>(entity).value, ownerBiome, projectileElement);
+        pending.push_back({{pos.x, pos.y}, direction,
+            ranged.projectileSpeed, view.get<Damage>(entity).value, ownerBiome, projectileElement});
 
         ranged.timer = ranged.cooldown;
     }
+
+    TC_LOG("Ranged", "firing pending=%d", static_cast<int>(pending.size()));
+    for (const auto& p : pending) {
+        EntityFactory::createProjectile(registry, p.origin, p.direction,
+            p.speed, p.damage, p.ownerBiome, p.element);
+    }
+    TC_LOG("Ranged", "done");
 }
 
 void CombatSystem::updateProjectiles(entt::registry& registry)
@@ -150,6 +170,7 @@ void CombatSystem::updateProjectiles(entt::registry& registry)
     constexpr float hitDistSq = PROJECTILE_HIT_RADIUS * PROJECTILE_HIT_RADIUS;
 
     auto view = registry.view<ProjectileTag, Position, Damage>();
+    TC_LOG("Projectiles", "begin view_size=%d", static_cast<int>(view.size_hint()));
     for (auto entity : view) {
         const auto& pos = view.get<Position>(entity);
 
@@ -188,12 +209,28 @@ void CombatSystem::updateProjectiles(entt::registry& registry)
         if (hit != entt::null) {
             applyDamage(registry, entity, hit, damage);
             toDestroy.push_back(entity);
+            continue;
+        }
+
+        for (auto obs : registry.view<Obstacle, Position, Renderable>()) {
+            const auto& opos = registry.get<Position>(obs);
+            const auto& osize = registry.get<Renderable>(obs).size;
+            const float left   = opos.x - osize.x * 0.5f;
+            const float right  = opos.x + osize.x * 0.5f;
+            const float top    = opos.y - osize.y * 0.5f;
+            const float bottom = opos.y + osize.y * 0.5f;
+            if (pos.x >= left && pos.x <= right && pos.y >= top && pos.y <= bottom) {
+                toDestroy.push_back(entity);
+                break;
+            }
         }
     }
 
+    TC_LOG("Projectiles", "destroying=%d", static_cast<int>(toDestroy.size()));
     for (auto entity : toDestroy) {
         registry.destroy(entity);
     }
+    TC_LOG("Projectiles", "done");
 }
 
 void CombatSystem::applyDamage(entt::registry& registry, entt::entity attacker, entt::entity target, int rawDamage)

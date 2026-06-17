@@ -1,12 +1,14 @@
 #include "states/PlayState.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <random>
 #include <string>
 
 #include "Game.hpp"
 #include "config/ConfigLoader.hpp"
+#include "core/DebugLog.hpp"
 #include "ecs/EntityFactory.hpp"
 #include "states/MainMenuState.hpp"
 #include "states/DeathState.hpp"
@@ -82,8 +84,9 @@ void PlayState::spawnBiomeEnemies()
 
     constexpr float MIN_SPAWN_DIST_SQ = 200.0f * 200.0f;
     constexpr int MAX_SPAWN_ATTEMPTS = 20;
-    constexpr int BASE_WAVE_BANK = 20;
-    constexpr int BANK_PER_META_POINT = 2;
+    // Base bank ≈ 6 cheap enemies (cost 2); each 10 meta points adds ~1-2 more
+    constexpr int BASE_WAVE_BANK    = 12;
+    constexpr int BANK_PER_10_META  = 4;
 
     const auto& playerPosition = registry.get<Position>(player);
     const sf::Vector2f playerPos{playerPosition.x, playerPosition.y};
@@ -92,20 +95,38 @@ void PlayState::spawnBiomeEnemies()
     auto pool = ConfigLoader::get().getEnemyConfig().getEnemiesForBiome(biome.getType());
     std::shuffle(pool.begin(), pool.end(), rng);
 
+    if (pool.empty()) {
+        spawnObstacles();
+        return;
+    }
+
     const auto& meta = game.getMetaProgression().getStats();
     const int metaTotalPoints = meta.strength + meta.endurance + meta.health;
-    int bank = BASE_WAVE_BANK + metaTotalPoints * BANK_PER_META_POINT;
+    int bank = BASE_WAVE_BANK + metaTotalPoints * BANK_PER_10_META / 10;
 
+    TC_LOG("Spawn", "spawnBiomeEnemies biome=%d pool=%d meta(str=%d end=%d hp=%d) bank=%d(base=%d+meta*%d/10)",
+        static_cast<int>(biome.getType()),
+        static_cast<int>(pool.size()),
+        meta.strength, meta.endurance, meta.health, bank,
+        BASE_WAVE_BANK, BANK_PER_10_META);
+
+    int spawnCount = 0;
     auto spawnOne = [&](const EnemyTemplate& tmpl) {
         sf::Vector2f position;
-        int attempts = 0;
-        do {
+        for (int attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; ++attempt) {
             position = {xDist(rng), yDist(rng)};
             const float dx = position.x - playerPos.x;
             const float dy = position.y - playerPos.y;
-            if (dx * dx + dy * dy >= MIN_SPAWN_DIST_SQ) break;
-        } while (++attempts < MAX_SPAWN_ATTEMPTS);
-        biome.getEnemies().push_back(EntityFactory::createEnemy(registry, tmpl, position));
+            if (dx * dx + dy * dy >= MIN_SPAWN_DIST_SQ) {
+                biome.getEnemies().push_back(EntityFactory::createEnemy(registry, tmpl, position, meta.strength, meta.endurance, meta.health));
+                ++spawnCount;
+                TC_LOG("Spawn", "  enemy id=%s cost=%d registry_size=%u",
+                    tmpl.id.c_str(), tmpl.cost,
+                    static_cast<unsigned>(registry.storage<entt::entity>().in_use()));
+                return;
+            }
+        }
+        TC_LOG("Spawn", "  SKIP id=%s — no valid position found", tmpl.id.c_str());
     };
 
     while (bank > 0) {
@@ -126,6 +147,9 @@ void PlayState::spawnBiomeEnemies()
         spawnOne(*chosen);
         bank -= chosen->cost;
     }
+
+    TC_LOG("Spawn", "spawnBiomeEnemies done: spawned=%d registry_size=%u",
+        spawnCount, static_cast<unsigned>(registry.storage<entt::entity>().in_use()));
 
     spawnObstacles();
 }
@@ -156,14 +180,15 @@ void PlayState::spawnObstacles()
     for (int i = 0; i < count; ++i) {
         const float w = wDist(rng);
         const float h = hDist(rng);
-        float x, y;
-        int attempts = 0;
-        do {
+        float x = 0.0f, y = 0.0f;
+        bool found = false;
+        for (int attempt = 0; attempt < 20; ++attempt) {
             x = xDist(rng);
             y = yDist(rng);
             const float dx = x - cx, dy = y - cy;
-            if (dx * dx + dy * dy >= SAFE_RADIUS_SQ) break;
-        } while (++attempts < 20);
+            if (dx * dx + dy * dy >= SAFE_RADIUS_SQ) { found = true; break; }
+        }
+        if (!found) continue;
 
         const entt::entity e = registry.create();
         registry.emplace<Position>(e, x, y);
@@ -201,8 +226,9 @@ void PlayState::advanceToNextBiome()
         return;
     }
 
-    const auto nextBiome = static_cast<BiomeType>(static_cast<int>(world.getCurrentBiome().getType()) + 1);
-    world.setCurrentBiome(nextBiome);
+    const int nextIdx = static_cast<int>(world.getCurrentBiome().getType()) + 1;
+    assert(nextIdx < BIOME_COUNT);
+    world.setCurrentBiome(static_cast<BiomeType>(nextIdx));
     spawnBiomeEnemies();
 
     game.getAudio().playMusic(musicTrackFor(world.getCurrentBiome().getType()));
@@ -397,8 +423,15 @@ void PlayState::update(float dt)
         facing.dy = moveDir.y;
     }
 
+    TC_FRAME_TICK();
+    TC_LOG("Frame", "begin registry_size=%u dt=%.4f",
+        static_cast<unsigned>(registry.storage<entt::entity>().in_use()), dt);
+
     movementSystem.update(registry, dt);
+    TC_LOG("Frame", "after MovementSystem");
+
     collisionSystem.update(registry);
+    TC_LOG("Frame", "after CollisionSystem");
 
     auto& playerPos = registry.get<Position>(player);
     const auto& playerSize = registry.get<Renderable>(player).size;
@@ -413,9 +446,16 @@ void PlayState::update(float dt)
     }
 
     aiSystem.update(registry, dt);
+    TC_LOG("Frame", "after AISystem registry_size=%u", static_cast<unsigned>(registry.storage<entt::entity>().in_use()));
+
     blizzardSystem.update(registry, player, dt);
+    TC_LOG("Frame", "after BlizzardSystem");
+
     combatSystem.update(registry, dt);
+    TC_LOG("Frame", "after CombatSystem registry_size=%u", static_cast<unsigned>(registry.storage<entt::entity>().in_use()));
+
     statusEffectSystem.update(registry, dt);
+    TC_LOG("Frame", "after StatusEffectSystem");
 
     const LootResult lootResult = lootSystem.update(registry, player, world.getCurrentBiome().getEnemies());
     runSummary.kills += lootResult.kills;
@@ -451,6 +491,9 @@ void PlayState::update(float dt)
         enemies.erase(std::remove_if(enemies.begin(), enemies.end(),
             [this](entt::entity e) { return !registry.valid(e); }), enemies.end());
         if (enemies.empty()) {
+            for (auto obs : registry.view<Obstacle>()) {
+                registry.destroy(obs);
+            }
             spawnBiomeEnemies();
         }
     }

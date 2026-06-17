@@ -51,15 +51,17 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
         ? static_cast<float>(health.current) / static_cast<float>(health.max)
         : 0.0f;
 
-    sf::RectangleShape healthBack({BAR_WIDTH, BAR_HEIGHT});
-    healthBack.setPosition(MARGIN, MARGIN);
-    healthBack.setFillColor(sf::Color(40, 40, 40));
-    window.draw(healthBack);
+    if (showHealth) {
+        sf::RectangleShape healthBack({BAR_WIDTH, BAR_HEIGHT});
+        healthBack.setPosition(MARGIN, MARGIN);
+        healthBack.setFillColor(sf::Color(40, 40, 40));
+        window.draw(healthBack);
 
-    sf::RectangleShape healthFill({BAR_WIDTH * healthRatio, BAR_HEIGHT});
-    healthFill.setPosition(MARGIN, MARGIN);
-    healthFill.setFillColor(sf::Color(200, 60, 60));
-    window.draw(healthFill);
+        sf::RectangleShape healthFill({BAR_WIDTH * healthRatio, BAR_HEIGHT});
+        healthFill.setPosition(MARGIN, MARGIN);
+        healthFill.setFillColor(sf::Color(200, 60, 60));
+        window.draw(healthFill);
+    }
 
     if (!fontManager.isLoaded()) {
         return;
@@ -98,17 +100,23 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
         textInitialized = true;
     }
 
-    healthText.setString(toSfString(localization.get("hud.health") + ": "
-        + std::to_string(health.current) + "/" + std::to_string(health.max)));
-    window.draw(healthText);
+    if (showHealth) {
+        healthText.setString(toSfString(localization.get("hud.health") + ": "
+            + std::to_string(health.current) + "/" + std::to_string(health.max)));
+        window.draw(healthText);
+    }
 
-    fragmentsText.setString(toSfString(localization.get("hud.fragments") + ": "
-        + std::to_string(fragments.count) + "/" + std::to_string(keyFragmentsRequired)));
-    window.draw(fragmentsText);
+    if (showFragments) {
+        fragmentsText.setString(toSfString(localization.get("hud.fragments") + ": "
+            + std::to_string(fragments.count)));
+        window.draw(fragmentsText);
+    }
 
-    potionText.setString(toSfString(localization.get("hud.potion") + ": "
-        + std::to_string(potion.charges) + "/" + std::to_string(potion.maxCharges)));
-    window.draw(potionText);
+    if (showPotions) {
+        potionText.setString(toSfString(localization.get("hud.potion") + ": "
+            + std::to_string(potion.charges) + "/" + std::to_string(potion.maxCharges)));
+        window.draw(potionText);
+    }
 
     // ── Equipment bar: only name + tier (stats are in the inventory screen) ──
     const std::string weaponLabel = equipment.weaponType == Equipment::BOW
@@ -145,6 +153,7 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
     drawSegment(localization.get("equipment.legs")   + " T" + std::to_string(equipment.leggingsTier), equipment.leggingsTier);
 
     // ── Status-effect icons (right of HP bar) ────────────────────────────────
+    if (showStatusIcons) {
     float iconX = ICONS_X;
 
     auto drawStatusIcon = [&](sf::Color bgColor, const std::string& sym, float timer) {
@@ -193,6 +202,7 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
         drawStatusIcon(sf::Color(220, 90, 20, 220),       "F", fb->timer);
     if (const auto* de = registry.try_get<DecayEffect>(player))
         drawStatusIcon(sf::Color(120, 120, 120, 220),     "D", de->timer);
+    } // showStatusIcons
 
     // ── Misc HUD ─────────────────────────────────────────────────────────────
     if (showNextBiomeHint) {

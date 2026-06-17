@@ -20,6 +20,12 @@ public:
     // 1 = chest, 2 = leggings, 3 = weapon.
     void showEquipmentDrop(int slot, int tier);
 
+    // Visibility flags — toggled by the developer panel.
+    bool showHealth      = true;
+    bool showFragments   = true;
+    bool showPotions     = true;
+    bool showStatusIcons = true;
+
 private:
     sf::Text healthText;
     sf::Text fragmentsText;

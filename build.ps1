@@ -1,4 +1,4 @@
-<#
+﻿<#
     Быстрая пересборка The Circle после изменений в коде.
 
     В отличие от setup.ps1, не проверяет инструменты и не запускает
@@ -96,7 +96,7 @@ if (Test-Path $exePath) {
 } else {
     Write-Host " Сборка завершена, но $exePath не найден - проверьте вывод выше." -ForegroundColor Yellow
 }
-Write-Host "========================================================"
+Write-Host "========================================================" -ForegroundColor Green
 
 if ($Run -and (Test-Path $exePath)) {
     Write-Step "Запуск TheCircle.exe"
