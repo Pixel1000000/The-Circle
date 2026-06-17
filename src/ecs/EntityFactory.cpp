@@ -106,7 +106,8 @@ entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTem
     }
 
     if (tmpl.appliesStatusEffect) {
-        registry.emplace<StatusEffect>(entity, tmpl.statusEffectType, tmpl.statusEffectDps, tmpl.statusEffectDuration, 0.0f);
+        registry.emplace<StatusEffect>(entity, tmpl.statusEffectType, tmpl.statusEffectDps,
+            tmpl.statusEffectDuration, 0.0f, 0.0f, tmpl.statusEffectChance);
     }
 
     if (tmpl.revivesOnce) {
@@ -118,7 +119,7 @@ entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTem
     }
 
     if (tmpl.element != Element::NONE) {
-        registry.emplace<ElementalEffect>(entity, tmpl.element, tmpl.elementPercent);
+        registry.emplace<ElementalEffect>(entity, tmpl.element, tmpl.elementPercent, tmpl.elementChance);
     }
 
     if (tmpl.hasDashAbility) registry.emplace<DashAbility>(entity);
@@ -135,6 +136,7 @@ entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTem
     if (tmpl.hasQuicksandSpawner) registry.emplace<QuicksandSpawner>(entity);
     if (tmpl.hasMummyDeathBomb) registry.emplace<MummyDeathBomb>(entity);
     if (tmpl.summonsOnLowHp) registry.emplace<EmergencySummon>(entity);
+    if (tmpl.hasIcePulseAbility) registry.emplace<IcePulseAbility>(entity);
 
     return entity;
 }

@@ -15,6 +15,20 @@ constexpr float PROJECTILE_HIT_RADIUS = 20.0f;
 constexpr float WORLD_WIDTH = 1280.0f;
 constexpr float WORLD_HEIGHT = 720.0f;
 constexpr float MAX_DAMAGE_REDUCTION = 0.9f;
+
+std::mt19937& debuffRng()
+{
+    static std::mt19937 instance{std::random_device{}()};
+    return instance;
+}
+
+bool rollChance(float chance)
+{
+    if (chance >= 1.0f) return true;
+    if (chance <= 0.0f) return false;
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    return dist(debuffRng()) < chance;
+}
 }
 
 void CombatSystem::update(entt::registry& registry, float dt)
@@ -83,7 +97,9 @@ void CombatSystem::updateMelee(entt::registry& registry, float dt)
 
             applyDamage(registry, entity, target, damage);
             if (const auto* effect = registry.try_get<StatusEffect>(entity)) {
-                registry.emplace_or_replace<StatusEffect>(target, effect->type, effect->dps, effect->duration, effect->duration);
+                if (rollChance(effect->applicationChance)) {
+                    registry.emplace_or_replace<StatusEffect>(target, effect->type, effect->dps, effect->duration, effect->duration);
+                }
             }
         }
 
@@ -250,15 +266,18 @@ void CombatSystem::applyDamage(entt::registry& registry, entt::entity attacker, 
 
     Element element = Element::NONE;
     float percent = 0.0f;
+    float elemChance = 1.0f;
     if (const auto* equip = registry.try_get<Equipment>(attacker)) {
         element = equip->weaponElement;
         percent = equip->weaponElementPercent;
+        // Player weapon always has full chance
     } else if (const auto* effect = registry.try_get<ElementalEffect>(attacker)) {
         element = effect->element;
         percent = effect->percent;
+        elemChance = effect->applicationChance;
     }
 
-    if (element != Element::NONE) {
+    if (element != Element::NONE && rollChance(elemChance)) {
         ElementalUtils::applyOnHit(registry, target, element, percent, rawDamage);
     }
 }

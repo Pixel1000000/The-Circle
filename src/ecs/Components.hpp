@@ -122,6 +122,9 @@ struct StatusEffect {
     float duration = 0.0f;
     float timer = 0.0f;
     float damageAccumulator = 0.0f;
+    // Chance (0–1) to actually apply this effect on each hit; only meaningful
+    // on the source enemy entity, not on the active copy placed on the target.
+    float applicationChance = 1.0f;
 };
 
 // Key fragment drop chance, attached to enemies
@@ -188,6 +191,9 @@ enum class Element { NONE, NATURE, FIRE, ICE, DECAY };
 struct ElementalEffect {
     Element element = Element::NONE;
     float percent = 0.0f;
+    // Chance (0–1) to trigger the elemental on-hit effect; always 1 for the
+    // player's weapon, may be <1 for enemy elemental attacks.
+    float applicationChance = 1.0f;
 };
 
 // Player equipment - tiers correspond to biome difficulty (1-4, 0 = none)
@@ -424,6 +430,16 @@ struct Stunned {
 struct EmergencySummon {
     float hpThreshold = 0.3f;
     bool triggered = false;
+};
+
+// Ice spirit: periodically fires an icy pulse that freezes (SLOWs) the player
+// if they are within range. This is the ability path for applying freeze;
+// regular melee hits do NOT carry an elemental on this enemy.
+struct IcePulseAbility {
+    float range = 130.0f;
+    float cooldown = 5.0f;
+    float timer = 0.0f;
+    float slowDuration = 2.5f;
 };
 
 // Meta-progression, persists across runs via meta_save.json

@@ -213,6 +213,7 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
                 tmpl.statusEffectType = statusEffectFromString(effect.value("type", std::string("POISON")));
                 tmpl.statusEffectDps = effect.value("dps", 0.0f);
                 tmpl.statusEffectDuration = effect.value("duration", 0.0f);
+                tmpl.statusEffectChance = effect.value("chance", 1.0f);
             }
 
             tmpl.revivesOnce = entry.value("revivesOnce", tmpl.revivesOnce);
@@ -220,6 +221,7 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
             tmpl.explodesOnDeath = entry.value("explodesOnDeath", tmpl.explodesOnDeath);
             tmpl.element = elementFromString(entry.value("element", std::string("NONE")));
             tmpl.elementPercent = entry.value("elementPercent", tmpl.elementPercent);
+            tmpl.elementChance = entry.value("elementChance", tmpl.elementChance);
 
             tmpl.hasDashAbility = entry.value("hasDashAbility", tmpl.hasDashAbility);
             tmpl.hasBurrowAbility = entry.value("hasBurrowAbility", tmpl.hasBurrowAbility);
@@ -235,6 +237,7 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
             tmpl.hasQuicksandSpawner = entry.value("hasQuicksandSpawner", tmpl.hasQuicksandSpawner);
             tmpl.hasMummyDeathBomb = entry.value("hasMummyDeathBomb", tmpl.hasMummyDeathBomb);
             tmpl.summonsOnLowHp = entry.value("summonsOnLowHp", tmpl.summonsOnLowHp);
+            tmpl.hasIcePulseAbility = entry.value("hasIcePulseAbility", tmpl.hasIcePulseAbility);
 
             tmpl.cost = entry.value("cost", tmpl.cost);
             tmpl.keyFragmentDropChance = entry.value("keyFragmentDropChance", tmpl.keyFragmentDropChance);

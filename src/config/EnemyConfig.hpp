@@ -36,6 +36,9 @@ struct EnemyTemplate {
 
     Element element = Element::NONE;
     float elementPercent = 0.0f;
+    float elementChance = 1.0f;        // 0–1: probability to apply elemental on hit
+
+    float statusEffectChance = 1.0f;   // 0–1: probability to apply statusEffect on hit
 
     // Ability flags - attaches the matching component (with default-tuned
     // values) in EntityFactory::createEnemy. See Components.hpp for the
@@ -54,6 +57,7 @@ struct EnemyTemplate {
     bool hasQuicksandSpawner = false;
     bool hasMummyDeathBomb = false;
     bool summonsOnLowHp = false;
+    bool hasIcePulseAbility = false;   // Ice spirit: periodic freeze burst via ability
 
     int cost = 3;
 

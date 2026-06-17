@@ -286,6 +286,28 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
         }
     }
 
+    // Ice spirit: periodically fires a frost pulse that freezes the player if
+    // they are within range. This is the ONLY source of ICE freeze from the
+    // ice spirit — regular melee hits carry no elemental on this enemy.
+    for (auto entity : registry.view<IcePulseAbility, Position, Health>()) {
+        auto& pulse = registry.get<IcePulseAbility>(entity);
+        auto& health = registry.get<Health>(entity);
+        if (health.current <= 0) continue;
+
+        pulse.timer -= dt;
+        if (pulse.timer <= 0.0f) {
+            pulse.timer = pulse.cooldown;
+            if (distanceBetween(registry.get<Position>(entity), playerPos) <= pulse.range) {
+                const auto* resist = registry.try_get<ElementalResist>(player);
+                if (!resist || resist->slowResist < 1.0f) {
+                    const float duration = pulse.slowDuration * (resist ? (1.0f - resist->slowResist) : 1.0f);
+                    registry.emplace_or_replace<StatusEffect>(player, StatusEffect::SLOW, 0.0f, duration, duration);
+                    registry.emplace_or_replace<IceChill>(player, duration);
+                }
+            }
+        }
+    }
+
     // Ghost: periodically releases accumulated absorbed damage as a burst
     // against the player if still nearby.
     for (auto entity : registry.view<AbsorbChance, Position, Health>()) {
