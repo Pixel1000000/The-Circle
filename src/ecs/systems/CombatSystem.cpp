@@ -135,6 +135,8 @@ void CombatSystem::updateRanged(entt::registry& registry, float dt)
         if (const auto* equip = registry.try_get<Equipment>(entity)) {
             projectileElement.element = equip->weaponElement;
             projectileElement.percent = equip->weaponElementPercent;
+        } else if (const auto* effect = registry.try_get<ElementalEffect>(entity)) {
+            projectileElement = *effect;
         }
 
         EntityFactory::createProjectile(registry, {pos.x, pos.y}, direction,
