@@ -150,16 +150,28 @@ bool DebugSpawnPanel::handleDropdownClick(sf::Vector2f point)
     return false;
 }
 
+bool DebugSpawnPanel::handleScroll(sf::Vector2f point, float delta)
+{
+    if (enemyDropdown.handleScroll(point, delta)) return true;
+    if (bossDropdown.handleScroll(point, delta)) return true;
+    return false;
+}
+
 void DebugSpawnPanel::render(sf::RenderWindow& window) const
 {
+    enemyDropdown.renderHeader(window);
     spawnEnemyButton.render(window);
     countSlider.render(window);
     clearEnemiesButton.render(window);
-    spawnBossButton.render(window);
 
-    // Dropdowns last so their expanded lists draw on top of everything else.
-    enemyDropdown.render(window);
-    bossDropdown.render(window);
+    bossDropdown.renderHeader(window);
+    spawnBossButton.render(window);
+}
+
+void DebugSpawnPanel::renderDropdownOverlays(sf::RenderWindow& window) const
+{
+    enemyDropdown.renderExpandedList(window);
+    bossDropdown.renderExpandedList(window);
 }
 
 } // namespace tc

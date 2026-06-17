@@ -19,8 +19,12 @@ public:
     void handleMouseMoved(sf::Vector2f point);
     void handleMouseReleased();
     bool handleDropdownClick(sf::Vector2f point);
+    bool handleScroll(sf::Vector2f point, float delta);
 
     void render(sf::RenderWindow& window) const;
+    // Draws expanded dropdown lists. Call after render() so an open list is
+    // always on top, even over widgets/dropdowns positioned below it.
+    void renderDropdownOverlays(sf::RenderWindow& window) const;
 
 private:
     DebugButton addFragmentButton;

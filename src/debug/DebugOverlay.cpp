@@ -133,6 +133,23 @@ void DebugOverlay::handleInput(const sf::Event& event, sf::RenderWindow& window,
         }
         return;
     }
+
+    if (event.type == sf::Event::MouseWheelScrolled) {
+        const sf::Vector2f point = window.mapPixelToCoords(
+            {event.mouseWheelScroll.x, event.mouseWheelScroll.y});
+        switch (currentTab) {
+        case Tab::Spawn:
+            spawnPanel.handleScroll(point, event.mouseWheelScroll.delta);
+            break;
+        case Tab::World:
+            worldPanel.handleScroll(point, event.mouseWheelScroll.delta);
+            break;
+        case Tab::Player:
+        case Tab::Display:
+            break;
+        }
+        return;
+    }
 }
 
 void DebugOverlay::renderTabs(sf::RenderWindow& window) const
@@ -153,12 +170,14 @@ void DebugOverlay::render(sf::RenderWindow& window, DebugContext& ctx)
     switch (currentTab) {
     case Tab::Spawn:
         spawnPanel.render(window);
+        spawnPanel.renderDropdownOverlays(window);
         break;
     case Tab::Player:
         playerPanel.render(window, ctx);
         break;
     case Tab::World:
         worldPanel.render(window);
+        worldPanel.renderDropdownOverlays(window);
         break;
     case Tab::Display:
         displayPanel.render(window, ctx);

@@ -69,12 +69,22 @@ struct DebugCheckbox {
 };
 
 // Simple expandable list. Click the header to expand/collapse, click an item to select it.
+// Rendering is split in two so callers can draw every dropdown's header inline
+// with the rest of a panel, then draw all expanded lists in one final pass -
+// that keeps an open list on top of any widget/dropdown header positioned
+// below it, regardless of draw order within the panel itself.
 struct DebugDropdown {
-    void setup(const sf::Font& font, sf::Vector2f pos, sf::Vector2f dropdownSize, unsigned int textCharSize = 14);
+    void setup(const sf::Font& font, sf::Vector2f pos, sf::Vector2f dropdownSize, unsigned int textCharSize = 14,
+        int maxVisibleItems = 6);
     void setItems(const std::vector<std::string>& newItems);
 
     // Returns true if the click was consumed by this dropdown.
     bool handleClick(sf::Vector2f point);
+    // Scrolls the open list when the wheel is used over it. Returns true if consumed.
+    bool handleScroll(sf::Vector2f point, float delta);
+
+    void renderHeader(sf::RenderWindow& window) const;
+    void renderExpandedList(sf::RenderWindow& window) const;
     void render(sf::RenderWindow& window) const;
 
     const std::string& getSelected() const;
@@ -90,12 +100,15 @@ struct DebugDropdown {
     sf::Vector2f size;
     int selectedIndex = -1;
     bool expanded = false;
+    int scrollOffset = 0;
+    int maxVisibleItems = 6;
 
 private:
     const sf::Font* font = nullptr;
     unsigned int charSize = 14;
 
     void refreshHeaderText();
+    void refreshItemPositions();
 };
 
 } // namespace tc

@@ -200,12 +200,14 @@ void DebugCheckbox::render(sf::RenderWindow& window) const
 
 // -------------------------------------------------------------- Dropdown --
 
-void DebugDropdown::setup(const sf::Font& fontRef, sf::Vector2f pos, sf::Vector2f dropdownSize, unsigned int textCharSize)
+void DebugDropdown::setup(const sf::Font& fontRef, sf::Vector2f pos, sf::Vector2f dropdownSize, unsigned int textCharSize,
+    int maxVisible)
 {
     font = &fontRef;
     position = pos;
     size = dropdownSize;
     charSize = textCharSize;
+    maxVisibleItems = maxVisible;
 
     headerBox.setSize(dropdownSize);
     headerBox.setPosition(position);
@@ -227,6 +229,7 @@ void DebugDropdown::setItems(const std::vector<std::string>& newItems)
     items = newItems;
     selectedIndex = items.empty() ? -1 : 0;
     expanded = false;
+    scrollOffset = 0;
 
     itemTexts.clear();
     if (!font) return;
@@ -237,14 +240,23 @@ void DebugDropdown::setItems(const std::vector<std::string>& newItems)
         text.setCharacterSize(charSize);
         text.setFillColor(sf::Color::White);
         text.setString(items[i]);
-        text.setPosition(position.x + 6.0f, position.y + size.y + static_cast<float>(i) * DROPDOWN_ITEM_HEIGHT + 3.0f);
         itemTexts.push_back(text);
     }
 
-    listBackground.setSize({size.x, static_cast<float>(items.size()) * DROPDOWN_ITEM_HEIGHT});
+    const int visibleCount = std::min(static_cast<int>(items.size()), maxVisibleItems);
+    listBackground.setSize({size.x, static_cast<float>(visibleCount) * DROPDOWN_ITEM_HEIGHT});
     listBackground.setPosition(position.x, position.y + size.y);
 
+    refreshItemPositions();
     refreshHeaderText();
+}
+
+void DebugDropdown::refreshItemPositions()
+{
+    for (std::size_t i = 0; i < itemTexts.size(); ++i) {
+        const float row = static_cast<float>(static_cast<int>(i) - scrollOffset);
+        itemTexts[i].setPosition(position.x + 6.0f, position.y + size.y + row * DROPDOWN_ITEM_HEIGHT + 3.0f);
+    }
 }
 
 void DebugDropdown::refreshHeaderText()
@@ -262,7 +274,8 @@ bool DebugDropdown::handleClick(sf::Vector2f point)
 
     if (expanded) {
         if (listBackground.getGlobalBounds().contains(point)) {
-            const int index = static_cast<int>((point.y - (position.y + size.y)) / DROPDOWN_ITEM_HEIGHT);
+            const int row = static_cast<int>((point.y - (position.y + size.y)) / DROPDOWN_ITEM_HEIGHT);
+            const int index = scrollOffset + row;
             if (index >= 0 && index < static_cast<int>(items.size())) {
                 selectedIndex = index;
                 refreshHeaderText();
@@ -277,17 +290,58 @@ bool DebugDropdown::handleClick(sf::Vector2f point)
     return false;
 }
 
-void DebugDropdown::render(sf::RenderWindow& window) const
+bool DebugDropdown::handleScroll(sf::Vector2f point, float delta)
+{
+    if (!expanded || !listBackground.getGlobalBounds().contains(point)) return false;
+
+    const int maxOffset = std::max(0, static_cast<int>(items.size()) - maxVisibleItems);
+    scrollOffset = std::clamp(scrollOffset - static_cast<int>(delta), 0, maxOffset);
+    refreshItemPositions();
+    return true;
+}
+
+void DebugDropdown::renderHeader(sf::RenderWindow& window) const
 {
     window.draw(headerBox);
     window.draw(headerText);
+}
 
-    if (expanded) {
-        window.draw(listBackground);
-        for (const auto& text : itemTexts) {
-            window.draw(text);
-        }
+void DebugDropdown::renderExpandedList(sf::RenderWindow& window) const
+{
+    if (!expanded) return;
+
+    window.draw(listBackground);
+
+    // Clip drawn items to the list's rectangle (rather than the whole panel)
+    // so that scrolled-off items don't bleed outside the dropdown's box.
+    const sf::View previousView = window.getView();
+    const sf::FloatRect listBounds = listBackground.getGlobalBounds();
+    const sf::Vector2i topLeftPixels = window.mapCoordsToPixel({listBounds.left, listBounds.top}, previousView);
+    const sf::Vector2i bottomRightPixels = window.mapCoordsToPixel(
+        {listBounds.left + listBounds.width, listBounds.top + listBounds.height}, previousView);
+    const sf::Vector2u windowSize = window.getSize();
+
+    sf::View clippedView = previousView;
+    clippedView.setViewport(sf::FloatRect(
+        static_cast<float>(topLeftPixels.x) / static_cast<float>(windowSize.x),
+        static_cast<float>(topLeftPixels.y) / static_cast<float>(windowSize.y),
+        static_cast<float>(bottomRightPixels.x - topLeftPixels.x) / static_cast<float>(windowSize.x),
+        static_cast<float>(bottomRightPixels.y - topLeftPixels.y) / static_cast<float>(windowSize.y)));
+    window.setView(clippedView);
+
+    const std::size_t firstVisible = static_cast<std::size_t>(scrollOffset);
+    const std::size_t lastVisible = std::min(itemTexts.size(), firstVisible + static_cast<std::size_t>(maxVisibleItems));
+    for (std::size_t i = firstVisible; i < lastVisible; ++i) {
+        window.draw(itemTexts[i]);
     }
+
+    window.setView(previousView);
+}
+
+void DebugDropdown::render(sf::RenderWindow& window) const
+{
+    renderHeader(window);
+    renderExpandedList(window);
 }
 
 const std::string& DebugDropdown::getSelected() const

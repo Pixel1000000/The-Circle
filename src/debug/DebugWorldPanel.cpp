@@ -125,11 +125,22 @@ bool DebugWorldPanel::handleDropdownClick(sf::Vector2f point)
     return false;
 }
 
+bool DebugWorldPanel::handleScroll(sf::Vector2f point, float delta)
+{
+    if (slotDropdown.handleScroll(point, delta)) return true;
+    if (tierDropdown.handleScroll(point, delta)) return true;
+    if (elementDropdown.handleScroll(point, delta)) return true;
+    return false;
+}
+
 void DebugWorldPanel::render(sf::RenderWindow& window) const
 {
     addFragmentButton.render(window);
     maxFragmentsButton.render(window);
 
+    slotDropdown.renderHeader(window);
+    tierDropdown.renderHeader(window);
+    elementDropdown.renderHeader(window);
     effectPercentSlider.render(window);
     giveEquipmentButton.render(window);
 
@@ -140,10 +151,13 @@ void DebugWorldPanel::render(sf::RenderWindow& window) const
 
     nextBiomeButton.render(window);
     enterBossRoomButton.render(window);
+}
 
-    slotDropdown.render(window);
-    tierDropdown.render(window);
-    elementDropdown.render(window);
+void DebugWorldPanel::renderDropdownOverlays(sf::RenderWindow& window) const
+{
+    slotDropdown.renderExpandedList(window);
+    tierDropdown.renderExpandedList(window);
+    elementDropdown.renderExpandedList(window);
 }
 
 } // namespace tc
