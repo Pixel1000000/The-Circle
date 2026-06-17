@@ -32,7 +32,8 @@ struct LootResult {
 // guaranteed a key fragment and an equipment drop.
 class LootSystem {
 public:
-    LootResult update(entt::registry& registry, entt::entity player, const std::vector<entt::entity>& waveEnemies);
+    LootResult update(entt::registry& registry, entt::entity player, const std::vector<entt::entity>& waveEnemies,
+        int fragmentsAlreadyCollected, int fragmentsRequired);
 
 private:
     // Tracks which equipment slots have already dropped per tier, so a

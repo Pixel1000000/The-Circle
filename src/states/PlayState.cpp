@@ -199,6 +199,7 @@ void PlayState::advanceToNextBiome()
 {
     clearCurrentBiomeEnemies();
     ++runSummary.biomesCleared;
+    registry.get<KeyFragmentHolder>(player).count = 0;
 
     if (world.getCurrentBiome().getType() == BiomeType::DEADLANDS) {
         enterBossRoom();
@@ -421,7 +422,8 @@ void PlayState::update(float dt)
     combatSystem.update(registry, dt);
     statusEffectSystem.update(registry, dt);
 
-    const LootResult lootResult = lootSystem.update(registry, player, world.getCurrentBiome().getEnemies());
+    const LootResult lootResult = lootSystem.update(registry, player, world.getCurrentBiome().getEnemies(),
+        world.getCurrentBiome().getKeyFragmentsCollected(), Biome::KEY_FRAGMENTS_REQUIRED);
     runSummary.kills += lootResult.kills;
     if (lootResult.fragmentsCollected > 0) {
         for (int i = 0; i < lootResult.fragmentsCollected; ++i) {
