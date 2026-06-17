@@ -43,8 +43,14 @@ target_compile_features(${PROJECT_NAME}
         cxx_std_17
 )
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+# Custom target with no OUTPUT is always considered out-of-date, so it
+# re-runs on every build invocation even when Ninja finds nothing to
+# recompile/relink for ${PROJECT_NAME} - otherwise a stale assets/ copy
+# from an old build directory can silently shadow repo config changes
+# (e.g. lang/*.json, enemies.json).
+add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
 )
+add_dependencies(${PROJECT_NAME} copy_assets)
