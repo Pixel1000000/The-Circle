@@ -279,6 +279,131 @@ struct BlizzardZone {
     float dirTimer = 0.f;
 };
 
+// Wolf: dashes toward the player at burst speed, briefly invulnerable.
+struct DashAbility {
+    float cooldown = 4.0f;
+    float timer = 0.0f;
+    float duration = 0.3f;
+    float durationTimer = 0.0f;
+    bool dashing = false;
+};
+
+// Scorpion: burrows (becomes untargetable/slowed-immune) once HP drops below
+// hpThreshold (fraction of max), for `duration` seconds.
+struct BurrowAbility {
+    float hpThreshold = 0.3f;
+    float duration = 2.0f;
+    float timer = 0.0f;
+    bool burrowed = false;
+};
+
+// Ant: spawns `count` traps in a ring around its death position.
+struct TrapSpawner {
+    int count = 3;
+    float radius = 60.0f;
+    float stunDuration = 1.0f;
+};
+
+// Wasp swarm: scatters away from the player briefly after taking damage.
+struct SwarmScatter {
+    float duration = 0.6f;
+    float timer = 0.0f;
+    bool scattered = false;
+};
+
+// Naga rider: periodically charges in a straight line at the player.
+struct ChargeAbility {
+    float cooldown = 3.0f;
+    float timer = 0.0f;
+    float speed = 400.0f;
+    bool charging = false;
+    sf::Vector2f chargeDir = {0.0f, 0.0f};
+    float stunOnFail = 0.5f;
+};
+
+// Ice goblin: on death, freezes (SLOW) and stuns nearby enemies/player within
+// stunRadius for stunDuration.
+struct FreezeOnDeath {
+    float freezeDuration = 2.0f;
+    float stunRadius = 80.0f;
+    float stunDuration = 1.0f;
+};
+
+// Snow witch / ice spirit: periodically teleports near the player.
+struct TeleportAbility {
+    float cooldown = 5.0f;
+    float timer = 0.0f;
+};
+
+// Yeti: enrages (speed + damage multiplier) once HP drops below hpThreshold.
+struct RageAbility {
+    float hpThreshold = 0.4f;
+    float speedMult = 1.5f;
+    float damageMult = 1.5f;
+    bool enraged = false;
+};
+
+// Ghost: chance to absorb incoming damage instead of taking it, releasing the
+// accumulated damage back as a burst every releaseInterval seconds.
+struct AbsorbChance {
+    float chance = 0.3f;
+    float accumulatedDamage = 0.0f;
+    float releaseTimer = 0.0f;
+    float releaseInterval = 2.0f;
+};
+
+// Bone golem: periodically detaches a skeleton minion once HP drops below
+// hpThreshold, up to maxDetach times.
+struct BoneDetach {
+    float hpThreshold = 0.6f;
+    float interval = 3.0f;
+    float timer = 0.0f;
+    int detached = 0;
+    int maxDetach = 2;
+};
+
+// Skeleton warrior: after reviving (ReviveOnce), gains temporary invulnerability
+// and a damage bonus.
+struct SkeletonReviveBonus {
+    float invulDuration = 1.5f;
+    float invulTimer = 0.0f;
+    float damageMult = 1.5f;
+    bool bonusActive = false;
+};
+
+// Sand spirit: periodically spawns a quicksand zone (global limit enforced by
+// ZoneSystem/AbilitySystem, not this component).
+struct QuicksandSpawner {
+    float cooldown = 4.0f;
+    float timer = 0.0f;
+    sf::Vector2f size = {70.0f, 70.0f};
+    float duration = 5.0f;
+};
+
+// Mummy: telegraphs death with a few blinks before exploding, stunning nearby
+// targets within radius.
+struct MummyDeathBomb {
+    float delay = 1.0f;
+    float timer = 0.0f;
+    bool triggered = false;
+    float radius = 90.0f;
+    float stunDuration = 1.0f;
+    int blinkCount = 4;
+    int currentBlink = 0;
+    float blinkInterval = 0.2f;
+    float blinkTimer = 0.0f;
+};
+
+// Tag: a trap zone left behind by an Ant's TrapSpawner.
+struct TrapTag {};
+
+// Tag: a quicksand zone spawned by a Sand spirit (global limit enforced
+// elsewhere, e.g. 3 concurrent on the map).
+struct QuicksandTag {};
+
+// Tag: an ice zone left by a Snow witch's TeleportAbility.
+struct IceZoneTag {};
+
 // Meta-progression, persists across runs via meta_save.json
 struct MetaStats {
     int strength = 0;

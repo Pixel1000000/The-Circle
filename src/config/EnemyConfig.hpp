@@ -34,6 +34,9 @@ struct EnemyTemplate {
     bool phaseThrough = false;
     bool explodesOnDeath = false;
 
+    Element element = Element::NONE;
+    float elementPercent = 0.0f;
+
     int cost = 3;
 
     float keyFragmentDropChance = 0.0f;

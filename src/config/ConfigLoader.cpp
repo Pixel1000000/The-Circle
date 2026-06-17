@@ -52,6 +52,15 @@ StatusEffect::Type statusEffectFromString(const std::string& name)
     return StatusEffect::POISON;
 }
 
+Element elementFromString(const std::string& name)
+{
+    if (name == "NATURE") return Element::NATURE;
+    if (name == "FIRE") return Element::FIRE;
+    if (name == "ICE") return Element::ICE;
+    if (name == "DECAY") return Element::DECAY;
+    return Element::NONE;
+}
+
 sf::Color colorFromJson(const nlohmann::json& json, sf::Color fallback)
 {
     if (!json.is_array() || json.size() < 3) {
@@ -209,6 +218,8 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
             tmpl.revivesOnce = entry.value("revivesOnce", tmpl.revivesOnce);
             tmpl.phaseThrough = entry.value("phaseThrough", tmpl.phaseThrough);
             tmpl.explodesOnDeath = entry.value("explodesOnDeath", tmpl.explodesOnDeath);
+            tmpl.element = elementFromString(entry.value("element", std::string("NONE")));
+            tmpl.elementPercent = entry.value("elementPercent", tmpl.elementPercent);
             tmpl.cost = entry.value("cost", tmpl.cost);
             tmpl.keyFragmentDropChance = entry.value("keyFragmentDropChance", tmpl.keyFragmentDropChance);
             tmpl.equipmentDropChance = entry.value("equipmentDropChance", tmpl.equipmentDropChance);
