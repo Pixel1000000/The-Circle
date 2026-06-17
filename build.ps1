@@ -36,6 +36,17 @@ if (-not (Test-Path (Join-Path $root "build\CMakePresets.json"))) {
     exit 1
 }
 
+# Conan генерирует отдельный набор файлов (и пресет) под каждый build_type,
+# поэтому для конфигурации, под которую ещё не выполняли "conan install",
+# пресета conan-<configuration> не будет - даже если build\CMakePresets.json
+# уже существует (создан под другой Configuration). cmake --preset выдал бы
+# в этом случае малопонятную ошибку "No such preset", поэтому проверяем сами.
+$presetExists = (& cmake --list-presets 2>$null) -match "`"$presetName`""
+if (-not $presetExists) {
+    Write-Host "Пресет '$presetName' не найден - выполните сначала: .\setup.ps1 -Configuration $Configuration" -ForegroundColor Red
+    exit 1
+}
+
 # ---------------------------------------------------------------------------
 # Окружение MSVC x64 (cl.exe), если сборка запускается не из
 # "x64 Native Tools Command Prompt" - см. комментарий в setup.ps1 про
