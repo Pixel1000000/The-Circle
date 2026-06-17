@@ -43,6 +43,7 @@ public:
     // without widening access to the real (private) gameplay methods.
     void debugAdvanceToNextBiome() { advanceToNextBiome(); }
     void debugEnterBossRoom() { enterBossRoom(); }
+    void debugRespawnObstacles() { spawnObstacles(); }
 #endif
 
 private:
