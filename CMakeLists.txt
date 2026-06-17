@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(TC_DEBUG_MODE "Enable debug overlay" ON)
+option(TC_DEBUG_MODE "Enable debug overlay" OFF)
 
 find_package(SFML REQUIRED COMPONENTS Graphics Window System Audio)
 find_package(EnTT REQUIRED)
