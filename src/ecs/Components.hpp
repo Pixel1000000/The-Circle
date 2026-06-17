@@ -404,6 +404,12 @@ struct QuicksandTag {};
 // Tag: an ice zone left by a Snow witch's TeleportAbility.
 struct IceZoneTag {};
 
+// Goblin archer: emergency summon of a wolf once HP drops below 30%.
+struct EmergencySummon {
+    float hpThreshold = 0.3f;
+    bool triggered = false;
+};
+
 // Meta-progression, persists across runs via meta_save.json
 struct MetaStats {
     int strength = 0;

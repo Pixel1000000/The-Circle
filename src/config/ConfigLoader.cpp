@@ -220,6 +220,22 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
             tmpl.explodesOnDeath = entry.value("explodesOnDeath", tmpl.explodesOnDeath);
             tmpl.element = elementFromString(entry.value("element", std::string("NONE")));
             tmpl.elementPercent = entry.value("elementPercent", tmpl.elementPercent);
+
+            tmpl.hasDashAbility = entry.value("hasDashAbility", tmpl.hasDashAbility);
+            tmpl.hasBurrowAbility = entry.value("hasBurrowAbility", tmpl.hasBurrowAbility);
+            tmpl.hasTrapSpawner = entry.value("hasTrapSpawner", tmpl.hasTrapSpawner);
+            tmpl.hasSwarmScatter = entry.value("hasSwarmScatter", tmpl.hasSwarmScatter);
+            tmpl.hasChargeAbility = entry.value("hasChargeAbility", tmpl.hasChargeAbility);
+            tmpl.hasFreezeOnDeath = entry.value("hasFreezeOnDeath", tmpl.hasFreezeOnDeath);
+            tmpl.hasTeleportAbility = entry.value("hasTeleportAbility", tmpl.hasTeleportAbility);
+            tmpl.hasRageAbility = entry.value("hasRageAbility", tmpl.hasRageAbility);
+            tmpl.hasAbsorbChance = entry.value("hasAbsorbChance", tmpl.hasAbsorbChance);
+            tmpl.hasBoneDetach = entry.value("hasBoneDetach", tmpl.hasBoneDetach);
+            tmpl.hasSkeletonReviveBonus = entry.value("hasSkeletonReviveBonus", tmpl.hasSkeletonReviveBonus);
+            tmpl.hasQuicksandSpawner = entry.value("hasQuicksandSpawner", tmpl.hasQuicksandSpawner);
+            tmpl.hasMummyDeathBomb = entry.value("hasMummyDeathBomb", tmpl.hasMummyDeathBomb);
+            tmpl.summonsOnLowHp = entry.value("summonsOnLowHp", tmpl.summonsOnLowHp);
+
             tmpl.cost = entry.value("cost", tmpl.cost);
             tmpl.keyFragmentDropChance = entry.value("keyFragmentDropChance", tmpl.keyFragmentDropChance);
             tmpl.equipmentDropChance = entry.value("equipmentDropChance", tmpl.equipmentDropChance);

@@ -37,6 +37,24 @@ struct EnemyTemplate {
     Element element = Element::NONE;
     float elementPercent = 0.0f;
 
+    // Ability flags - attaches the matching component (with default-tuned
+    // values) in EntityFactory::createEnemy. See Components.hpp for the
+    // per-ability parameters.
+    bool hasDashAbility = false;
+    bool hasBurrowAbility = false;
+    bool hasTrapSpawner = false;
+    bool hasSwarmScatter = false;
+    bool hasChargeAbility = false;
+    bool hasFreezeOnDeath = false;
+    bool hasTeleportAbility = false;
+    bool hasRageAbility = false;
+    bool hasAbsorbChance = false;
+    bool hasBoneDetach = false;
+    bool hasSkeletonReviveBonus = false;
+    bool hasQuicksandSpawner = false;
+    bool hasMummyDeathBomb = false;
+    bool summonsOnLowHp = false;
+
     int cost = 3;
 
     float keyFragmentDropChance = 0.0f;
