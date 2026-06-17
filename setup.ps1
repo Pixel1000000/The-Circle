@@ -255,8 +255,12 @@ Write-Ok "Окружение MSVC подключено (cl.exe: $clPath)"
 # ---------------------------------------------------------------------------
 $presetName = "conan-$($Configuration.ToLower())"
 
-Write-Step "cmake --preset $presetName"
-& cmake --preset $presetName
+# Debug-сборка автоматически включает оверлей отладки (F1 в игре);
+# Release собирается без него (флаг TC_DEBUG нигде не определён).
+$tcDebugMode = if ($Configuration -eq "Debug") { "ON" } else { "OFF" }
+
+Write-Step "cmake --preset $presetName (TC_DEBUG_MODE=$tcDebugMode)"
+& cmake --preset $presetName "-DTC_DEBUG_MODE=$tcDebugMode"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "`nКонфигурация CMake завершилась с ошибкой (код $LASTEXITCODE)." -ForegroundColor Red
     exit 1

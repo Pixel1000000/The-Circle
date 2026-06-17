@@ -80,6 +80,21 @@ if ($env:VSCMD_ARG_TGT_ARCH -ne "x64") {
 }
 
 # ---------------------------------------------------------------------------
+# Debug-сборка автоматически включает оверлей отладки (F1 в игре);
+# Release собирается без него (флаг TC_DEBUG нигде не определён).
+# Перенастраиваем кэш CMake под выбранный $Configuration на случай, если он
+# отличается от того, с которым последний раз запускали .\setup.ps1.
+# ---------------------------------------------------------------------------
+$tcDebugMode = if ($Configuration -eq "Debug") { "ON" } else { "OFF" }
+
+Write-Step "cmake --preset $presetName (TC_DEBUG_MODE=$tcDebugMode)"
+& cmake --preset $presetName "-DTC_DEBUG_MODE=$tcDebugMode"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`nКонфигурация CMake завершилась с ошибкой (код $LASTEXITCODE)." -ForegroundColor Red
+    exit 1
+}
+
+# ---------------------------------------------------------------------------
 # Сборка
 # ---------------------------------------------------------------------------
 Write-Step "cmake --build --preset $presetName"

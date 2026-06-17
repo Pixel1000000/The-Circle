@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(TC_DEBUG_MODE "Enable debug overlay" ON)
+
 find_package(SFML REQUIRED COMPONENTS Graphics Window System Audio)
 find_package(EnTT REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -21,6 +23,10 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         src
 )
+
+if(TC_DEBUG_MODE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE TC_DEBUG)
+endif()
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
