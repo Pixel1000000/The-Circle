@@ -24,6 +24,11 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $root
 
+# Release и Debug собираются в отдельные папки, чтобы не делить один и тот же
+# CMake-кэш/CRT между конфигурациями и чтобы можно было держать обе сборки
+# одновременно.
+$buildFolder = "build-$($Configuration.ToLower())"
+
 function Write-Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 function Write-Info($msg) { Write-Host "    $msg" }
 function Write-Ok($msg)   { Write-Host "    [OK] $msg" -ForegroundColor Green }
@@ -136,7 +141,7 @@ if ($problems.Count -gt 0) {
 # ---------------------------------------------------------------------------
 Write-Step "Профиль Conan"
 
-New-Item -ItemType Directory -Force -Path (Join-Path $root "build") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $root $buildFolder) | Out-Null
 
 function Get-SettingValue($content, $key) {
     if ($content -match "(?m)^\s*$key\s*=\s*(\S+)") { return $Matches[1] }
@@ -168,7 +173,7 @@ try {
     Write-Info "Профиль репозитория ($trackedProfilePath) рассчитан на compiler.version: $trackedCompilerVersion"
 
     if ($detectedCompilerVersion -and $detectedCompilerVersion -ne $trackedCompilerVersion) {
-        $hostProfilePath = "build/conan-profile-host.txt"
+        $hostProfilePath = "$buildFolder/conan-profile-host.txt"
         $lines = ($detectedContent -split "`r?`n") | ForEach-Object {
             if ($_ -match '^\s*compiler\.cppstd\s*=')      { "compiler.cppstd=17" }
             elseif ($_ -match '^\s*build_type\s*=')        { "build_type=$Configuration" }
@@ -200,7 +205,7 @@ Write-Step "conan install (зависимости проекта)"
 
 $conanArgs = @(
     "install", ".",
-    "--output-folder=build",
+    "--output-folder=$buildFolder",
     "--build=missing",
     "-pr:h", $profilePath,
     "-pr:b", $profilePath,
@@ -284,11 +289,11 @@ if ($LASTEXITCODE -ne 0) {
 # ---------------------------------------------------------------------------
 # Готово
 # ---------------------------------------------------------------------------
-$exePath = Join-Path $root "build\TheCircle.exe"
+$exePath = Join-Path $root "$buildFolder\TheCircle.exe"
 Write-Host "`n========================================================" -ForegroundColor Green
 if (Test-Path $exePath) {
     Write-Host " Сборка готова: $exePath" -ForegroundColor Green
-    Write-Host " Запуск: build\TheCircle.exe" -ForegroundColor Green
+    Write-Host " Запуск: $buildFolder\TheCircle.exe" -ForegroundColor Green
 } else {
     Write-Host " Сборка завершена, но $exePath не найден - проверьте вывод выше." -ForegroundColor Yellow
 }
@@ -299,7 +304,7 @@ Write-Host "========================================================"
 # ---------------------------------------------------------------------------
 if (Test-Path $exePath) {
     Write-Step "Ярлык на TheCircle.exe"
-    $shortcutPath = Join-Path $root "TheCircle.lnk"
+    $shortcutPath = Join-Path $root "TheCircle-$Configuration.lnk"
     $shell = New-Object -ComObject WScript.Shell
     $shortcut = $shell.CreateShortcut($shortcutPath)
     $shortcut.TargetPath = $exePath

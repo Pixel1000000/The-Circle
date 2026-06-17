@@ -4,11 +4,12 @@
 
 ## Для игрока (просто запустить готовую сборку)
 
-1. Скачайте zip-архив со сборкой игры (`build.zip` / релизный архив).
-2. Распакуйте архив - внутри будет папка `build`. Можно разместить её куда
-   угодно, переносить из архива не обязательно ничего, кроме самой папки
-   `build`.
-3. Зайдите в папку `build` и запустите `TheCircle.exe`.
+1. Скачайте zip-архив со сборкой игры (`build-release.zip`, либо
+   `build-debug.zip` для тестовой сборки с дебаг-оверлеем).
+2. Распакуйте архив - внутри будет папка `build-release` (или
+   `build-debug`). Можно разместить её куда угодно, переносить из архива не
+   обязательно ничего, кроме самой этой папки.
+3. Зайдите в папку и запустите `TheCircle.exe`.
 
 ### Требования к софту
 
@@ -35,13 +36,15 @@ https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 Скрипт сам проверит, что установлены Conan 2.x, CMake >= 3.20, Ninja и Visual
 Studio с компонентом C++; подберёт подходящий профиль Conan под установленную
-у вас версию MSVC, поставит зависимости и сделает первую сборку
-(`build\TheCircle.exe`). Если чего-то не хватает, скрипт остановится и выведет
-список того, что нужно установить.
+у вас версию MSVC, поставит зависимости и сделает первую сборку. Если
+чего-то не хватает, скрипт остановится и выведет список того, что нужно
+установить.
 
-Conan ставит зависимости отдельно под каждую конфигурацию (`Release`/`Debug`),
-поэтому `setup.ps1` нужно один раз выполнить под каждой конфигурацией, которую
-собираетесь собирать (по умолчанию `-Configuration Release`).
+Release и Debug собираются в отдельные папки - `build-release\TheCircle.exe`
+и `build-debug\TheCircle.exe` соответственно - со своими Conan-зависимостями
+и CMake-кэшем, поэтому `setup.ps1` нужно один раз выполнить под каждой
+конфигурацией, которую собираетесь собирать (по умолчанию
+`-Configuration Release`).
 
 Debug-сборка (`-Configuration Debug`) включает оверлей отладки (см. ниже) -
 он отсутствует в Release.
@@ -79,14 +82,14 @@ redistributable из раздела "Для игрока" выше.
 ## Build with Conan (вручную)
 
 ### 1. Установить зависимости (один раз, или при изменении conanfile.txt)
-conan install . --output-folder=build --build=missing -pr:h conan/profiles/windows-msvc -pr:b conan/profiles/windows-msvc -s build_type=Release -c tools.cmake.cmaketoolchain:generator=Ninja -c tools.microsoft.msbuild:vs_version=18
+conan install . --output-folder=build-release --build=missing -pr:h conan/profiles/windows-msvc -pr:b conan/profiles/windows-msvc -s build_type=Release -s compiler.runtime_type=Release -c tools.cmake.cmaketoolchain:generator=Ninja -c tools.microsoft.msbuild:vs_version=18
 
 ### 2. Открыть "x64 Native Tools Command Prompt for VS 2026" (или вызвать vcvarsall.bat x64), затем:
 cmake --preset conan-release
 cmake --build --preset conan-release
 
 ### 3. Запустить
-build\TheCircle.exe
+build-release\TheCircle.exe
 
 
 
