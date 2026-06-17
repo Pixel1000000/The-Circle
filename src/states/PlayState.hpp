@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "ecs/ItemUpgrader.hpp"
+#include "ecs/systems/AbilitySystem.hpp"
 #include "ecs/systems/AISystem.hpp"
 #include "ecs/systems/BlizzardSystem.hpp"
 #include "ecs/systems/CollisionSystem.hpp"
@@ -12,6 +13,7 @@
 #include "ecs/systems/MovementSystem.hpp"
 #include "ecs/systems/RenderSystem.hpp"
 #include "ecs/systems/StatusEffectSystem.hpp"
+#include "ecs/systems/ZoneSystem.hpp"
 #include "meta/MetaProgression.hpp"
 #include "states/IGameState.hpp"
 #include "ui/HUD.hpp"
@@ -65,6 +67,8 @@ private:
     CollisionSystem collisionSystem;
     AISystem aiSystem;
     BlizzardSystem blizzardSystem;
+    AbilitySystem abilitySystem;
+    ZoneSystem zoneSystem;
     CombatSystem combatSystem;
     StatusEffectSystem statusEffectSystem;
     LootSystem lootSystem;
