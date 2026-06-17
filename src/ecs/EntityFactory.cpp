@@ -117,6 +117,25 @@ entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTem
         registry.emplace<PhaseThrough>(entity);
     }
 
+    if (tmpl.element != Element::NONE) {
+        registry.emplace<ElementalEffect>(entity, tmpl.element, tmpl.elementPercent);
+    }
+
+    if (tmpl.hasDashAbility) registry.emplace<DashAbility>(entity);
+    if (tmpl.hasBurrowAbility) registry.emplace<BurrowAbility>(entity);
+    if (tmpl.hasTrapSpawner) registry.emplace<TrapSpawner>(entity);
+    if (tmpl.hasSwarmScatter) registry.emplace<SwarmScatter>(entity);
+    if (tmpl.hasChargeAbility) registry.emplace<ChargeAbility>(entity);
+    if (tmpl.hasFreezeOnDeath) registry.emplace<FreezeOnDeath>(entity);
+    if (tmpl.hasTeleportAbility) registry.emplace<TeleportAbility>(entity);
+    if (tmpl.hasRageAbility) registry.emplace<RageAbility>(entity);
+    if (tmpl.hasAbsorbChance) registry.emplace<AbsorbChance>(entity);
+    if (tmpl.hasBoneDetach) registry.emplace<BoneDetach>(entity);
+    if (tmpl.hasSkeletonReviveBonus) registry.emplace<SkeletonReviveBonus>(entity);
+    if (tmpl.hasQuicksandSpawner) registry.emplace<QuicksandSpawner>(entity);
+    if (tmpl.hasMummyDeathBomb) registry.emplace<MummyDeathBomb>(entity);
+    if (tmpl.summonsOnLowHp) registry.emplace<EmergencySummon>(entity);
+
     return entity;
 }
 

@@ -1,6 +1,7 @@
 #include "ecs/systems/CombatSystem.hpp"
 
 #include <algorithm>
+#include <random>
 #include <vector>
 
 #include "ecs/Components.hpp"
@@ -135,6 +136,8 @@ void CombatSystem::updateRanged(entt::registry& registry, float dt)
         if (const auto* equip = registry.try_get<Equipment>(entity)) {
             projectileElement.element = equip->weaponElement;
             projectileElement.percent = equip->weaponElementPercent;
+        } else if (const auto* effect = registry.try_get<ElementalEffect>(entity)) {
+            projectileElement = *effect;
         }
 
         EntityFactory::createProjectile(registry, {pos.x, pos.y}, direction,
@@ -216,6 +219,18 @@ void CombatSystem::applyDamage(entt::registry& registry, entt::entity attacker, 
 
     int mitigated = static_cast<int>(static_cast<float>(rawDamage - armor) * (1.0f - reduction));
     mitigated = std::max(mitigated, 1);
+
+    // Ghost: a chance to absorb the hit entirely, banking it for a periodic
+    // AOE release handled by AbilitySystem, instead of losing HP.
+    if (auto* absorb = registry.try_get<AbsorbChance>(target)) {
+        static std::mt19937 absorbRng{std::random_device{}()};
+        std::uniform_real_distribution<float> roll(0.0f, 1.0f);
+        if (roll(absorbRng) < absorb->chance) {
+            absorb->accumulatedDamage += static_cast<float>(mitigated);
+            registry.emplace_or_replace<HitFlash>(target);
+            return;
+        }
+    }
 
     auto& health = registry.get<Health>(target);
     health.current = std::max(health.current - mitigated, 0);

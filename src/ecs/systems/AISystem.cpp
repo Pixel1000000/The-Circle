@@ -205,6 +205,31 @@ void AISystem::update(entt::registry& registry, float dt)
             }
         }
 
+        // Goblin archer: emergency summon of a wolf once its HP drops below
+        // the threshold, spawned via the same deferred PendingSpawn buffer
+        // used by boss summon waves.
+        if (auto* summon = registry.try_get<EmergencySummon>(entity)) {
+            if (!summon->triggered) {
+                const auto& health = registry.get<Health>(entity);
+                const float hpFraction = health.max > 0
+                    ? static_cast<float>(health.current) / static_cast<float>(health.max)
+                    : 0.0f;
+                if (hpFraction < summon->hpThreshold) {
+                    summon->triggered = true;
+                    const auto& wolfTemplates = ConfigLoader::get().getEnemyConfig().getEnemiesForBiome(BiomeType::FOREST);
+                    for (const auto& tmpl : wolfTemplates) {
+                        if (tmpl.id == "forest_wolf") {
+                            const sf::Vector2f spawnPos{
+                                std::clamp(pos.x + offsetDist(rng), 40.0f, WORLD_WIDTH - 40.0f),
+                                std::clamp(pos.y + offsetDist(rng), 40.0f, WORLD_HEIGHT - 40.0f)};
+                            pendingSpawns.push_back({tmpl, spawnPos, entt::null});
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         if (distance < 0.0001f) {
             velocity.dx = 0.0f;
             velocity.dy = 0.0f;

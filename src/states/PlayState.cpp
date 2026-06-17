@@ -4,6 +4,7 @@
 #include <cmath>
 #include <random>
 #include <string>
+#include <vector>
 
 #include "Game.hpp"
 #include "config/ConfigLoader.hpp"
@@ -454,8 +455,18 @@ void PlayState::update(float dt)
 
     aiSystem.update(registry, dt);
     blizzardSystem.update(registry, player, dt);
+
+    std::vector<entt::entity> spawnedByAbilities;
+    abilitySystem.update(registry, player, dt, spawnedByAbilities);
+    if (!spawnedByAbilities.empty()) {
+        auto& enemies = world.getCurrentBiome().getEnemies();
+        enemies.insert(enemies.end(), spawnedByAbilities.begin(), spawnedByAbilities.end());
+    }
+
+    zoneSystem.update(registry, player, dt);
     combatSystem.update(registry, dt);
     statusEffectSystem.update(registry, dt);
+    abilitySystem.handleDeathEffects(registry, player, dt);
 
     const LootResult lootResult = lootSystem.update(registry, player, world.getCurrentBiome().getEnemies(),
         world.getCurrentBiome().getKeyFragmentsCollected(), Biome::KEY_FRAGMENTS_REQUIRED);
