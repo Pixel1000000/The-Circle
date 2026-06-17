@@ -94,6 +94,12 @@
   "help.armor": "Броня (шлем / кираса)",
   "help.leggings": "Поножи",
 
+  "settings.title": "Настройки",
+  "settings.language": "Язык",
+  "settings.music": "Громкость музыки",
+  "settings.sfx": "Громкость эффектов",
+  "settings.back": "Назад",
+
   "help.dmgps": "ур/с",
   "help.sec": "с",
   "help.stacks": "×стаки",

@@ -5,6 +5,7 @@
 
 #include "ecs/ItemUpgrader.hpp"
 #include "ecs/systems/AISystem.hpp"
+#include "ecs/systems/BlizzardSystem.hpp"
 #include "ecs/systems/CollisionSystem.hpp"
 #include "ecs/systems/CombatSystem.hpp"
 #include "ecs/systems/LootSystem.hpp"
@@ -17,6 +18,7 @@
 #include "ui/InventoryScreen.hpp"
 #include "ui/ItemChoiceScreen.hpp"
 #include "ui/PauseScreen.hpp"
+#include "ui/SettingsScreen.hpp"
 #include "ui/TutorialHint.hpp"
 #include "world/World.hpp"
 
@@ -41,10 +43,12 @@ public:
     // without widening access to the real (private) gameplay methods.
     void debugAdvanceToNextBiome() { advanceToNextBiome(); }
     void debugEnterBossRoom() { enterBossRoom(); }
+    void debugRespawnObstacles() { spawnObstacles(); }
 #endif
 
 private:
     void spawnBiomeEnemies();
+    void spawnObstacles();
     void clearCurrentBiomeEnemies();
     void advanceToNextBiome();
     void enterBossRoom();
@@ -60,6 +64,7 @@ private:
     MovementSystem movementSystem;
     CollisionSystem collisionSystem;
     AISystem aiSystem;
+    BlizzardSystem blizzardSystem;
     CombatSystem combatSystem;
     StatusEffectSystem statusEffectSystem;
     LootSystem lootSystem;
@@ -68,12 +73,14 @@ private:
     HUD hud;
     TutorialHint tutorialHint;
     PauseScreen pauseScreen;
+    SettingsScreen settingsScreen;
     InventoryScreen inventoryScreen;
     ItemChoiceScreen itemChoiceScreen;
 
     RunSummary runSummary;
     bool inBossRoom = false;
     bool paused = false;
+    bool settingsOpen = false;
     bool inventoryOpen = false;
     bool itemChoiceOpen = false;
     float lastDt = 0.0f;

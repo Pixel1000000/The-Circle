@@ -43,6 +43,9 @@ private:
 
     DebugButton nextBiomeButton;
     DebugButton enterBossRoomButton;
+    DebugButton respawnObstaclesButton;
+    DebugButton spawnBlizzardButton;
+    DebugButton clearBlizzardButton;
 
     // In-memory only; never written to meta_save.json.
     MetaStats debugMetaStats;

@@ -3,6 +3,7 @@
 #ifdef TC_DEBUG
 
 #include <cmath>
+#include <random>
 
 #include "config/ConfigLoader.hpp"
 #include "ecs/EntityFactory.hpp"
@@ -21,6 +22,39 @@ void applyMetaStats(DebugContext& ctx, const MetaStats& metaStats)
 {
     EntityFactory::applyEquipmentStats(ctx.registry, ctx.player, ConfigLoader::get().getPlayerConfig(),
         ConfigLoader::get().getEquipmentConfig(), metaStats);
+}
+
+// Spawns one drifting large blizzard zone plus the usual batch of small
+// static ones, mirroring AISystem's BOSS_ELEMENTAL phase so the mechanic can
+// be tested without waiting for the elemental boss to trigger it.
+void spawnBlizzardZones(entt::registry& registry)
+{
+    for (auto zone : registry.view<BlizzardZoneTag>()) {
+        registry.destroy(zone);
+    }
+
+    const auto& bcfg = ConfigLoader::get().getElementalConfig().blizzard;
+    static std::mt19937 rng{std::random_device{}()};
+    std::uniform_real_distribution<float> xd(80.0f, static_cast<float>(Game::LOGICAL_WIDTH) - 80.0f);
+    std::uniform_real_distribution<float> yd(80.0f, static_cast<float>(Game::LOGICAL_HEIGHT) - 80.0f);
+    std::uniform_int_distribution<int> smallCount(bcfg.smallCountMin, bcfg.smallCountMax);
+
+    {
+        auto e = registry.create();
+        registry.emplace<Position>(e, xd(rng), yd(rng));
+        registry.emplace<Renderable>(e, sf::Color(80, 180, 255, 70), bcfg.bigSize);
+        registry.emplace<BlizzardZoneTag>(e);
+        registry.emplace<BlizzardZone>(e, true, sf::Vector2f{0.f, 0.f}, 0.f);
+    }
+
+    const int sc = smallCount(rng);
+    for (int i = 0; i < sc; ++i) {
+        auto e = registry.create();
+        registry.emplace<Position>(e, xd(rng), yd(rng));
+        registry.emplace<Renderable>(e, sf::Color(80, 180, 255, 70), bcfg.smallSize);
+        registry.emplace<BlizzardZoneTag>(e);
+        registry.emplace<BlizzardZone>(e, false, sf::Vector2f{0.f, 0.f}, 0.f);
+    }
 }
 } // namespace
 
@@ -52,6 +86,12 @@ void DebugWorldPanel::init(const sf::Font& font, sf::Vector2f origin)
         sf::Color(70, 110, 90));
     enterBossRoomButton.setup(font, "Enter Boss Room", origin + sf::Vector2f(280.0f, 40.0f), {160.0f, 28.0f},
         sf::Color(110, 70, 70));
+    respawnObstaclesButton.setup(font, "Respawn Obstacles", origin + sf::Vector2f(280.0f, 80.0f), {180.0f, 28.0f},
+        sf::Color(90, 90, 70));
+    spawnBlizzardButton.setup(font, "Spawn Blizzard", origin + sf::Vector2f(280.0f, 120.0f), {180.0f, 28.0f},
+        sf::Color(70, 90, 110));
+    clearBlizzardButton.setup(font, "Clear Blizzard", origin + sf::Vector2f(280.0f, 160.0f), {180.0f, 28.0f},
+        sf::Color(110, 60, 60));
 }
 
 void DebugWorldPanel::onOpen(DebugContext& ctx)
@@ -90,6 +130,14 @@ void DebugWorldPanel::handleMousePressed(sf::Vector2f point, DebugContext& ctx)
         ctx.playState.debugAdvanceToNextBiome();
     } else if (enterBossRoomButton.isPressed(point)) {
         ctx.playState.debugEnterBossRoom();
+    } else if (respawnObstaclesButton.isPressed(point)) {
+        ctx.playState.debugRespawnObstacles();
+    } else if (spawnBlizzardButton.isPressed(point)) {
+        spawnBlizzardZones(ctx.registry);
+    } else if (clearBlizzardButton.isPressed(point)) {
+        for (auto zone : ctx.registry.view<BlizzardZoneTag>()) {
+            ctx.registry.destroy(zone);
+        }
     }
 
     debugMetaStats.strength = static_cast<int>(std::round(strengthSlider.getValue()));
@@ -151,6 +199,9 @@ void DebugWorldPanel::render(sf::RenderWindow& window) const
 
     nextBiomeButton.render(window);
     enterBossRoomButton.render(window);
+    respawnObstaclesButton.render(window);
+    spawnBlizzardButton.render(window);
+    clearBlizzardButton.render(window);
 }
 
 void DebugWorldPanel::renderDropdownOverlays(sf::RenderWindow& window) const

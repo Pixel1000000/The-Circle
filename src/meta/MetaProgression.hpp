@@ -17,10 +17,10 @@ struct RunSummary {
 // Persists MetaStats (Strength / Endurance / Health) to meta_save.json between runs.
 class MetaProgression {
 public:
-    static constexpr int POINTS_PER_10_KILLS = 1;
-    static constexpr int POINTS_PER_BIOME = 2;
+    static constexpr int KILLS_PER_POINT = 20;
+    static constexpr int POINTS_PER_BIOME = 1;
     static constexpr int POINTS_FOR_BOSS = 5;
-    static constexpr int POINTS_PER_FRAGMENT = 0; // easy to change
+    static constexpr int POINTS_PER_FRAGMENT = 0;
 
     // Each meta-progression point grants a percentage bonus rather than a
     // flat amount, so equipment upgrades remain meaningful at every tier.
