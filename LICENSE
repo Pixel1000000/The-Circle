@@ -1,21 +1,72 @@
-MIT License
+Pixel Game Source License (PGSL) 1.0
 
 Copyright (c) 2026 Georgii Shagabutdinov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of this software and associated documentation files (the "Software"), to:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+- use the Software for personal and non-commercial purposes;
+- study and inspect the source code;
+- modify the Software;
+- create and publish forks;
+- create derivative works;
+- distribute original or modified versions of the Software;
+- submit contributions and Pull Requests to the original repository.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+The above rights are granted subject to the following conditions:
+
+1. Attribution
+
+Any distribution of the Software or derivative works must include this
+copyright notice and this license.
+
+2. Non-Commercial Use
+
+The Software and any derivative works may not be used, distributed,
+licensed, sold, rented, sublicensed, monetized, or otherwise exploited
+for any commercial purpose.
+
+Commercial purpose includes, but is not limited to:
+
+- selling copies of the Software;
+- selling derivative works;
+- charging for access;
+- including the Software in a paid product or service;
+- generating revenue through advertisements, subscriptions, donations
+  tied to Software access, or other direct monetization methods.
+
+3. Official Releases
+
+Only the original copyright holder has the exclusive right to:
+
+- publish official releases;
+- distribute commercial versions;
+- sublicense the Software;
+- commercially exploit the Software and derivative works.
+
+4. Contributions
+
+By submitting a Pull Request or any other contribution to the original
+repository, the contributor:
+
+- retains copyright over their contribution;
+- grants the original copyright holder a perpetual, irrevocable,
+  worldwide, non-exclusive, royalty-free license to use, modify,
+  redistribute, relicense, sublicense, and commercially exploit that
+  contribution as part of the Software or any derivative work.
+
+5. No Trademark Rights
+
+This license does not grant permission to use the project's name, logo,
+branding, or trademarks in a way that suggests endorsement by the
+original author.
+
+6. Warranty Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
