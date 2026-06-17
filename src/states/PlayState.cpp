@@ -132,6 +132,10 @@ void PlayState::spawnBiomeEnemies()
 
 void PlayState::spawnObstacles()
 {
+    for (auto entity : registry.view<Obstacle>()) {
+        registry.destroy(entity);
+    }
+
     static std::mt19937 rng{std::random_device{}()};
     std::uniform_real_distribution<float> xDist(80.0f, static_cast<float>(Game::LOGICAL_WIDTH) - 80.0f);
     std::uniform_real_distribution<float> yDist(80.0f, static_cast<float>(Game::LOGICAL_HEIGHT) - 80.0f);

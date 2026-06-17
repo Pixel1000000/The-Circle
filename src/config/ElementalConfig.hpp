@@ -19,9 +19,9 @@ struct BlizzardConfig {
     float interval = 8.0f;
     sf::Vector2f bigSize = {150.0f, 150.0f};
     sf::Vector2f smallSize = {60.0f, 60.0f};
-    int smallCountMin = 3;
-    int smallCountMax = 6;
-    float driftSpeed = 20.0f;
+    int smallCountMin = 10;
+    int smallCountMax = 10;
+    float driftSpeed = 12.0f; // big zone's slow chase speed
     float driftChangeMin = 3.0f;
     float driftChangeMax = 5.0f;
     float slowDuration = 0.2f;

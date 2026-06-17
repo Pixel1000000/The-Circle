@@ -50,7 +50,7 @@ const MetaStats& MetaProgression::getStats() const
 
 int MetaProgression::computePointsEarned(const RunSummary& summary) const
 {
-    int points = (summary.kills / 10) * POINTS_PER_10_KILLS;
+    int points = summary.kills / KILLS_PER_POINT;
     points += summary.biomesCleared * POINTS_PER_BIOME;
     if (summary.bossDefeated) {
         points += POINTS_FOR_BOSS;
