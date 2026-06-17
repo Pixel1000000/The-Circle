@@ -2,8 +2,10 @@
     Быстрая пересборка The Circle после изменений в коде.
 
     В отличие от setup.ps1, не проверяет инструменты и не запускает
-    "conan install" - предполагается, что .\setup.ps1 уже был выполнен
-    хотя бы раз и build\CMakePresets.json существует.
+    "conan install" - предполагается, что .\setup.ps1 уже был выполнен хотя
+    бы раз с той же -Configuration и build-<configuration>\CMakePresets.json
+    существует. Release и Debug собираются в отдельных папках
+    (build-release, build-debug).
 
     Подключает окружение MSVC x64 (vcvarsall.bat), если оно ещё не
     подключено в текущей сессии, и запускает
@@ -30,20 +32,10 @@ function Write-Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 function Write-Ok($msg)   { Write-Host "    [OK] $msg" -ForegroundColor Green }
 
 $presetName = "conan-$($Configuration.ToLower())"
+$buildFolder = "build-$($Configuration.ToLower())"
 
-if (-not (Test-Path (Join-Path $root "build\CMakePresets.json"))) {
-    Write-Host "build\CMakePresets.json не найден - сначала выполните .\setup.ps1" -ForegroundColor Red
-    exit 1
-}
-
-# Conan генерирует отдельный набор файлов (и пресет) под каждый build_type,
-# поэтому для конфигурации, под которую ещё не выполняли "conan install",
-# пресета conan-<configuration> не будет - даже если build\CMakePresets.json
-# уже существует (создан под другой Configuration). cmake --preset выдал бы
-# в этом случае малопонятную ошибку "No such preset", поэтому проверяем сами.
-$presetExists = (& cmake --list-presets 2>$null) -match "`"$presetName`""
-if (-not $presetExists) {
-    Write-Host "Пресет '$presetName' не найден - выполните сначала: .\setup.ps1 -Configuration $Configuration" -ForegroundColor Red
+if (-not (Test-Path (Join-Path $root "$buildFolder\CMakePresets.json"))) {
+    Write-Host "$buildFolder\CMakePresets.json не найден - сначала выполните: .\setup.ps1 -Configuration $Configuration" -ForegroundColor Red
     exit 1
 }
 
@@ -115,7 +107,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-$exePath = Join-Path $root "build\TheCircle.exe"
+$exePath = Join-Path $root "$buildFolder\TheCircle.exe"
 Write-Host "`n========================================================" -ForegroundColor Green
 if (Test-Path $exePath) {
     Write-Host " Сборка готова: $exePath" -ForegroundColor Green
