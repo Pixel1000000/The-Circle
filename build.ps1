@@ -2,8 +2,10 @@
     Быстрая пересборка The Circle после изменений в коде.
 
     В отличие от setup.ps1, не проверяет инструменты и не запускает
-    "conan install" - предполагается, что .\setup.ps1 уже был выполнен
-    хотя бы раз и build\CMakePresets.json существует.
+    "conan install" - предполагается, что .\setup.ps1 уже был выполнен хотя
+    бы раз с той же -Configuration и build-<configuration>\CMakePresets.json
+    существует. Release и Debug собираются в отдельных папках
+    (build-release, build-debug).
 
     Подключает окружение MSVC x64 (vcvarsall.bat), если оно ещё не
     подключено в текущей сессии, и запускает
@@ -30,9 +32,10 @@ function Write-Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 function Write-Ok($msg)   { Write-Host "    [OK] $msg" -ForegroundColor Green }
 
 $presetName = "conan-$($Configuration.ToLower())"
+$buildFolder = "build-$($Configuration.ToLower())"
 
-if (-not (Test-Path (Join-Path $root "build\CMakePresets.json"))) {
-    Write-Host "build\CMakePresets.json не найден - сначала выполните .\setup.ps1" -ForegroundColor Red
+if (-not (Test-Path (Join-Path $root "$buildFolder\CMakePresets.json"))) {
+    Write-Host "$buildFolder\CMakePresets.json не найден - сначала выполните: .\setup.ps1 -Configuration $Configuration" -ForegroundColor Red
     exit 1
 }
 
@@ -80,6 +83,21 @@ if ($env:VSCMD_ARG_TGT_ARCH -ne "x64") {
 }
 
 # ---------------------------------------------------------------------------
+# Debug-сборка автоматически включает оверлей отладки (F1 в игре);
+# Release собирается без него (флаг TC_DEBUG нигде не определён).
+# Перенастраиваем кэш CMake под выбранный $Configuration на случай, если он
+# отличается от того, с которым последний раз запускали .\setup.ps1.
+# ---------------------------------------------------------------------------
+$tcDebugMode = if ($Configuration -eq "Debug") { "ON" } else { "OFF" }
+
+Write-Step "cmake --preset $presetName (TC_DEBUG_MODE=$tcDebugMode)"
+& cmake --preset $presetName "-DTC_DEBUG_MODE=$tcDebugMode"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`nКонфигурация CMake завершилась с ошибкой (код $LASTEXITCODE)." -ForegroundColor Red
+    exit 1
+}
+
+# ---------------------------------------------------------------------------
 # Сборка
 # ---------------------------------------------------------------------------
 Write-Step "cmake --build --preset $presetName"
@@ -89,7 +107,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-$exePath = Join-Path $root "build\TheCircle.exe"
+$exePath = Join-Path $root "$buildFolder\TheCircle.exe"
 Write-Host "`n========================================================" -ForegroundColor Green
 if (Test-Path $exePath) {
     Write-Host " Сборка готова: $exePath" -ForegroundColor Green

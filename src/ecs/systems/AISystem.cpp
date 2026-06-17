@@ -138,19 +138,15 @@ void AISystem::update(entt::registry& registry, float dt)
                     static std::mt19937 brng{std::random_device{}()};
                     std::uniform_real_distribution<float> xd(80.0f, WORLD_WIDTH - 80.0f);
                     std::uniform_real_distribution<float> yd(80.0f, WORLD_HEIGHT - 80.0f);
-                    std::uniform_real_distribution<float> dirAng(0.0f, 6.2832f);
                     std::uniform_int_distribution<int> smallCount(bcfg.smallCountMin, bcfg.smallCountMax);
-                    std::uniform_real_distribution<float> changeDist(bcfg.driftChangeMin, bcfg.driftChangeMax);
 
-                    // 1 large drifting zone
+                    // 1 large zone that slowly chases the player
                     {
-                        const float a = dirAng(brng);
-                        const sf::Vector2f dir{std::cos(a), std::sin(a)};
                         auto e = registry.create();
                         registry.emplace<Position>(e, xd(brng), yd(brng));
                         registry.emplace<Renderable>(e, sf::Color(80, 180, 255, 70), bcfg.bigSize);
                         registry.emplace<BlizzardZoneTag>(e);
-                        registry.emplace<BlizzardZone>(e, true, dir, changeDist(brng));
+                        registry.emplace<BlizzardZone>(e, true, sf::Vector2f{0.f, 0.f}, 0.f);
                     }
 
                     // Small static zones

@@ -1,33 +1,21 @@
 #include "ecs/systems/BlizzardSystem.hpp"
 
+#include <algorithm>
 #include <cmath>
-#include <random>
 
 #include "Game.hpp"
+#include "config/ConfigLoader.hpp"
 #include "ecs/Components.hpp"
 
 namespace tc {
 
 namespace {
-
-constexpr float DRIFT_SPEED = 20.0f;
-constexpr float DIR_CHANGE_MIN = 3.0f;
-constexpr float DIR_CHANGE_MAX = 5.0f;
 constexpr float SLOW_DURATION = 0.2f;
-
-sf::Vector2f randomDir(std::mt19937& rng)
-{
-    std::uniform_real_distribution<float> ang(0.0f, 6.2832f);
-    const float a = ang(rng);
-    return {std::cos(a), std::sin(a)};
-}
-
 } // namespace
 
 void BlizzardSystem::update(entt::registry& registry, entt::entity player, float dt)
 {
-    static std::mt19937 rng{std::random_device{}()};
-    std::uniform_real_distribution<float> changeDist(DIR_CHANGE_MIN, DIR_CHANGE_MAX);
+    const float driftSpeed = ConfigLoader::get().getElementalConfig().blizzard.driftSpeed;
 
     const float W = static_cast<float>(Game::LOGICAL_WIDTH);
     const float H = static_cast<float>(Game::LOGICAL_HEIGHT);
@@ -43,21 +31,21 @@ void BlizzardSystem::update(entt::registry& registry, entt::entity player, float
         const auto& size = registry.get<Renderable>(entity).size;
 
         if (zone.drifting) {
-            zone.dirTimer -= dt;
-            if (zone.dirTimer <= 0.0f) {
-                zone.driftDir = randomDir(rng);
-                zone.dirTimer = changeDist(rng);
+            // Large zone slowly chases the player.
+            const float dx = playerPos.x - pos.x;
+            const float dy = playerPos.y - pos.y;
+            const float dist = std::sqrt(dx * dx + dy * dy);
+            if (dist > 1.0f) {
+                zone.driftDir = {dx / dist, dy / dist};
             }
-            pos.x += zone.driftDir.x * DRIFT_SPEED * dt;
-            pos.y += zone.driftDir.y * DRIFT_SPEED * dt;
+            pos.x += zone.driftDir.x * driftSpeed * dt;
+            pos.y += zone.driftDir.y * driftSpeed * dt;
 
-            // Bounce off edges
+            // Clamp to screen bounds
             const float hw = size.x * 0.5f;
             const float hh = size.y * 0.5f;
-            if (pos.x - hw < 0.0f)  { pos.x = hw;     zone.driftDir.x =  std::abs(zone.driftDir.x); }
-            if (pos.x + hw > W)     { pos.x = W - hw;  zone.driftDir.x = -std::abs(zone.driftDir.x); }
-            if (pos.y - hh < 0.0f)  { pos.y = hh;     zone.driftDir.y =  std::abs(zone.driftDir.y); }
-            if (pos.y + hh > H)     { pos.y = H - hh;  zone.driftDir.y = -std::abs(zone.driftDir.y); }
+            pos.x = std::clamp(pos.x, hw, W - hw);
+            pos.y = std::clamp(pos.y, hh, H - hh);
         }
 
         // AABB overlap with player

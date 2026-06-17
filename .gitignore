@@ -1,9 +1,14 @@
 /build/
+/build-release/
+/build-debug/
+/CMakeUserPresets.json
 /out/
 /.vs/
 /.idea/
 /.conan2/
 /TheCircle.lnk
+/TheCircle-Release.lnk
+/TheCircle-Debug.lnk
 /meta_save.json
 crash_log.txt
 ps_debug.txt

@@ -15,9 +15,9 @@
     "interval": 8.0,
     "bigSize": [150, 150],
     "smallSize": [60, 60],
-    "smallCountMin": 3,
-    "smallCountMax": 6,
-    "driftSpeed": 20.0,
+    "smallCountMin": 10,
+    "smallCountMax": 10,
+    "driftSpeed": 12.0,
     "driftChangeMin": 3.0,
     "driftChangeMax": 5.0,
     "slowDuration": 0.2

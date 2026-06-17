@@ -26,7 +26,8 @@ Element elementForBiomeTier(int tier)
 
 } // namespace
 
-LootResult LootSystem::update(entt::registry& registry, entt::entity player, const std::vector<entt::entity>& waveEnemies)
+LootResult LootSystem::update(entt::registry& registry, entt::entity player, const std::vector<entt::entity>& waveEnemies,
+    int fragmentsAlreadyCollected, int fragmentsRequired)
 {
     static std::mt19937 rng{std::random_device{}()};
     std::uniform_real_distribution<float> roll(0.0f, 1.0f);
@@ -66,7 +67,8 @@ LootResult LootSystem::update(entt::registry& registry, entt::entity player, con
         const bool guaranteedDrop = waveCleared && i == toDestroy.size() - 1;
 
         if (const auto* drop = registry.try_get<KeyFragmentDrop>(entity)) {
-            if (guaranteedDrop || roll(rng) <= drop->chance) {
+            const bool fragmentsStillNeeded = fragmentsAlreadyCollected + result.fragmentsCollected < fragmentsRequired;
+            if (fragmentsStillNeeded && (guaranteedDrop || roll(rng) <= drop->chance)) {
                 ++registry.get<KeyFragmentHolder>(player).count;
                 ++result.fragmentsCollected;
             }

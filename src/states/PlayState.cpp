@@ -13,6 +13,10 @@
 #include "states/MainMenuState.hpp"
 #include "states/DeathState.hpp"
 
+#ifdef TC_DEBUG
+#include "debug/DebugContext.hpp"
+#endif
+
 namespace tc {
 
 namespace {
@@ -57,6 +61,10 @@ PlayState::PlayState(Game& game)
     spawnBiomeEnemies();
 
     game.getAudio().playMusic(musicTrackFor(world.getCurrentBiome().getType()));
+
+#ifdef TC_DEBUG
+    debugOverlay.init(game);
+#endif
 }
 
 sf::Vector2f PlayState::readMovementInput() const
@@ -156,6 +164,10 @@ void PlayState::spawnBiomeEnemies()
 
 void PlayState::spawnObstacles()
 {
+    for (auto entity : registry.view<Obstacle>()) {
+        registry.destroy(entity);
+    }
+
     static std::mt19937 rng{std::random_device{}()};
     std::uniform_real_distribution<float> xDist(80.0f, static_cast<float>(Game::LOGICAL_WIDTH) - 80.0f);
     std::uniform_real_distribution<float> yDist(80.0f, static_cast<float>(Game::LOGICAL_HEIGHT) - 80.0f);
@@ -220,6 +232,7 @@ void PlayState::advanceToNextBiome()
 {
     clearCurrentBiomeEnemies();
     ++runSummary.biomesCleared;
+    registry.get<KeyFragmentHolder>(player).count = 0;
 
     if (world.getCurrentBiome().getType() == BiomeType::DEADLANDS) {
         enterBossRoom();
@@ -264,6 +277,26 @@ void PlayState::finishRun(bool victory)
 
 void PlayState::handleInput(const sf::Event& event)
 {
+#ifdef TC_DEBUG
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F1) {
+        debugOpen = !debugOpen;
+        if (debugOpen) {
+            DebugContext ctx{registry, player, world, game, *this, renderSystem, lastDt};
+            debugOverlay.onOpen(ctx);
+        }
+        return;
+    }
+
+    if (debugOpen) {
+        DebugContext ctx{registry, player, world, game, *this, renderSystem, lastDt};
+        debugOverlay.handleInput(event, game.getWindow(), ctx);
+        if (debugOverlay.consumeCloseRequest()) {
+            debugOpen = false;
+        }
+        return;
+    }
+#endif
+
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
         const sf::Vector2f point = game.getWindow().mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
 
@@ -405,6 +438,13 @@ void PlayState::handleInput(const sf::Event& event)
 
 void PlayState::update(float dt)
 {
+#ifdef TC_DEBUG
+    if (debugOpen) {
+        lastDt = 0.0f;
+        return;
+    }
+#endif
+
     if (paused || settingsOpen || inventoryOpen || itemChoiceOpen) {
         lastDt = 0.0f;
         return;
@@ -457,7 +497,8 @@ void PlayState::update(float dt)
     statusEffectSystem.update(registry, dt);
     TC_LOG("Frame", "after StatusEffectSystem");
 
-    const LootResult lootResult = lootSystem.update(registry, player, world.getCurrentBiome().getEnemies());
+    const LootResult lootResult = lootSystem.update(registry, player, world.getCurrentBiome().getEnemies(),
+        world.getCurrentBiome().getKeyFragmentsCollected(), Biome::KEY_FRAGMENTS_REQUIRED);
     runSummary.kills += lootResult.kills;
     if (lootResult.fragmentsCollected > 0) {
         for (int i = 0; i < lootResult.fragmentsCollected; ++i) {
@@ -551,6 +592,13 @@ void PlayState::render(sf::RenderWindow& window)
             pendingDrop.slot, pendingDrop.tier, pendingDrop.element, pendingDrop.percent,
             ItemUpgrader::getTier(equipment, pendingDrop.slot), currentElement, currentPercent);
     }
+
+#ifdef TC_DEBUG
+    if (debugOpen) {
+        DebugContext ctx{registry, player, world, game, *this, renderSystem, lastDt};
+        debugOverlay.render(window, ctx);
+    }
+#endif
 }
 
 } // namespace tc
