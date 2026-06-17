@@ -188,6 +188,13 @@ try {
 
 # ---------------------------------------------------------------------------
 # 6. conan install
+#
+#    compiler.runtime_type=Release - намеренно не привязан к $Configuration:
+#    debug-вариант CRT (MSVCP140D.dll и т.п.) ставится только вместе с Visual
+#    Studio и не входит в обычный VC++ Redistributable, поэтому Debug-сборка
+#    с debug-CRT не запустится на машине тестера, где нет VS. Линкуем Debug
+#    (неоптимизированный код + символы + TC_DEBUG) с обычным Release-CRT,
+#    чтобы для запуска было достаточно стандартного redist.
 # ---------------------------------------------------------------------------
 Write-Step "conan install (зависимости проекта)"
 
@@ -198,6 +205,7 @@ $conanArgs = @(
     "-pr:h", $profilePath,
     "-pr:b", $profilePath,
     "-s", "build_type=$Configuration",
+    "-s", "compiler.runtime_type=Release",
     "-c", "tools.cmake.cmaketoolchain:generator=Ninja",
     "-c", "tools.microsoft.msbuild:vs_version=$vsVersionMajor"
 )
