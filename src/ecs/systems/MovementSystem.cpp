@@ -10,6 +10,8 @@ void MovementSystem::update(entt::registry& registry, float dt)
 {
     auto view = registry.view<Position, Velocity, Speed>();
     for (auto entity : view) {
+        if (registry.all_of<Stunned>(entity)) continue;
+
         auto& position = view.get<Position>(entity);
         const auto& velocity = view.get<Velocity>(entity);
         float speed = view.get<Speed>(entity).value;

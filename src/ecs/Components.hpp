@@ -404,6 +404,22 @@ struct QuicksandTag {};
 // Tag: an ice zone left by a Snow witch's TeleportAbility.
 struct IceZoneTag {};
 
+// Shared expiry timer for effect zones (TrapTag/QuicksandTag/IceZoneTag).
+struct ZoneDuration {
+    float timer = 0.0f;
+};
+
+// Stun duration carried by a trap zone, captured from the Ant's TrapSpawner
+// at spawn time (the Ant itself is destroyed once it dies).
+struct TrapZone {
+    float stunDuration = 1.0f;
+};
+
+// Prevents movement for `timer` seconds (traps, failed charges).
+struct Stunned {
+    float timer = 0.0f;
+};
+
 // Goblin archer: emergency summon of a wolf once HP drops below 30%.
 struct EmergencySummon {
     float hpThreshold = 0.3f;
