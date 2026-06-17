@@ -22,6 +22,10 @@
 #include "ui/TutorialHint.hpp"
 #include "world/World.hpp"
 
+#ifdef TC_DEBUG
+#include "debug/DebugOverlay.hpp"
+#endif
+
 namespace tc {
 
 // The core gameplay loop: drives the ECS systems, biome progression
@@ -33,6 +37,13 @@ public:
     void handleInput(const sf::Event& event) override;
     void update(float dt) override;
     void render(sf::RenderWindow& window) override;
+
+#ifdef TC_DEBUG
+    // Thin public wrappers so DebugWorldPanel can trigger progression
+    // without widening access to the real (private) gameplay methods.
+    void debugAdvanceToNextBiome() { advanceToNextBiome(); }
+    void debugEnterBossRoom() { enterBossRoom(); }
+#endif
 
 private:
     void spawnBiomeEnemies();
@@ -72,6 +83,11 @@ private:
     bool inventoryOpen = false;
     bool itemChoiceOpen = false;
     float lastDt = 0.0f;
+
+#ifdef TC_DEBUG
+    DebugOverlay debugOverlay;
+    bool debugOpen = false;
+#endif
 
     // Equipment drop awaiting an ItemChoiceScreen decision (slot indices:
     // 0 = helmet, 1 = chest, 2 = leggings, 3 = weapon).

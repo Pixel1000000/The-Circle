@@ -11,6 +11,10 @@
 #include "states/MainMenuState.hpp"
 #include "states/DeathState.hpp"
 
+#ifdef TC_DEBUG
+#include "debug/DebugContext.hpp"
+#endif
+
 namespace tc {
 
 namespace {
@@ -55,6 +59,10 @@ PlayState::PlayState(Game& game)
     spawnBiomeEnemies();
 
     game.getAudio().playMusic(musicTrackFor(world.getCurrentBiome().getType()));
+
+#ifdef TC_DEBUG
+    debugOverlay.init(game);
+#endif
 }
 
 sf::Vector2f PlayState::readMovementInput() const
@@ -243,6 +251,26 @@ void PlayState::finishRun(bool victory)
 
 void PlayState::handleInput(const sf::Event& event)
 {
+#ifdef TC_DEBUG
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F1) {
+        debugOpen = !debugOpen;
+        if (debugOpen) {
+            DebugContext ctx{registry, player, world, game, *this, renderSystem, lastDt};
+            debugOverlay.onOpen(ctx);
+        }
+        return;
+    }
+
+    if (debugOpen) {
+        DebugContext ctx{registry, player, world, game, *this, renderSystem, lastDt};
+        debugOverlay.handleInput(event, game.getWindow(), ctx);
+        if (debugOverlay.consumeCloseRequest()) {
+            debugOpen = false;
+        }
+        return;
+    }
+#endif
+
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
         const sf::Vector2f point = game.getWindow().mapPixelToCoords({event.mouseButton.x, event.mouseButton.y});
 
@@ -384,6 +412,13 @@ void PlayState::handleInput(const sf::Event& event)
 
 void PlayState::update(float dt)
 {
+#ifdef TC_DEBUG
+    if (debugOpen) {
+        lastDt = 0.0f;
+        return;
+    }
+#endif
+
     if (paused || settingsOpen || inventoryOpen || itemChoiceOpen) {
         lastDt = 0.0f;
         return;
@@ -514,6 +549,13 @@ void PlayState::render(sf::RenderWindow& window)
             pendingDrop.slot, pendingDrop.tier, pendingDrop.element, pendingDrop.percent,
             ItemUpgrader::getTier(equipment, pendingDrop.slot), currentElement, currentPercent);
     }
+
+#ifdef TC_DEBUG
+    if (debugOpen) {
+        DebugContext ctx{registry, player, world, game, *this, renderSystem, lastDt};
+        debugOverlay.render(window, ctx);
+    }
+#endif
 }
 
 } // namespace tc

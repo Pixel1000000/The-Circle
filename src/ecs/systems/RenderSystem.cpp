@@ -1,6 +1,7 @@
 #include "ecs/systems/RenderSystem.hpp"
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
 #include "core/TextUtils.hpp"
@@ -41,6 +42,19 @@ void RenderSystem::update(entt::registry& registry, sf::RenderWindow& window, co
         nameText.setFont(fontManager.getFont(localization.getCurrentLanguage()));
     }
 
+#ifdef TC_DEBUG
+    if (fontManager.isLoaded() && !debugTextInitialized) {
+        hpNumberText.setOutlineColor(sf::Color::Black);
+        hpNumberText.setOutlineThickness(1.0f);
+        hpNumberText.setFillColor(sf::Color::Yellow);
+        hpNumberText.setCharacterSize(NAME_FONT_SIZE);
+        debugTextInitialized = true;
+    }
+    if (fontManager.isLoaded()) {
+        hpNumberText.setFont(fontManager.getFont(localization.getCurrentLanguage()));
+    }
+#endif
+
     auto view = registry.view<Position, Renderable>();
     for (auto entity : view) {
         const auto& pos = view.get<Position>(entity);
@@ -60,6 +74,31 @@ void RenderSystem::update(entt::registry& registry, sf::RenderWindow& window, co
         shape.setFillColor(color);
 
         window.draw(shape);
+
+#ifdef TC_DEBUG
+        if (showHitboxes) {
+            sf::RectangleShape outline(renderable.size);
+            outline.setOrigin(renderable.size.x * 0.5f, renderable.size.y * 0.5f);
+            outline.setPosition(pos.x, pos.y);
+            outline.setFillColor(sf::Color::Transparent);
+            outline.setOutlineColor(sf::Color::Yellow);
+            outline.setOutlineThickness(1.0f);
+            window.draw(outline);
+        }
+
+        if (showVelocityVectors) {
+            if (const auto* velocity = registry.try_get<Velocity>(entity)) {
+                const bool isPlayer = registry.all_of<PlayerTag>(entity);
+                const sf::Color lineColor = isPlayer ? sf::Color::Green : sf::Color::Red;
+                constexpr float VELOCITY_VECTOR_SCALE = 30.0f;
+                sf::Vertex line[2] = {
+                    sf::Vertex({pos.x, pos.y}, lineColor),
+                    sf::Vertex({pos.x + velocity->dx * VELOCITY_VECTOR_SCALE, pos.y + velocity->dy * VELOCITY_VECTOR_SCALE}, lineColor)
+                };
+                window.draw(line, 2, sf::Lines);
+            }
+        }
+#endif
 
         // Elemental status overlays — semi-transparent tint on the sprite.
         {
@@ -114,6 +153,16 @@ void RenderSystem::update(entt::registry& registry, sf::RenderWindow& window, co
         barFill.setPosition(barX, barY);
         barFill.setFillColor(sf::Color(200, 60, 60));
         window.draw(barFill);
+
+#ifdef TC_DEBUG
+        if (showHpNumbers && fontManager.isLoaded()) {
+            hpNumberText.setString(std::to_string(health->current) + "/" + std::to_string(health->max));
+            const auto hpBounds = hpNumberText.getLocalBounds();
+            hpNumberText.setPosition(pos.x - hpBounds.width * 0.5f - hpBounds.left,
+                pos.y - renderable.size.y * 0.5f - HP_BAR_GAP - HP_BAR_HEIGHT - NAME_FONT_SIZE - 4.0f);
+            window.draw(hpNumberText);
+        }
+#endif
 
         if (!fontManager.isLoaded()) continue;
 

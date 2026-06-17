@@ -16,9 +16,21 @@ public:
     void update(entt::registry& registry, sf::RenderWindow& window, const Localization& localization,
         const FontManager& fontManager, float dt);
 
+#ifdef TC_DEBUG
+    bool showHitboxes = false;
+    bool showHpNumbers = false;
+    bool showVelocityVectors = false;
+    bool showBlizzardZones = false;
+#endif
+
 private:
     sf::Text nameText;
     bool textInitialized = false;
+
+#ifdef TC_DEBUG
+    sf::Text hpNumberText;
+    bool debugTextInitialized = false;
+#endif
 };
 
 } // namespace tc
