@@ -139,8 +139,12 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
         if (burrow.burrowed) {
             burrow.timer -= dt;
             registry.get<Velocity>(entity) = {0.0f, 0.0f};
-            health.current = std::min(health.max, health.current
-                + static_cast<int>(std::round(health.max * burrow.regenPercentPerSecond * dt)));
+            burrow.regenAccumulator += health.max * burrow.regenPercentPerSecond * dt;
+            const int regenAmount = static_cast<int>(burrow.regenAccumulator);
+            if (regenAmount > 0) {
+                burrow.regenAccumulator -= static_cast<float>(regenAmount);
+                health.current = std::min(health.max, health.current + regenAmount);
+            }
 
             if (distanceBetween(pos, playerPos) <= burrow.dashRange) {
                 burrow.burrowed = false;

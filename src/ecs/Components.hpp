@@ -318,6 +318,7 @@ struct BurrowAbility {
     float dashDuration = 0.3f;
     float dashRange = dashSpeed * dashDuration;
     float timer = 0.0f;
+    float regenAccumulator = 0.0f;
     bool burrowed = false;
     bool usedOnce = false;
     bool dashing = false;
