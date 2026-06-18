@@ -68,6 +68,23 @@ struct Name {
 // Tag: projectile
 struct ProjectileTag {
     int ownerBiome = 0;
+    // When true, the projectile can hit either the player or any enemy
+    // (whichever it touches first), ignoring ownerBiome faction rules.
+    // Used by the ice goblin's death-explosion shards.
+    bool hitsAnyUnit = false;
+};
+
+// Applied to a projectile entity; on hit, this SLOW duration is applied to
+// the struck target in addition to its damage (ice goblin death shards).
+struct SlowOnHit {
+    float duration = 2.0f;
+};
+
+// Debug-only: overrides the attack damage used in combat without touching
+// the stored Damage.value, so equipment recalculations (which overwrite
+// Damage.value from gear stats) can't silently clobber the One Shot toggle.
+struct DamageOverride {
+    int value = 0;
 };
 
 // Render - placeholder rectangle until sprites are added
@@ -350,19 +367,50 @@ struct ChargeAbility {
     float stunOnFail = 0.5f;
 };
 
-// Ice goblin: on death, freezes (SLOW) and stuns nearby enemies/player within
-// stunRadius for stunDuration.
-struct FreezeOnDeath {
-    float freezeDuration = 2.0f;
-    float stunRadius = 80.0f;
-    float stunDuration = 1.0f;
+// Ice goblin: before dying, stands still and turns white for `delay` seconds.
+// If undisturbed, the corpse explodes into `shardCount` projectile shards
+// fired in all directions, each dealing shardDamage and applying a slow.
+// Any further damage taken while telegraphing cancels the explosion (the
+// goblin just dies normally).
+struct IceGoblinExplosion {
+    float delay = 2.0f;
+    float timer = 0.0f;
+    bool telegraphing = false;
+    bool exploded = false;
+    bool cancelled = false;
+    int shardCount = 8;
+    int shardDamage = 10;
+    float shardSpeed = 260.0f;
+    float slowDuration = 2.0f;
 };
 
-// Snow witch / ice spirit: periodically teleports near the player.
+// Ice spirit: periodically teleports near the player.
 struct TeleportAbility {
     float cooldown = 5.0f;
     float timer = 0.0f;
 };
+
+// Snow witch: periodically spawns a decoy clone of herself (1 HP). Destroying
+// the clone slows the player; if the witch dies first, remaining clones just
+// vanish. Capped at maxClones concurrently alive; while at the cap, the
+// witch's ability is locked.
+struct WitchCloneAbility {
+    float cooldown = 5.0f;
+    float timer = 0.0f;
+    int maxClones = 2;
+    float cloneSlowDuration = 2.5f;
+    std::vector<entt::entity> activeClones;
+};
+
+// Tag on a snow witch decoy clone entity. On the clone's death, the player
+// is slowed for slowDuration (handled in AbilitySystem::handleDeathEffects).
+struct WitchCloneTag {
+    float slowDuration = 2.5f;
+};
+
+// Tag: this entity's movement/melee targeting picks the nearest unit
+// (player or enemy), not always the player (Yeti berserk aggro).
+struct AggroNearestUnit {};
 
 // Yeti: enrages (speed + damage multiplier) once HP drops below hpThreshold.
 struct RageAbility {
@@ -463,6 +511,14 @@ struct IcePulseAbility {
     float cooldown = 5.0f;
     float timer = 0.0f;
     float slowDuration = 2.5f;
+};
+
+// Skeleton corpse-prop left behind on first death, with half the skeleton's
+// max HP. If destroyed within `timer` seconds, the skeleton stays dead. If
+// it survives, the skeleton revives (handled by AbilitySystem).
+struct SkeletonBones {
+    std::string templateId;
+    float timer = 5.0f;
 };
 
 // Meta-progression, persists across runs via meta_save.json

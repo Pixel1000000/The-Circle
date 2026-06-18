@@ -34,7 +34,6 @@ private:
 
     DebugButton fillPotionButton;
 
-    int savedDamageValue = 0;
     bool oneShotActive = false;
 };
 

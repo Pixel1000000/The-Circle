@@ -86,6 +86,21 @@ void ZoneSystem::update(entt::registry& registry, entt::entity player, float dt)
             }
         }
 
+        // Quicksand is a ground hazard: any walking enemy caught in it gets
+        // slowed too, except the sand spirits themselves (they spawn it).
+        for (auto enemy : registry.view<EnemyTag, Position, Renderable, Health>()) {
+            if (registry.all_of<QuicksandSpawner>(enemy)) continue;
+            const auto& enemyHealth = registry.get<Health>(enemy);
+            if (enemyHealth.current <= 0) continue;
+            const auto& enemyPos = registry.get<Position>(enemy);
+            const auto& enemySize = registry.get<Renderable>(enemy).size;
+            if (!overlaps(enemyPos, enemySize, pos, size)) continue;
+            const auto* resist = registry.try_get<ElementalResist>(enemy);
+            if (!resist || resist->slowResist < 1.0f) {
+                registry.emplace_or_replace<StatusEffect>(enemy, StatusEffect::SLOW, 0.0f, 0.2f, 0.2f);
+            }
+        }
+
         duration.timer -= dt;
         if (duration.timer <= 0.0f) {
             expiredQuicksand.push_back(entity);

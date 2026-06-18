@@ -34,6 +34,7 @@ LootResult LootSystem::update(entt::registry& registry, entt::entity player, con
 
     LootResult result;
     std::vector<entt::entity> toDestroy;
+    std::vector<entt::entity> toBones;
 
     auto view = registry.view<EnemyTag, Health>();
     for (auto entity : view) {
@@ -43,12 +44,32 @@ LootResult LootSystem::update(entt::registry& registry, entt::entity player, con
         if (auto* revive = registry.try_get<ReviveOnce>(entity)) {
             if (!revive->used) {
                 revive->used = true;
-                health.current = health.max / 2;
+                toBones.push_back(entity);
                 continue;
             }
         }
 
         toDestroy.push_back(entity);
+    }
+
+    // Skeleton: instead of reviving immediately, leaves bones behind that
+    // must be destroyed within their timer or the skeleton revives from
+    // them (see AbilitySystem). No loot roll happens on this fake death.
+    for (auto entity : toBones) {
+        const auto& pos = registry.get<Position>(entity);
+        const auto& name = registry.get<Name>(entity);
+        const auto& enemyTag = registry.get<EnemyTag>(entity);
+        const int bonesMaxHealth = std::max(1, registry.get<Health>(entity).max / 2);
+
+        const entt::entity bones = registry.create();
+        registry.emplace<Position>(bones, pos.x, pos.y);
+        registry.emplace<Renderable>(bones, sf::Color(200, 200, 190), sf::Vector2f{26.0f, 18.0f});
+        registry.emplace<Health>(bones, bonesMaxHealth, bonesMaxHealth);
+        registry.emplace<EnemyTag>(bones, enemyTag.biome);
+        registry.emplace<SkeletonBones>(bones, name.id, 5.0f);
+    }
+    for (auto entity : toBones) {
+        registry.destroy(entity);
     }
 
     // If killing everything in `toDestroy` empties the current wave, the last

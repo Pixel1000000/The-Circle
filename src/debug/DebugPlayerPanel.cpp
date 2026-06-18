@@ -41,8 +41,7 @@ void DebugPlayerPanel::onOpen(DebugContext& ctx)
 
     speedSlider.setValue(ctx.registry.get<Speed>(ctx.player).value);
     armorSlider.setValue(static_cast<float>(ctx.registry.get<Armor>(ctx.player).value));
-    damageSlider.setValue(static_cast<float>(
-        oneShotActive ? savedDamageValue : ctx.registry.get<Damage>(ctx.player).value));
+    damageSlider.setValue(static_cast<float>(ctx.registry.get<Damage>(ctx.player).value));
 }
 
 void DebugPlayerPanel::handleMousePressed(sf::Vector2f point, DebugContext& ctx)
@@ -67,13 +66,10 @@ void DebugPlayerPanel::handleMousePressed(sf::Vector2f point, DebugContext& ctx)
     } else if (oneShotCheckbox.isClicked(point)) {
         oneShotCheckbox.toggle();
         oneShotActive = oneShotCheckbox.checked;
-        auto& damage = ctx.registry.get<Damage>(ctx.player);
         if (oneShotActive) {
-            savedDamageValue = damage.value;
-            damage.value = ONE_SHOT_DAMAGE;
+            ctx.registry.emplace_or_replace<DamageOverride>(ctx.player, ONE_SHOT_DAMAGE);
         } else {
-            damage.value = savedDamageValue;
-            damageSlider.setValue(static_cast<float>(savedDamageValue));
+            ctx.registry.remove<DamageOverride>(ctx.player);
         }
     }
 
@@ -93,12 +89,7 @@ void DebugPlayerPanel::applySlidersToEntity(DebugContext& ctx)
 {
     ctx.registry.get<Speed>(ctx.player).value = speedSlider.getValue();
     ctx.registry.get<Armor>(ctx.player).value = static_cast<int>(std::round(armorSlider.getValue()));
-
-    if (oneShotActive) {
-        savedDamageValue = static_cast<int>(std::round(damageSlider.getValue()));
-    } else {
-        ctx.registry.get<Damage>(ctx.player).value = static_cast<int>(std::round(damageSlider.getValue()));
-    }
+    ctx.registry.get<Damage>(ctx.player).value = static_cast<int>(std::round(damageSlider.getValue()));
 }
 
 void DebugPlayerPanel::handleMouseReleased()

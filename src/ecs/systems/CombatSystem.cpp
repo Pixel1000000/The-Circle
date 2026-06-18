@@ -29,6 +29,17 @@ bool rollChance(float chance)
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     return dist(debuffRng()) < chance;
 }
+
+// Debug One Shot toggle stores its override here instead of mutating
+// Damage.value directly, so equipment recalculations can't silently clobber
+// it (see DebugPlayerPanel).
+int attackDamageOf(entt::registry& registry, entt::entity attacker, int storedDamage)
+{
+    if (const auto* override_ = registry.try_get<DamageOverride>(attacker)) {
+        return override_->value;
+    }
+    return storedDamage;
+}
 }
 
 void CombatSystem::update(entt::registry& registry, float dt)
@@ -58,7 +69,7 @@ void CombatSystem::updateMelee(entt::registry& registry, float dt)
         }
 
         const float rangeSq = melee.range * melee.range;
-        const int damage = view.get<Damage>(entity).value;
+        const int damage = attackDamageOf(registry, entity, view.get<Damage>(entity).value);
 
         if (isPlayer) {
             // The player's melee attack hits every enemy within range, not
@@ -90,6 +101,24 @@ void CombatSystem::updateMelee(entt::registry& registry, float dt)
                 if (distSq <= bestDistSq) {
                     bestDistSq = distSq;
                     target = candidate;
+                }
+            }
+
+            // Yeti berserk: also consider other enemies as melee targets,
+            // attacking whichever unit (player or enemy) is nearest.
+            if (registry.all_of<AggroNearestUnit>(entity)) {
+                for (auto candidate : registry.view<EnemyTag, Position, Health>()) {
+                    if (candidate == entity) continue;
+                    const auto& candidateHealth = registry.get<Health>(candidate);
+                    if (candidateHealth.current <= 0) continue;
+                    const auto& tpos = registry.get<Position>(candidate);
+                    const float dx = tpos.x - origin.x;
+                    const float dy = tpos.y - origin.y;
+                    const float distSq = dx * dx + dy * dy;
+                    if (distSq <= bestDistSq) {
+                        bestDistSq = distSq;
+                        target = candidate;
+                    }
                 }
             }
 
@@ -157,7 +186,8 @@ void CombatSystem::updateRanged(entt::registry& registry, float dt)
         }
 
         EntityFactory::createProjectile(registry, {pos.x, pos.y}, direction,
-            ranged.projectileSpeed, view.get<Damage>(entity).value, ownerBiome, projectileElement);
+            ranged.projectileSpeed, attackDamageOf(registry, entity, view.get<Damage>(entity).value),
+            ownerBiome, projectileElement);
 
         ranged.timer = ranged.cooldown;
     }
@@ -177,35 +207,43 @@ void CombatSystem::updateProjectiles(entt::registry& registry)
             continue;
         }
 
-        const int ownerBiome = view.get<ProjectileTag>(entity).ownerBiome;
+        const auto& tag = view.get<ProjectileTag>(entity);
+        const int ownerBiome = tag.ownerBiome;
         const int damage = view.get<Damage>(entity).value;
 
         entt::entity hit = entt::null;
 
-        if (ownerBiome == 0) {
-            for (auto candidate : registry.view<EnemyTag, Position, Health>()) {
+        auto findHitAmong = [&](auto candidateView) {
+            for (auto candidate : candidateView) {
                 const auto& tpos = registry.get<Position>(candidate);
                 const float dx = tpos.x - pos.x;
                 const float dy = tpos.y - pos.y;
                 if (dx * dx + dy * dy <= hitDistSq) {
                     hit = candidate;
-                    break;
+                    return;
                 }
             }
+        };
+
+        if (tag.hitsAnyUnit) {
+            findHitAmong(registry.view<PlayerTag, Position, Health>());
+            if (hit == entt::null) {
+                findHitAmong(registry.view<EnemyTag, Position, Health>());
+            }
+        } else if (ownerBiome == 0) {
+            findHitAmong(registry.view<EnemyTag, Position, Health>());
         } else {
-            for (auto candidate : registry.view<PlayerTag, Position, Health>()) {
-                const auto& tpos = registry.get<Position>(candidate);
-                const float dx = tpos.x - pos.x;
-                const float dy = tpos.y - pos.y;
-                if (dx * dx + dy * dy <= hitDistSq) {
-                    hit = candidate;
-                    break;
-                }
-            }
+            findHitAmong(registry.view<PlayerTag, Position, Health>());
         }
 
         if (hit != entt::null) {
             applyDamage(registry, entity, hit, damage);
+            if (const auto* slow = registry.try_get<SlowOnHit>(entity)) {
+                const auto* resist = registry.try_get<ElementalResist>(hit);
+                if (!resist || resist->slowResist < 1.0f) {
+                    registry.emplace_or_replace<StatusEffect>(hit, StatusEffect::SLOW, 0.0f, slow->duration, slow->duration);
+                }
+            }
             toDestroy.push_back(entity);
         }
     }
@@ -252,6 +290,16 @@ void CombatSystem::applyDamage(entt::registry& registry, entt::entity attacker, 
     health.current = std::max(health.current - mitigated, 0);
 
     registry.emplace_or_replace<HitFlash>(target);
+
+    // Yeti berserk: recoils 50% of the damage it deals back onto itself.
+    if (const auto* rage = registry.try_get<RageAbility>(attacker)) {
+        if (rage->enraged && !registry.all_of<Invulnerable>(attacker)) {
+            auto& attackerHealth = registry.get<Health>(attacker);
+            const int recoil = std::max(1, static_cast<int>(std::round(mitigated * 0.5f)));
+            attackerHealth.current = std::max(attackerHealth.current - recoil, 0);
+            registry.emplace_or_replace<HitFlash>(attacker);
+        }
+    }
 
     if (health.current == 0) {
         if (auto* potion = registry.try_get<Potion>(attacker)) {

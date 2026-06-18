@@ -193,6 +193,8 @@ void HUD::render(sf::RenderWindow& window, entt::registry& registry, entt::entit
         drawStatusIcon(sf::Color(220, 90, 20, 220),       "F", fb->timer);
     if (const auto* de = registry.try_get<DecayEffect>(player))
         drawStatusIcon(sf::Color(120, 120, 120, 220),     "D", de->timer);
+    if (const auto* stunned = registry.try_get<Stunned>(player))
+        drawStatusIcon(sf::Color(200, 200, 60, 220),      "St", stunned->timer);
 
     // ── Misc HUD ─────────────────────────────────────────────────────────────
     if (showNextBiomeHint) {

@@ -28,6 +28,11 @@ public:
     static entt::entity createProjectile(entt::registry& registry, sf::Vector2f position,
         sf::Vector2f direction, float speed, int damage, int ownerBiome, ElementalEffect element = {});
 
+    // Ice goblin death-explosion shard: hits whichever unit (player or enemy)
+    // it touches first, dealing `damage` and applying a SLOW for `slowDuration`.
+    static entt::entity createIceShard(entt::registry& registry, sf::Vector2f position,
+        sf::Vector2f direction, float speed, int damage, float slowDuration);
+
     // Recomputes Armor, Damage, Health, Speed, MeleeCombat/RangedCombat and
     // BlockAbility for the player from their current Equipment, MetaStats and
     // the base PlayerConfig. Call whenever Equipment or MetaStats change.

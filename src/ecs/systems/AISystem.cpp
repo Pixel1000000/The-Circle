@@ -75,8 +75,30 @@ void AISystem::update(entt::registry& registry, float dt)
         auto& velocity = view.get<Velocity>(entity);
         const auto& behavior = view.get<AIBehavior>(entity);
 
-        const float dx = playerPos.x - pos.x;
-        const float dy = playerPos.y - pos.y;
+        Position targetPos = playerPos;
+
+        // Yeti berserk: aggros whichever unit (player or another enemy) is
+        // currently nearest, instead of always the player.
+        if (registry.all_of<AggroNearestUnit>(entity)) {
+            float bestDistSq = (targetPos.x - pos.x) * (targetPos.x - pos.x)
+                + (targetPos.y - pos.y) * (targetPos.y - pos.y);
+            for (auto candidate : registry.view<EnemyTag, Position, Health>()) {
+                if (candidate == entity) continue;
+                const auto& candidateHealth = registry.get<Health>(candidate);
+                if (candidateHealth.current <= 0) continue;
+                const auto& cpos = registry.get<Position>(candidate);
+                const float cdx = cpos.x - pos.x;
+                const float cdy = cpos.y - pos.y;
+                const float distSq = cdx * cdx + cdy * cdy;
+                if (distSq < bestDistSq) {
+                    bestDistSq = distSq;
+                    targetPos = cpos;
+                }
+            }
+        }
+
+        const float dx = targetPos.x - pos.x;
+        const float dy = targetPos.y - pos.y;
         const float distance = std::sqrt(dx * dx + dy * dy);
         const float nx = distance > 0.0001f ? dx / distance : 0.0f;
         const float ny = distance > 0.0001f ? dy / distance : 0.0f;
