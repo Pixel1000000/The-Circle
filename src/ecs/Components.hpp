@@ -285,22 +285,32 @@ struct BlizzardZone {
     float dirTimer = 0.f;
 };
 
-// Wolf: dashes toward the player at burst speed, briefly invulnerable.
+// Wolf: dashes in a straight line at burst speed, briefly invulnerable.
+// The dash direction is locked in at activation (the player's last known
+// position), not homed onto the player while dashing. `timer` is seeded
+// with a random per-wolf offset so a pack doesn't dash in lockstep.
 struct DashAbility {
     float cooldown = 4.0f;
     float timer = 0.0f;
     float duration = 0.3f;
     float durationTimer = 0.0f;
     bool dashing = false;
+    float dirX = 0.0f;
+    float dirY = 0.0f;
 };
 
-// Scorpion: burrows (becomes untargetable/slowed-immune) once HP drops below
-// hpThreshold (fraction of max), for `duration` seconds.
+// Scorpion: burrows once per life (becomes invulnerable, stops moving, and
+// regenerates HP) when its HP drops below hpThreshold (fraction of max).
+// Forces itself to surface near the player after maxDuration seconds, or
+// immediately if the player comes within surfaceRadius while it's burrowed.
 struct BurrowAbility {
     float hpThreshold = 0.3f;
-    float duration = 2.0f;
+    float maxDuration = 5.0f;
+    float regenPercentPerSecond = 0.05f;
+    float surfaceRadius = 80.0f;
     float timer = 0.0f;
     bool burrowed = false;
+    bool usedOnce = false;
 };
 
 // Ant: spawns `count` traps in a ring around its death position.

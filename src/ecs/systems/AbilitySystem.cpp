@@ -1,5 +1,6 @@
 #include "ecs/systems/AbilitySystem.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <random>
 
@@ -12,6 +13,7 @@ namespace tc {
 namespace {
 
 constexpr float DASH_SPEED = 480.0f;
+constexpr float DASH_COOLDOWN_JITTER = 2.0f; // wolves don't dash in lockstep
 constexpr float CHARGE_TRIGGER_RANGE = 260.0f;
 constexpr float CHARGE_DURATION = 0.5f;
 constexpr int MAX_CONCURRENT_QUICKSAND = 3;
@@ -77,7 +79,10 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
     if (!registry.valid(player)) return;
     const auto& playerPos = registry.get<Position>(player);
 
-    // Wolf: periodic burst dash toward the player, invulnerable mid-dash.
+    // Wolf: periodic burst dash in a straight line, invulnerable mid-dash.
+    // The direction is locked to the player's position at activation time
+    // (no homing while dashing), and the cooldown gets a random jitter so a
+    // pack of wolves doesn't all dash on the same beat.
     for (auto entity : registry.view<DashAbility, Position, Velocity, Health>()) {
         auto& dash = registry.get<DashAbility>(entity);
         const auto& pos = registry.get<Position>(entity);
@@ -86,12 +91,12 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
 
         if (dash.dashing) {
             dash.durationTimer -= dt;
-            const sf::Vector2f dir = directionTo(pos, playerPos);
-            registry.get<Position>(entity).x += dir.x * DASH_SPEED * dt;
-            registry.get<Position>(entity).y += dir.y * DASH_SPEED * dt;
+            registry.get<Position>(entity).x += dash.dirX * DASH_SPEED * dt;
+            registry.get<Position>(entity).y += dash.dirY * DASH_SPEED * dt;
             if (dash.durationTimer <= 0.0f) {
                 dash.dashing = false;
-                dash.timer = dash.cooldown;
+                std::uniform_real_distribution<float> jitterDist(0.0f, DASH_COOLDOWN_JITTER);
+                dash.timer = dash.cooldown + jitterDist(rng());
                 registry.remove<Invulnerable>(entity);
             }
         } else {
@@ -99,28 +104,46 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
             if (dash.timer <= 0.0f) {
                 dash.dashing = true;
                 dash.durationTimer = dash.duration;
+                const sf::Vector2f dir = directionTo(pos, playerPos);
+                dash.dirX = dir.x;
+                dash.dirY = dir.y;
                 registry.emplace_or_replace<Invulnerable>(entity);
             }
         }
     }
 
-    // Scorpion: burrows (becomes invulnerable and stops moving) once its HP
-    // drops below the threshold, for a fixed duration, once.
-    for (auto entity : registry.view<BurrowAbility, Velocity, Health>()) {
+    // Scorpion: burrows once per life (becomes invulnerable, stops moving,
+    // and regenerates HP) once its HP drops below the threshold. After
+    // maxDuration seconds it forces itself to surface near the player; if
+    // the player approaches while it's still burrowed, it surfaces on the
+    // spot immediately and resumes attacking.
+    for (auto entity : registry.view<BurrowAbility, Position, Velocity, Health>()) {
         auto& burrow = registry.get<BurrowAbility>(entity);
+        auto& pos = registry.get<Position>(entity);
         auto& health = registry.get<Health>(entity);
         if (health.current <= 0) continue;
 
         if (burrow.burrowed) {
             burrow.timer -= dt;
             registry.get<Velocity>(entity) = {0.0f, 0.0f};
-            if (burrow.timer <= 0.0f) {
+            health.current = std::min(health.max, health.current
+                + static_cast<int>(std::round(health.max * burrow.regenPercentPerSecond * dt)));
+
+            const bool playerClose = distanceBetween(pos, playerPos) <= burrow.surfaceRadius;
+            if (playerClose || burrow.timer <= 0.0f) {
+                if (!playerClose) {
+                    std::uniform_real_distribution<float> angleDist(0.0f, 6.2831853f);
+                    const float angle = angleDist(rng());
+                    pos.x = playerPos.x + std::cos(angle) * burrow.surfaceRadius;
+                    pos.y = playerPos.y + std::sin(angle) * burrow.surfaceRadius;
+                }
                 burrow.burrowed = false;
                 registry.remove<Invulnerable>(entity);
             }
-        } else if (healthFraction(health) < burrow.hpThreshold) {
+        } else if (!burrow.usedOnce && healthFraction(health) < burrow.hpThreshold) {
             burrow.burrowed = true;
-            burrow.timer = burrow.duration;
+            burrow.usedOnce = true;
+            burrow.timer = burrow.maxDuration;
             registry.emplace_or_replace<Invulnerable>(entity);
         }
     }

@@ -2,12 +2,19 @@
 
 #include <algorithm>
 #include <cmath>
+#include <random>
 
 #include "meta/MetaProgression.hpp"
 
 namespace tc {
 
 namespace {
+
+std::mt19937& factoryRng()
+{
+    static std::mt19937 instance{std::random_device{}()};
+    return instance;
+}
 
 const ArmorPieceStats& pieceStats(const std::array<ArmorPieceStats, TIER_COUNT>& tiers, int tier)
 {
@@ -122,7 +129,13 @@ entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTem
         registry.emplace<ElementalEffect>(entity, tmpl.element, tmpl.elementPercent, tmpl.elementChance);
     }
 
-    if (tmpl.hasDashAbility) registry.emplace<DashAbility>(entity);
+    if (tmpl.hasDashAbility) {
+        // Stagger each wolf's first dash so a pack doesn't lunge in unison.
+        DashAbility dash;
+        std::uniform_real_distribution<float> initialTimerDist(0.0f, dash.cooldown);
+        dash.timer = initialTimerDist(factoryRng());
+        registry.emplace<DashAbility>(entity, dash);
+    }
     if (tmpl.hasBurrowAbility) registry.emplace<BurrowAbility>(entity);
     if (tmpl.hasTrapSpawner) registry.emplace<TrapSpawner>(entity);
     if (tmpl.hasSwarmScatter) registry.emplace<SwarmScatter>(entity);
