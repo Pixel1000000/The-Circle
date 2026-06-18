@@ -38,19 +38,19 @@
     {
       "id": "forest_ant",
       "biome": "forest",
-      "health": 25,
-      "damage": 4,
-      "armor": 0,
-      "speed": 90,
+      "health": 110,
+      "damage": 8,
+      "armor": 6,
+      "speed": 60,
       "behavior": "CHASE",
       "isRanged": false,
       "range": 35,
       "cooldown": 0.9,
       "hasTrapSpawner": true,
-      "cost": 3,
+      "cost": 6,
       "keyFragmentDropChance": 0.12,
       "color": [80, 60, 40],
-      "size": [26, 26]
+      "size": [46, 46]
     },
     {
       "id": "forest_wasp_swarm",

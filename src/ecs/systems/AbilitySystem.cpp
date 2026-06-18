@@ -112,16 +112,29 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
         }
     }
 
-    // Scorpion: burrows once per life (becomes invulnerable, stops moving,
-    // and regenerates HP) once its HP drops below the threshold. After
-    // maxDuration seconds it forces itself to surface near the player; if
-    // the player approaches while it's still burrowed, it surfaces on the
-    // spot immediately and resumes attacking.
+    // Scorpion: at <30% HP gets one (50%-chance) opportunity per life to
+    // burrow. On success it teleports a medium distance in a random
+    // direction, leaves a quicksand zone at its old spot, and regenerates
+    // HP while burrowed. It surfaces and resumes chasing after maxDuration
+    // seconds, or surfaces immediately and dashes once in a straight line
+    // to the player's last known position if the player gets within
+    // dashRange while it's still burrowed.
     for (auto entity : registry.view<BurrowAbility, Position, Velocity, Health>()) {
         auto& burrow = registry.get<BurrowAbility>(entity);
         auto& pos = registry.get<Position>(entity);
         auto& health = registry.get<Health>(entity);
         if (health.current <= 0) continue;
+
+        if (burrow.dashing) {
+            pos.x += burrow.dashDirX * burrow.dashSpeed * dt;
+            pos.y += burrow.dashDirY * burrow.dashSpeed * dt;
+            burrow.timer -= dt;
+            if (burrow.timer <= 0.0f) {
+                burrow.dashing = false;
+                registry.remove<Invulnerable>(entity);
+            }
+            continue;
+        }
 
         if (burrow.burrowed) {
             burrow.timer -= dt;
@@ -129,22 +142,39 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
             health.current = std::min(health.max, health.current
                 + static_cast<int>(std::round(health.max * burrow.regenPercentPerSecond * dt)));
 
-            const bool playerClose = distanceBetween(pos, playerPos) <= burrow.surfaceRadius;
-            if (playerClose || burrow.timer <= 0.0f) {
-                if (!playerClose) {
-                    std::uniform_real_distribution<float> angleDist(0.0f, 6.2831853f);
-                    const float angle = angleDist(rng());
-                    pos.x = playerPos.x + std::cos(angle) * burrow.surfaceRadius;
-                    pos.y = playerPos.y + std::sin(angle) * burrow.surfaceRadius;
-                }
+            if (distanceBetween(pos, playerPos) <= burrow.dashRange) {
+                burrow.burrowed = false;
+                burrow.dashing = true;
+                burrow.timer = burrow.dashDuration;
+                const sf::Vector2f dir = directionTo(pos, playerPos);
+                burrow.dashDirX = dir.x;
+                burrow.dashDirY = dir.y;
+                registry.emplace_or_replace<Invulnerable>(entity);
+            } else if (burrow.timer <= 0.0f) {
                 burrow.burrowed = false;
                 registry.remove<Invulnerable>(entity);
             }
         } else if (!burrow.usedOnce && healthFraction(health) < burrow.hpThreshold) {
-            burrow.burrowed = true;
             burrow.usedOnce = true;
-            burrow.timer = burrow.maxDuration;
-            registry.emplace_or_replace<Invulnerable>(entity);
+            std::uniform_real_distribution<float> chanceDist(0.0f, 1.0f);
+            if (chanceDist(rng()) <= burrow.burrowChance) {
+                const entt::entity zone = registry.create();
+                registry.emplace<Position>(zone, pos.x, pos.y);
+                registry.emplace<Renderable>(zone, sf::Color(210, 180, 100, 130), sf::Vector2f{40.0f, 40.0f});
+                registry.emplace<QuicksandTag>(zone);
+                registry.emplace<ZoneDuration>(zone, 4.0f);
+
+                std::uniform_real_distribution<float> offsetDist(burrow.teleportMinOffset, burrow.teleportMaxOffset);
+                std::uniform_real_distribution<float> angleDist(0.0f, 6.2831853f);
+                const float angle = angleDist(rng());
+                const float offset = offsetDist(rng());
+                pos.x += std::cos(angle) * offset;
+                pos.y += std::sin(angle) * offset;
+
+                burrow.burrowed = true;
+                burrow.timer = burrow.maxDuration;
+                registry.emplace_or_replace<Invulnerable>(entity);
+            }
         }
     }
 

@@ -299,18 +299,30 @@ struct DashAbility {
     float dirY = 0.0f;
 };
 
-// Scorpion: burrows once per life (becomes invulnerable, stops moving, and
-// regenerates HP) when its HP drops below hpThreshold (fraction of max).
-// Forces itself to surface near the player after maxDuration seconds, or
-// immediately if the player comes within surfaceRadius while it's burrowed.
+// Scorpion: when HP first drops below hpThreshold (fraction of max), rolls
+// burrowChance once to decide whether it burrows at all (one opportunity
+// per life either way). On a successful roll it teleports a medium
+// distance in a random direction, leaves a small quicksand zone at its old
+// spot, and regenerates HP while burrowed/invulnerable. It force-surfaces
+// and resumes chasing after maxDuration seconds, or surfaces immediately
+// and dashes once in a straight line to the player's last known position
+// if the player gets within dashRange while it's still burrowed.
 struct BurrowAbility {
     float hpThreshold = 0.3f;
+    float burrowChance = 0.5f;
+    float teleportMinOffset = 280.0f;
+    float teleportMaxOffset = 360.0f;
     float maxDuration = 5.0f;
     float regenPercentPerSecond = 0.05f;
-    float surfaceRadius = 80.0f;
+    float dashSpeed = 480.0f;
+    float dashDuration = 0.3f;
+    float dashRange = dashSpeed * dashDuration;
     float timer = 0.0f;
     bool burrowed = false;
     bool usedOnce = false;
+    bool dashing = false;
+    float dashDirX = 0.0f;
+    float dashDirY = 0.0f;
 };
 
 // Ant: spawns `count` traps in a ring around its death position.

@@ -37,10 +37,29 @@ void ZoneSystem::update(entt::registry& registry, entt::entity player, float dt)
         auto& duration = registry.get<ZoneDuration>(entity);
         const auto& pos = registry.get<Position>(entity);
         const auto& size = registry.get<Renderable>(entity).size;
+        const auto& trap = registry.get<TrapZone>(entity);
 
         if (overlaps(playerPos, playerSize, pos, size) && !registry.all_of<Invulnerable>(player)) {
-            const auto& trap = registry.get<TrapZone>(entity);
             registry.emplace_or_replace<Stunned>(player, trap.stunDuration);
+            expiredTraps.push_back(entity);
+            continue;
+        }
+
+        // Traps are environmental hazards: any enemy that wanders into one
+        // gets stunned too, not just the player.
+        bool caughtEnemy = false;
+        for (auto enemy : registry.view<EnemyTag, Position, Renderable, Health>()) {
+            const auto& enemyHealth = registry.get<Health>(enemy);
+            if (enemyHealth.current <= 0 || registry.all_of<Invulnerable>(enemy)) continue;
+            const auto& enemyPos = registry.get<Position>(enemy);
+            const auto& enemySize = registry.get<Renderable>(enemy).size;
+            if (overlaps(enemyPos, enemySize, pos, size)) {
+                registry.emplace_or_replace<Stunned>(enemy, trap.stunDuration);
+                caughtEnemy = true;
+                break;
+            }
+        }
+        if (caughtEnemy) {
             expiredTraps.push_back(entity);
             continue;
         }
