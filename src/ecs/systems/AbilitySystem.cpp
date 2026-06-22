@@ -514,7 +514,10 @@ void AbilitySystem::handleDeathEffects(entt::registry& registry, entt::entity pl
         explosion.timer -= dt;
         if (explosion.timer <= 0.0f) {
             explosion.exploded = true;
-            const auto& pos = registry.get<Position>(entity);
+            // Copy by value: creating shards below emplaces Position on new
+            // entities, which can reallocate the Position pool and dangle a
+            // reference held across the loop.
+            const Position pos = registry.get<Position>(entity);
             for (int i = 0; i < explosion.shardCount; ++i) {
                 const float angle = (2.0f * 3.14159265f * static_cast<float>(i)) / static_cast<float>(explosion.shardCount);
                 const sf::Vector2f dir{std::cos(angle), std::sin(angle)};
