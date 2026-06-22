@@ -38,9 +38,9 @@
     {
       "id": "forest_ant",
       "biome": "forest",
-      "health": 60,
+      "health": 30,
       "damage": 8,
-      "armor": 6,
+      "armor": 2,
       "speed": 60,
       "behavior": "CHASE",
       "isRanged": false,
