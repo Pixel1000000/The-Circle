@@ -104,9 +104,11 @@ void CombatSystem::updateMelee(entt::registry& registry, float dt)
                 }
             }
 
-            // Yeti berserk: also consider other enemies as melee targets,
-            // attacking whichever unit (player or enemy) is nearest.
-            if (registry.all_of<AggroNearestUnit>(entity)) {
+            // Yeti berserk: once enraged, also consider other enemies as
+            // melee targets, attacking whichever unit (player or enemy) is
+            // nearest.
+            const auto* aggroRage = registry.try_get<RageAbility>(entity);
+            if (registry.all_of<AggroNearestUnit>(entity) && aggroRage && aggroRage->enraged) {
                 for (auto candidate : registry.view<EnemyTag, Position, Health>()) {
                     if (candidate == entity) continue;
                     const auto& candidateHealth = registry.get<Health>(candidate);

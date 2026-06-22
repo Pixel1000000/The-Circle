@@ -77,9 +77,10 @@ void AISystem::update(entt::registry& registry, float dt)
 
         Position targetPos = playerPos;
 
-        // Yeti berserk: aggros whichever unit (player or another enemy) is
-        // currently nearest, instead of always the player.
-        if (registry.all_of<AggroNearestUnit>(entity)) {
+        // Yeti berserk: once enraged, aggros whichever unit (player or
+        // another enemy) is currently nearest, instead of always the player.
+        const auto* aggroRage = registry.try_get<RageAbility>(entity);
+        if (registry.all_of<AggroNearestUnit>(entity) && aggroRage && aggroRage->enraged) {
             float bestDistSq = (targetPos.x - pos.x) * (targetPos.x - pos.x)
                 + (targetPos.y - pos.y) * (targetPos.y - pos.y);
             for (auto candidate : registry.view<EnemyTag, Position, Health>()) {
