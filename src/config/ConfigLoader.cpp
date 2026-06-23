@@ -228,8 +228,9 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
             tmpl.hasTrapSpawner = entry.value("hasTrapSpawner", tmpl.hasTrapSpawner);
             tmpl.hasSwarmScatter = entry.value("hasSwarmScatter", tmpl.hasSwarmScatter);
             tmpl.hasChargeAbility = entry.value("hasChargeAbility", tmpl.hasChargeAbility);
-            tmpl.hasFreezeOnDeath = entry.value("hasFreezeOnDeath", tmpl.hasFreezeOnDeath);
+            tmpl.hasIceGoblinExplosion = entry.value("hasIceGoblinExplosion", tmpl.hasIceGoblinExplosion);
             tmpl.hasTeleportAbility = entry.value("hasTeleportAbility", tmpl.hasTeleportAbility);
+            tmpl.hasWitchCloneAbility = entry.value("hasWitchCloneAbility", tmpl.hasWitchCloneAbility);
             tmpl.hasRageAbility = entry.value("hasRageAbility", tmpl.hasRageAbility);
             tmpl.hasAbsorbChance = entry.value("hasAbsorbChance", tmpl.hasAbsorbChance);
             tmpl.hasBoneDetach = entry.value("hasBoneDetach", tmpl.hasBoneDetach);
@@ -238,6 +239,7 @@ EnemyConfig ConfigLoader::loadEnemies(const std::string& enemiesPath, const std:
             tmpl.hasMummyDeathBomb = entry.value("hasMummyDeathBomb", tmpl.hasMummyDeathBomb);
             tmpl.summonsOnLowHp = entry.value("summonsOnLowHp", tmpl.summonsOnLowHp);
             tmpl.hasIcePulseAbility = entry.value("hasIcePulseAbility", tmpl.hasIcePulseAbility);
+            tmpl.hasAggroNearestUnit = entry.value("hasAggroNearestUnit", tmpl.hasAggroNearestUnit);
 
             tmpl.cost = entry.value("cost", tmpl.cost);
             tmpl.keyFragmentDropChance = entry.value("keyFragmentDropChance", tmpl.keyFragmentDropChance);

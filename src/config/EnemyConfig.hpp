@@ -48,8 +48,9 @@ struct EnemyTemplate {
     bool hasTrapSpawner = false;
     bool hasSwarmScatter = false;
     bool hasChargeAbility = false;
-    bool hasFreezeOnDeath = false;
+    bool hasIceGoblinExplosion = false; // Ice goblin: pre-death telegraph + shard explosion
     bool hasTeleportAbility = false;
+    bool hasWitchCloneAbility = false; // Snow witch: decoy clone instead of teleport zone
     bool hasRageAbility = false;
     bool hasAbsorbChance = false;
     bool hasBoneDetach = false;
@@ -58,6 +59,7 @@ struct EnemyTemplate {
     bool hasMummyDeathBomb = false;
     bool summonsOnLowHp = false;
     bool hasIcePulseAbility = false;   // Ice spirit: periodic freeze burst via ability
+    bool hasAggroNearestUnit = false;  // Targets the nearest unit, not just the player
 
     int cost = 3;
 

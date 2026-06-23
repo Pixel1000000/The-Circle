@@ -91,19 +91,18 @@ void PlayState::spawnBiomeEnemies()
 
     constexpr float MIN_SPAWN_DIST_SQ = 200.0f * 200.0f;
     constexpr int MAX_SPAWN_ATTEMPTS = 20;
-    constexpr int BASE_WAVE_BANK = 20;
-    constexpr int BANK_PER_META_POINT = 2;
+    constexpr int BASE_WAVE_SIZE = 5;
+    constexpr int META_POINTS_PER_EXTRA_ENEMY = 10;
 
     const auto& playerPosition = registry.get<Position>(player);
     const sf::Vector2f playerPos{playerPosition.x, playerPosition.y};
 
     auto& biome = world.getCurrentBiome();
     auto pool = ConfigLoader::get().getEnemyConfig().getEnemiesForBiome(biome.getType());
-    std::shuffle(pool.begin(), pool.end(), rng);
 
     const auto& meta = game.getMetaProgression().getStats();
     const int metaTotalPoints = meta.strength + meta.endurance + meta.health;
-    int bank = BASE_WAVE_BANK + metaTotalPoints * BANK_PER_META_POINT;
+    const int waveSize = BASE_WAVE_SIZE + metaTotalPoints / META_POINTS_PER_EXTRA_ENEMY;
 
     auto spawnOne = [&](const EnemyTemplate& tmpl) {
         sf::Vector2f position;
@@ -117,23 +116,9 @@ void PlayState::spawnBiomeEnemies()
         biome.getEnemies().push_back(EntityFactory::createEnemy(registry, tmpl, position));
     };
 
-    while (bank > 0) {
-        std::vector<const EnemyTemplate*> affordable;
-        for (const auto& t : pool) {
-            if (t.cost <= bank) affordable.push_back(&t);
-        }
-        if (affordable.empty()) {
-            const auto* cheapest = &pool[0];
-            for (const auto& t : pool) {
-                if (t.cost < cheapest->cost) cheapest = &t;
-            }
-            spawnOne(*cheapest);
-            break;
-        }
-        std::uniform_int_distribution<int> pick(0, static_cast<int>(affordable.size()) - 1);
-        const EnemyTemplate* chosen = affordable[pick(rng)];
-        spawnOne(*chosen);
-        bank -= chosen->cost;
+    std::uniform_int_distribution<int> pick(0, static_cast<int>(pool.size()) - 1);
+    for (int i = 0; i < waveSize; ++i) {
+        spawnOne(pool[pick(rng)]);
     }
 
     spawnObstacles();

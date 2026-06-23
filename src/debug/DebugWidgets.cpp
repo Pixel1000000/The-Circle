@@ -321,7 +321,12 @@ void DebugDropdown::renderExpandedList(sf::RenderWindow& window) const
         {listBounds.left + listBounds.width, listBounds.top + listBounds.height}, previousView);
     const sf::Vector2u windowSize = window.getSize();
 
-    sf::View clippedView = previousView;
+    // reset() also points the view's world-space rect at listBounds (1:1 with
+    // the screen pixels it's mapped to below), so content isn't squeezed/
+    // rescaled the way it would be if we only changed the viewport on a copy
+    // of the full-window view.
+    sf::View clippedView;
+    clippedView.reset(listBounds);
     clippedView.setViewport(sf::FloatRect(
         static_cast<float>(topLeftPixels.x) / static_cast<float>(windowSize.x),
         static_cast<float>(topLeftPixels.y) / static_cast<float>(windowSize.y),

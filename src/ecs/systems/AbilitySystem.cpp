@@ -1,5 +1,6 @@
 #include "ecs/systems/AbilitySystem.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <random>
 
@@ -12,12 +13,18 @@ namespace tc {
 namespace {
 
 constexpr float DASH_SPEED = 480.0f;
+constexpr float DASH_COOLDOWN_JITTER = 2.0f; // wolves don't dash in lockstep
 constexpr float CHARGE_TRIGGER_RANGE = 260.0f;
 constexpr float CHARGE_DURATION = 0.5f;
 constexpr int MAX_CONCURRENT_QUICKSAND = 3;
 constexpr float ABSORB_RELEASE_RADIUS = 150.0f;
 constexpr float TELEPORT_MIN_OFFSET = 150.0f;
 constexpr float TELEPORT_MAX_OFFSET = 260.0f;
+constexpr float QUICKSAND_COOLDOWN_JITTER = 1.5f; // sand spirits don't spawn in lockstep
+constexpr float TELEPORT_COOLDOWN_JITTER = 1.5f;  // ice spirits don't teleport in lockstep
+constexpr float WITCH_CLONE_COOLDOWN_JITTER = 1.5f; // snow witches don't summon in lockstep
+const sf::Color YETI_RAGE_COLOR(220, 60, 60);
+const sf::Color ICE_GOBLIN_TELEGRAPH_COLOR = sf::Color::White;
 
 std::mt19937& rng()
 {
@@ -77,7 +84,10 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
     if (!registry.valid(player)) return;
     const auto& playerPos = registry.get<Position>(player);
 
-    // Wolf: periodic burst dash toward the player, invulnerable mid-dash.
+    // Wolf: periodic burst dash in a straight line, invulnerable mid-dash.
+    // The direction is locked to the player's position at activation time
+    // (no homing while dashing), and the cooldown gets a random jitter so a
+    // pack of wolves doesn't all dash on the same beat.
     for (auto entity : registry.view<DashAbility, Position, Velocity, Health>()) {
         auto& dash = registry.get<DashAbility>(entity);
         const auto& pos = registry.get<Position>(entity);
@@ -86,12 +96,12 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
 
         if (dash.dashing) {
             dash.durationTimer -= dt;
-            const sf::Vector2f dir = directionTo(pos, playerPos);
-            registry.get<Position>(entity).x += dir.x * DASH_SPEED * dt;
-            registry.get<Position>(entity).y += dir.y * DASH_SPEED * dt;
+            registry.get<Position>(entity).x += dash.dirX * DASH_SPEED * dt;
+            registry.get<Position>(entity).y += dash.dirY * DASH_SPEED * dt;
             if (dash.durationTimer <= 0.0f) {
                 dash.dashing = false;
-                dash.timer = dash.cooldown;
+                std::uniform_real_distribution<float> jitterDist(0.0f, DASH_COOLDOWN_JITTER);
+                dash.timer = dash.cooldown + jitterDist(rng());
                 registry.remove<Invulnerable>(entity);
             }
         } else {
@@ -99,29 +109,81 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
             if (dash.timer <= 0.0f) {
                 dash.dashing = true;
                 dash.durationTimer = dash.duration;
+                const sf::Vector2f dir = directionTo(pos, playerPos);
+                dash.dirX = dir.x;
+                dash.dirY = dir.y;
                 registry.emplace_or_replace<Invulnerable>(entity);
             }
         }
     }
 
-    // Scorpion: burrows (becomes invulnerable and stops moving) once its HP
-    // drops below the threshold, for a fixed duration, once.
-    for (auto entity : registry.view<BurrowAbility, Velocity, Health>()) {
+    // Scorpion: at <30% HP gets one (50%-chance) opportunity per life to
+    // burrow. On success it teleports a medium distance in a random
+    // direction, leaves a quicksand zone at its old spot, and regenerates
+    // HP while burrowed. It surfaces and resumes chasing after maxDuration
+    // seconds, or surfaces immediately and dashes once in a straight line
+    // to the player's last known position if the player gets within
+    // dashRange while it's still burrowed.
+    for (auto entity : registry.view<BurrowAbility, Position, Velocity, Health>()) {
         auto& burrow = registry.get<BurrowAbility>(entity);
+        auto& pos = registry.get<Position>(entity);
         auto& health = registry.get<Health>(entity);
         if (health.current <= 0) continue;
+
+        if (burrow.dashing) {
+            pos.x += burrow.dashDirX * burrow.dashSpeed * dt;
+            pos.y += burrow.dashDirY * burrow.dashSpeed * dt;
+            burrow.timer -= dt;
+            if (burrow.timer <= 0.0f) {
+                burrow.dashing = false;
+                registry.remove<Invulnerable>(entity);
+            }
+            continue;
+        }
 
         if (burrow.burrowed) {
             burrow.timer -= dt;
             registry.get<Velocity>(entity) = {0.0f, 0.0f};
-            if (burrow.timer <= 0.0f) {
+            burrow.regenAccumulator += health.max * burrow.regenPercentPerSecond * dt;
+            const int regenAmount = static_cast<int>(burrow.regenAccumulator);
+            if (regenAmount > 0) {
+                burrow.regenAccumulator -= static_cast<float>(regenAmount);
+                health.current = std::min(health.max, health.current + regenAmount);
+            }
+
+            if (distanceBetween(pos, playerPos) <= burrow.dashRange) {
+                burrow.burrowed = false;
+                burrow.dashing = true;
+                burrow.timer = burrow.dashDuration;
+                const sf::Vector2f dir = directionTo(pos, playerPos);
+                burrow.dashDirX = dir.x;
+                burrow.dashDirY = dir.y;
+                registry.emplace_or_replace<Invulnerable>(entity);
+            } else if (burrow.timer <= 0.0f) {
                 burrow.burrowed = false;
                 registry.remove<Invulnerable>(entity);
             }
-        } else if (healthFraction(health) < burrow.hpThreshold) {
-            burrow.burrowed = true;
-            burrow.timer = burrow.duration;
-            registry.emplace_or_replace<Invulnerable>(entity);
+        } else if (!burrow.usedOnce && healthFraction(health) < burrow.hpThreshold) {
+            burrow.usedOnce = true;
+            std::uniform_real_distribution<float> chanceDist(0.0f, 1.0f);
+            if (chanceDist(rng()) <= burrow.burrowChance) {
+                const entt::entity zone = registry.create();
+                registry.emplace<Position>(zone, pos.x, pos.y);
+                registry.emplace<Renderable>(zone, sf::Color(210, 180, 100, 130), sf::Vector2f{40.0f, 40.0f});
+                registry.emplace<QuicksandTag>(zone);
+                registry.emplace<ZoneDuration>(zone, 4.0f);
+
+                std::uniform_real_distribution<float> offsetDist(burrow.teleportMinOffset, burrow.teleportMaxOffset);
+                std::uniform_real_distribution<float> angleDist(0.0f, 6.2831853f);
+                const float angle = angleDist(rng());
+                const float offset = offsetDist(rng());
+                pos.x += std::cos(angle) * offset;
+                pos.y += std::sin(angle) * offset;
+
+                burrow.burrowed = true;
+                burrow.timer = burrow.maxDuration;
+                registry.emplace_or_replace<Invulnerable>(entity);
+            }
         }
     }
 
@@ -168,6 +230,9 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
             registry.get<Speed>(entity).value *= rage.speedMult;
             registry.get<Damage>(entity).value = static_cast<int>(
                 std::round(registry.get<Damage>(entity).value * rage.damageMult));
+            if (auto* renderable = registry.try_get<Renderable>(entity)) {
+                renderable->color = YETI_RAGE_COLOR;
+            }
         }
     }
 
@@ -246,7 +311,8 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
 
         spawner.timer -= dt;
         if (spawner.timer <= 0.0f) {
-            spawner.timer = spawner.cooldown;
+            std::uniform_real_distribution<float> jitterDist(0.0f, QUICKSAND_COOLDOWN_JITTER);
+            spawner.timer = spawner.cooldown + jitterDist(rng());
             const auto quicksandCount = registry.view<QuicksandTag>().size();
             if (quicksandCount < static_cast<std::size_t>(MAX_CONCURRENT_QUICKSAND)) {
                 std::uniform_real_distribution<float> offsetDist(-100.0f, 100.0f);
@@ -259,8 +325,9 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
         }
     }
 
-    // Snow witch / Ice spirit: periodically teleports near the player,
-    // leaving a slowing ice zone at its previous position.
+    // Ice spirit: periodically teleports near the player, leaving a slowing
+    // ice zone at its previous position. The cooldown gets a random jitter
+    // so a pack doesn't all teleport on the same beat.
     for (auto entity : registry.view<TeleportAbility, Position, Health>()) {
         auto& teleport = registry.get<TeleportAbility>(entity);
         auto& health = registry.get<Health>(entity);
@@ -268,7 +335,8 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
 
         teleport.timer -= dt;
         if (teleport.timer <= 0.0f) {
-            teleport.timer = teleport.cooldown;
+            std::uniform_real_distribution<float> jitterDist(0.0f, TELEPORT_COOLDOWN_JITTER);
+            teleport.timer = teleport.cooldown + jitterDist(rng());
             auto& pos = registry.get<Position>(entity);
 
             const entt::entity zone = registry.create();
@@ -283,6 +351,73 @@ void AbilitySystem::update(entt::registry& registry, entt::entity player, float 
             const float offset = offsetDist(rng());
             pos.x = playerPos.x + std::cos(angle) * offset;
             pos.y = playerPos.y + std::sin(angle) * offset;
+        }
+    }
+
+    // Snow witch: periodically spawns a decoy clone of herself (1 HP) near
+    // her current position, capped at maxClones concurrently alive. While at
+    // the cap, her ability is locked. The cooldown gets a random jitter so a
+    // pack doesn't summon in lockstep.
+    for (auto entity : registry.view<WitchCloneAbility, Position, Health, Renderable>()) {
+        auto& clone = registry.get<WitchCloneAbility>(entity);
+        auto& health = registry.get<Health>(entity);
+        if (health.current <= 0) continue;
+
+        clone.activeClones.erase(
+            std::remove_if(clone.activeClones.begin(), clone.activeClones.end(),
+                [&registry](entt::entity c) { return !registry.valid(c); }),
+            clone.activeClones.end());
+
+        if (static_cast<int>(clone.activeClones.size()) >= clone.maxClones) continue;
+
+        clone.timer -= dt;
+        if (clone.timer <= 0.0f) {
+            std::uniform_real_distribution<float> jitterDist(0.0f, WITCH_CLONE_COOLDOWN_JITTER);
+            clone.timer = clone.cooldown + jitterDist(rng());
+
+            const auto& pos = registry.get<Position>(entity);
+            const auto& renderable = registry.get<Renderable>(entity);
+            std::uniform_real_distribution<float> offsetDist(-50.0f, 50.0f);
+
+            const entt::entity decoy = registry.create();
+            registry.emplace<Position>(decoy, pos.x + offsetDist(rng()), pos.y + offsetDist(rng()));
+            registry.emplace<Velocity>(decoy, 0.0f, 0.0f);
+            registry.emplace<Health>(decoy, 1, 1);
+            registry.emplace<Renderable>(decoy, sf::Color(220, 240, 255, 200), renderable.size);
+            registry.emplace<EnemyTag>(decoy, registry.get<EnemyTag>(entity).biome);
+            registry.emplace<WitchCloneTag>(decoy, clone.cloneSlowDuration);
+
+            clone.activeClones.push_back(decoy);
+        }
+    }
+
+    // Skeleton bones: corpse-prop left by a skeleton's first death. If left
+    // undisturbed for its timer duration, the skeleton revives from it (half
+    // HP, then SkeletonReviveBonus grants its usual invuln + damage bonus).
+    // If destroyed first, it's simply gone from this view and nothing
+    // revives.
+    {
+        std::vector<entt::entity> expiredBones;
+        for (auto entity : registry.view<SkeletonBones, Position>()) {
+            auto& bones = registry.get<SkeletonBones>(entity);
+            bones.timer -= dt;
+            if (bones.timer <= 0.0f) {
+                expiredBones.push_back(entity);
+            }
+        }
+        for (auto entity : expiredBones) {
+            const auto pos = registry.get<Position>(entity);
+            const std::string templateId = registry.get<SkeletonBones>(entity).templateId;
+            registry.destroy(entity);
+            if (const auto* tmpl = findTemplateById(templateId)) {
+                const entt::entity revived = EntityFactory::createEnemy(registry, *tmpl, {pos.x, pos.y});
+                auto& revivedHealth = registry.get<Health>(revived);
+                revivedHealth.current = revivedHealth.max / 2;
+                if (auto* revive = registry.try_get<ReviveOnce>(revived)) {
+                    revive->used = true;
+                }
+                spawnedEnemies.push_back(revived);
+            }
         }
     }
 
@@ -346,21 +481,88 @@ void AbilitySystem::handleDeathEffects(entt::registry& registry, entt::entity pl
         spawnTrapRing(registry, {pos.x, pos.y}, registry.get<TrapSpawner>(entity));
     }
 
-    // Ice goblin: on death, freezes/stuns the player if within range.
-    for (auto entity : registry.view<FreezeOnDeath, Health, Position>()) {
+    // Ice goblin: stands still and turns white before dying. If undisturbed
+    // for `delay` seconds, the corpse explodes into shardCount projectile
+    // shards fired in all directions, each hitting any unit they touch. Any
+    // further damage while telegraphing cancels the explosion (it just dies
+    // normally, no shards).
+    for (auto entity : registry.view<IceGoblinExplosion, Health, Position>()) {
+        auto& explosion = registry.get<IceGoblinExplosion>(entity);
+        auto& health = registry.get<Health>(entity);
+
+        if (explosion.exploded || explosion.cancelled) continue;
+
+        if (!explosion.telegraphing) {
+            if (health.current > 0) continue;
+            explosion.telegraphing = true;
+            explosion.timer = explosion.delay;
+            health.current = 1;
+            if (auto* renderable = registry.try_get<Renderable>(entity)) {
+                renderable->color = ICE_GOBLIN_TELEGRAPH_COLOR;
+            }
+            registry.emplace_or_replace<Velocity>(entity, 0.0f, 0.0f);
+            continue;
+        }
+
+        if (health.current <= 0) {
+            // Took lethal damage during the telegraph: just die normally.
+            explosion.cancelled = true;
+            continue;
+        }
+
+        registry.emplace_or_replace<Velocity>(entity, 0.0f, 0.0f);
+        explosion.timer -= dt;
+        if (explosion.timer <= 0.0f) {
+            explosion.exploded = true;
+            // Copy by value: creating shards below emplaces Position on new
+            // entities, which can reallocate the Position pool and dangle a
+            // reference held across the loop.
+            const Position pos = registry.get<Position>(entity);
+            for (int i = 0; i < explosion.shardCount; ++i) {
+                const float angle = (2.0f * 3.14159265f * static_cast<float>(i)) / static_cast<float>(explosion.shardCount);
+                const sf::Vector2f dir{std::cos(angle), std::sin(angle)};
+                EntityFactory::createIceShard(registry, {pos.x, pos.y}, dir, explosion.shardSpeed,
+                    explosion.shardDamage, explosion.slowDuration);
+            }
+            health.current = 0;
+        }
+    }
+
+    // Snow witch decoy clone: if destroyed, slows the player. If the witch
+    // herself dies first, her remaining clones (handled below) just vanish
+    // with no effect.
+    {
+        std::vector<entt::entity> destroyedClones;
+        for (auto entity : registry.view<WitchCloneTag, Health, Position>()) {
+            auto& health = registry.get<Health>(entity);
+            if (health.current > 0) continue;
+
+            const auto& tag = registry.get<WitchCloneTag>(entity);
+            if (playerValid) {
+                const auto* resist = registry.try_get<ElementalResist>(player);
+                if (!resist || resist->slowResist < 1.0f) {
+                    registry.emplace_or_replace<StatusEffect>(player, StatusEffect::SLOW, 0.0f, tag.slowDuration, tag.slowDuration);
+                }
+            }
+            destroyedClones.push_back(entity);
+        }
+        for (auto entity : destroyedClones) {
+            registry.destroy(entity);
+        }
+    }
+
+    // Snow witch: on death, any clones she still has out simply vanish.
+    for (auto entity : registry.view<WitchCloneAbility, Health>()) {
         auto& health = registry.get<Health>(entity);
         if (health.current > 0) continue;
-        if (!playerValid) continue;
 
-        const auto& pos = registry.get<Position>(entity);
-        if (distanceBetween(pos, playerPos) <= registry.get<FreezeOnDeath>(entity).stunRadius) {
-            const auto& freeze = registry.get<FreezeOnDeath>(entity);
-            registry.emplace_or_replace<Stunned>(player, freeze.stunDuration);
-            const auto* resist = registry.try_get<ElementalResist>(player);
-            if (!resist || resist->slowResist < 1.0f) {
-                registry.emplace_or_replace<StatusEffect>(player, StatusEffect::SLOW, 0.0f, freeze.freezeDuration, freeze.freezeDuration);
+        auto& clone = registry.get<WitchCloneAbility>(entity);
+        for (auto decoy : clone.activeClones) {
+            if (registry.valid(decoy)) {
+                registry.destroy(decoy);
             }
         }
+        clone.activeClones.clear();
     }
 
     // Mummy: telegraphs death with a few blinks (staying alive at 1 HP,
@@ -396,6 +598,16 @@ void AbilitySystem::handleDeathEffects(entt::registry& registry, entt::entity pl
                 const auto& pos = registry.get<Position>(entity);
                 if (playerValid && distanceBetween(pos, playerPos) <= bomb.radius) {
                     registry.emplace_or_replace<Stunned>(player, bomb.stunDuration);
+                }
+
+                for (auto other : registry.view<EnemyTag, Position, Health>()) {
+                    if (other == entity) continue;
+                    const auto& otherHealth = registry.get<Health>(other);
+                    if (otherHealth.current <= 0) continue;
+                    const auto& otherPos = registry.get<Position>(other);
+                    if (distanceBetween(pos, otherPos) <= bomb.radius) {
+                        registry.emplace_or_replace<Stunned>(other, bomb.stunDuration);
+                    }
                 }
             }
         }

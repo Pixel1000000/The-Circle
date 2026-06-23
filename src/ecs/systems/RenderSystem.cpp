@@ -55,6 +55,20 @@ void RenderSystem::update(entt::registry& registry, sf::RenderWindow& window, co
     }
 #endif
 
+    // Mummy death-bomb telegraph: a light-red danger zone showing the blast
+    // radius, drawn under all units.
+    for (auto entity : registry.view<MummyDeathBomb, Position>()) {
+        const auto& bomb = registry.get<MummyDeathBomb>(entity);
+        if (bomb.triggered || bomb.timer <= 0.0f) continue;
+
+        const auto& pos = registry.get<Position>(entity);
+        sf::CircleShape danger(bomb.radius);
+        danger.setOrigin(bomb.radius, bomb.radius);
+        danger.setPosition(pos.x, pos.y);
+        danger.setFillColor(sf::Color(255, 80, 80, 70));
+        window.draw(danger);
+    }
+
     auto view = registry.view<Position, Renderable>();
     for (auto entity : view) {
         const auto& pos = view.get<Position>(entity);

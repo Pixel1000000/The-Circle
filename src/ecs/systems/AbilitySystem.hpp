@@ -7,10 +7,11 @@
 namespace tc {
 
 // Drives all per-enemy special abilities (DashAbility, BurrowAbility,
-// ChargeAbility, RageAbility, TeleportAbility, AbsorbChance, BoneDetach,
-// SkeletonReviveBonus, QuicksandSpawner, SwarmScatter, EmergencySummon) and
-// the death-triggered abilities (TrapSpawner, FreezeOnDeath,
-// MummyDeathBomb) that must run before LootSystem destroys dead enemies.
+// ChargeAbility, RageAbility, TeleportAbility, WitchCloneAbility,
+// AbsorbChance, BoneDetach, SkeletonReviveBonus, QuicksandSpawner,
+// SwarmScatter, EmergencySummon, SkeletonBones) and the death-triggered
+// abilities (TrapSpawner, IceGoblinExplosion, MummyDeathBomb,
+// WitchCloneTag) that must run before LootSystem destroys dead enemies.
 class AbilitySystem {
 public:
     // Called once per frame between AISystem and CombatSystem. Any new

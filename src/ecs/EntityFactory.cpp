@@ -2,12 +2,19 @@
 
 #include <algorithm>
 #include <cmath>
+#include <random>
 
 #include "meta/MetaProgression.hpp"
 
 namespace tc {
 
 namespace {
+
+std::mt19937& factoryRng()
+{
+    static std::mt19937 instance{std::random_device{}()};
+    return instance;
+}
 
 const ArmorPieceStats& pieceStats(const std::array<ArmorPieceStats, TIER_COUNT>& tiers, int tier)
 {
@@ -122,21 +129,46 @@ entt::entity EntityFactory::createEnemy(entt::registry& registry, const EnemyTem
         registry.emplace<ElementalEffect>(entity, tmpl.element, tmpl.elementPercent, tmpl.elementChance);
     }
 
-    if (tmpl.hasDashAbility) registry.emplace<DashAbility>(entity);
+    if (tmpl.hasDashAbility) {
+        // Stagger each wolf's first dash so a pack doesn't lunge in unison.
+        DashAbility dash;
+        std::uniform_real_distribution<float> initialTimerDist(0.0f, dash.cooldown);
+        dash.timer = initialTimerDist(factoryRng());
+        registry.emplace<DashAbility>(entity, dash);
+    }
     if (tmpl.hasBurrowAbility) registry.emplace<BurrowAbility>(entity);
     if (tmpl.hasTrapSpawner) registry.emplace<TrapSpawner>(entity);
     if (tmpl.hasSwarmScatter) registry.emplace<SwarmScatter>(entity);
     if (tmpl.hasChargeAbility) registry.emplace<ChargeAbility>(entity);
-    if (tmpl.hasFreezeOnDeath) registry.emplace<FreezeOnDeath>(entity);
-    if (tmpl.hasTeleportAbility) registry.emplace<TeleportAbility>(entity);
+    if (tmpl.hasIceGoblinExplosion) registry.emplace<IceGoblinExplosion>(entity);
+    if (tmpl.hasTeleportAbility) {
+        // Stagger each spirit's first teleport so a pack doesn't sync up.
+        TeleportAbility teleport;
+        std::uniform_real_distribution<float> initialTimerDist(0.0f, teleport.cooldown);
+        teleport.timer = initialTimerDist(factoryRng());
+        registry.emplace<TeleportAbility>(entity, teleport);
+    }
+    if (tmpl.hasWitchCloneAbility) {
+        WitchCloneAbility clone;
+        std::uniform_real_distribution<float> initialTimerDist(0.0f, clone.cooldown);
+        clone.timer = initialTimerDist(factoryRng());
+        registry.emplace<WitchCloneAbility>(entity, clone);
+    }
     if (tmpl.hasRageAbility) registry.emplace<RageAbility>(entity);
     if (tmpl.hasAbsorbChance) registry.emplace<AbsorbChance>(entity);
     if (tmpl.hasBoneDetach) registry.emplace<BoneDetach>(entity);
     if (tmpl.hasSkeletonReviveBonus) registry.emplace<SkeletonReviveBonus>(entity);
-    if (tmpl.hasQuicksandSpawner) registry.emplace<QuicksandSpawner>(entity);
+    if (tmpl.hasQuicksandSpawner) {
+        // Stagger each sand spirit's first quicksand spawn.
+        QuicksandSpawner spawner;
+        std::uniform_real_distribution<float> initialTimerDist(0.0f, spawner.cooldown);
+        spawner.timer = initialTimerDist(factoryRng());
+        registry.emplace<QuicksandSpawner>(entity, spawner);
+    }
     if (tmpl.hasMummyDeathBomb) registry.emplace<MummyDeathBomb>(entity);
     if (tmpl.summonsOnLowHp) registry.emplace<EmergencySummon>(entity);
     if (tmpl.hasIcePulseAbility) registry.emplace<IcePulseAbility>(entity);
+    if (tmpl.hasAggroNearestUnit) registry.emplace<AggroNearestUnit>(entity);
 
     return entity;
 }
@@ -194,6 +226,29 @@ entt::entity EntityFactory::createProjectile(entt::registry& registry, sf::Vecto
 
     const sf::Color color = ownerBiome == 0 ? sf::Color(120, 220, 255) : sf::Color(220, 80, 80);
     registry.emplace<Renderable>(entity, color, sf::Vector2f(8.0f, 8.0f));
+
+    return entity;
+}
+
+entt::entity EntityFactory::createIceShard(entt::registry& registry, sf::Vector2f position,
+    sf::Vector2f direction, float speed, int damage, float slowDuration)
+{
+    entt::entity entity = registry.create();
+
+    float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+    if (length < 0.0001f) {
+        direction = {1.0f, 0.0f};
+        length = 1.0f;
+    }
+    direction /= length;
+
+    registry.emplace<Position>(entity, position.x, position.y);
+    registry.emplace<Velocity>(entity, direction.x, direction.y);
+    registry.emplace<Speed>(entity, speed);
+    registry.emplace<Damage>(entity, damage);
+    registry.emplace<ProjectileTag>(entity, 0, true);
+    registry.emplace<SlowOnHit>(entity, slowDuration);
+    registry.emplace<Renderable>(entity, sf::Color(180, 230, 255), sf::Vector2f(8.0f, 8.0f));
 
     return entity;
 }

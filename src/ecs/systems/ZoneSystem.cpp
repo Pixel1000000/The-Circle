@@ -37,10 +37,29 @@ void ZoneSystem::update(entt::registry& registry, entt::entity player, float dt)
         auto& duration = registry.get<ZoneDuration>(entity);
         const auto& pos = registry.get<Position>(entity);
         const auto& size = registry.get<Renderable>(entity).size;
+        const auto& trap = registry.get<TrapZone>(entity);
 
         if (overlaps(playerPos, playerSize, pos, size) && !registry.all_of<Invulnerable>(player)) {
-            const auto& trap = registry.get<TrapZone>(entity);
             registry.emplace_or_replace<Stunned>(player, trap.stunDuration);
+            expiredTraps.push_back(entity);
+            continue;
+        }
+
+        // Traps are environmental hazards: any enemy that wanders into one
+        // gets stunned too, not just the player.
+        bool caughtEnemy = false;
+        for (auto enemy : registry.view<EnemyTag, Position, Renderable, Health>()) {
+            const auto& enemyHealth = registry.get<Health>(enemy);
+            if (enemyHealth.current <= 0 || registry.all_of<Invulnerable>(enemy)) continue;
+            const auto& enemyPos = registry.get<Position>(enemy);
+            const auto& enemySize = registry.get<Renderable>(enemy).size;
+            if (overlaps(enemyPos, enemySize, pos, size)) {
+                registry.emplace_or_replace<Stunned>(enemy, trap.stunDuration);
+                caughtEnemy = true;
+                break;
+            }
+        }
+        if (caughtEnemy) {
             expiredTraps.push_back(entity);
             continue;
         }
@@ -64,6 +83,21 @@ void ZoneSystem::update(entt::registry& registry, entt::entity player, float dt)
             const auto* resist = registry.try_get<ElementalResist>(player);
             if (!resist || resist->slowResist < 1.0f) {
                 registry.emplace_or_replace<StatusEffect>(player, StatusEffect::SLOW, 0.0f, 0.2f, 0.2f);
+            }
+        }
+
+        // Quicksand is a ground hazard: any walking enemy caught in it gets
+        // slowed too, except the sand spirits themselves (they spawn it).
+        for (auto enemy : registry.view<EnemyTag, Position, Renderable, Health>()) {
+            if (registry.all_of<QuicksandSpawner>(enemy)) continue;
+            const auto& enemyHealth = registry.get<Health>(enemy);
+            if (enemyHealth.current <= 0) continue;
+            const auto& enemyPos = registry.get<Position>(enemy);
+            const auto& enemySize = registry.get<Renderable>(enemy).size;
+            if (!overlaps(enemyPos, enemySize, pos, size)) continue;
+            const auto* resist = registry.try_get<ElementalResist>(enemy);
+            if (!resist || resist->slowResist < 1.0f) {
+                registry.emplace_or_replace<StatusEffect>(enemy, StatusEffect::SLOW, 0.0f, 0.2f, 0.2f);
             }
         }
 
