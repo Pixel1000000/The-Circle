@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(TC_DEBUG_MODE "Enable debug overlay" OFF)
+option(TC_BUILD_TESTS "Build the doctest unit test suite" OFF)
 
 find_package(SFML REQUIRED COMPONENTS Graphics Window System Audio)
 find_package(EnTT REQUIRED)
@@ -54,3 +55,36 @@ add_custom_target(copy_assets ALL
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
 )
 add_dependencies(${PROJECT_NAME} copy_assets)
+
+if(TC_BUILD_TESTS)
+    enable_testing()
+
+    file(GLOB_RECURSE TEST_SOURCES "tests/*.cpp")
+    file(GLOB_RECURSE LIB_SOURCES "src/*.cpp")
+    list(REMOVE_ITEM LIB_SOURCES "${CMAKE_SOURCE_DIR}/src/main.cpp")
+
+    add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES} ${LIB_SOURCES})
+
+    target_include_directories(${PROJECT_NAME}_tests
+        PRIVATE
+            src
+            third_party/doctest
+    )
+
+    target_link_libraries(${PROJECT_NAME}_tests
+        PRIVATE
+            sfml-graphics
+            sfml-window
+            sfml-system
+            sfml-audio
+            EnTT::EnTT
+            nlohmann_json::nlohmann_json
+    )
+
+    target_compile_features(${PROJECT_NAME}_tests PRIVATE cxx_std_17)
+
+    add_test(NAME ${PROJECT_NAME}_tests
+        COMMAND ${PROJECT_NAME}_tests
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endif()
