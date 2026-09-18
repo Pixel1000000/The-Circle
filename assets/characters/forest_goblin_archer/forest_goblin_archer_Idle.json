@@ -2,7 +2,7 @@
   "character": {
     "id": "5ed0c9d2-bf5e-45c1-b959-6c6306339612",
     "name": "Idle",
-    "prompt": "\u0437\u0435\u043b\u0451\u043d\u044b\u0439 \u043b\u0435\u0441\u043d\u043e\u0439 \u0433\u043e\u0431\u043b\u0438\u043d-\u0434\u043e\u0437\u043e\u0440\u043d\u044b\u0439 \u0441 \u043e\u0441\u0442\u0440\u044b\u043c\u0438 \u043a\u043b\u044b\u043a\u0430\u043c\u0438 \u0438 \u043e\u0441\u0442\u0440\u043e\u043a\u043e\u043d\u0435\u0447\u043d\u044b\u043c\u0438 \u0443\u0448\u0430\u043c\u0438, \u044f\u0440\u043a\u043e-\u0437\u0435\u043b\u0451\u043d\u0430\u044f \u0448\u0435\u0440\u0448\u0430\u0432\u0430\u044f \u043a\u043e\u0436\u0430, \u043d\u0430\u0442\u044f\u0433\u0438\u0432\u0430\u0435\u0442 \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 \u0441\u043e\u0441\u0442\u0430\u0432\u043d\u043e\u0439 \u043b\u0443\u043a, \u043a\u043e\u043b\u0447\u0430\u043d \u0441\u043e \u0441\u0442\u0440\u0435\u043b\u0430\u043c\u0438 \u0437\u0430 \u0441\u043f\u0438\u043d\u043e\u0439, \u0440\u0432\u0430\u043d\u0430\u044f \u0442\u0451\u043c\u043d\u043e-\u043a\u043e\u0440\u0438\u0447\u043d\u0435\u0432\u0430\u044f \u043a\u043e\u0436\u0430\u043d\u0430\u044f \u0431\u0435\u0437\u0440\u0443\u043a\u0430\u0432\u043a\u0430",
+    "prompt": "зелёный лесной гоблин-дозорный с острыми клыками и остроконечными ушами, ярко-зелёная шершавая кожа, натягивает короткий составной лук, колчан со стрелами за спиной, рваная тёмно-коричневая кожаная безрукавка",
     "size": {
       "width": 92,
       "height": 92
@@ -18,7 +18,7 @@
     },
     "sheet_size": {
       "width": 736,
-      "height": 92
+      "height": 828
     },
     "columns": 8,
     "pivot": "cell-center",
@@ -37,9 +37,76 @@
           "west",
           "south-west"
         ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "8c942d58-adea-4aff-beed-58d13a1e5b46",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "8c942d58-adea-4aff-beed-58d13a1e5b46",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "8c942d58-adea-4aff-beed-58d13a1e5b46",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "8c942d58-adea-4aff-beed-58d13a1e5b46",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "8c942d58-adea-4aff-beed-58d13a1e5b46",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "8c942d58-adea-4aff-beed-58d13a1e5b46",
+        "direction": "north-west",
+        "mirrored_from": "north-east"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "8c942d58-adea-4aff-beed-58d13a1e5b46",
+        "direction": "west",
+        "mirrored_from": "east"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "8c942d58-adea-4aff-beed-58d13a1e5b46",
+        "direction": "south-west",
+        "mirrored_from": "south-east"
       }
     ]
   },
   "export_version": "1.0",
-  "export_date": "2026-09-18T18:00:36.563212+00:00"
+  "export_date": "2026-09-18T20:15:00.000000+00:00"
 }

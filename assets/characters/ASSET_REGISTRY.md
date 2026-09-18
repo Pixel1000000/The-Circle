@@ -51,8 +51,30 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     `spritesheet` export endpoint only atlases the *raw* (pre-`reduce_colors`)
     rotations. JSON layout metadata copied from that same export endpoint with
     `path` repointed at the corrected PNG.
-  - Walk `animation_group_id`: not started — next step now that idle is
-    committed and confirmed.
+  - Walk `animation_group_id`: `8c942d58-adea-4aff-beed-58d13a1e5b46`, `template_animation_id="walk"`,
+    6 frames × 5 authored directions (south, south-east, east, north-east, north).
+    West/south-west/north-west are horizontal mirrors of east/south-east/north-east
+    respectively (same convention as `dead_swordsman`'s walk row layout), produced
+    locally with Pillow rather than a 6th/7th/8th PixelLab generation.
+    - Each authored direction's 6 raw frames ran through `reduce_colors` against
+      `assets/palettes/db32.png` (jobs: south `c7f57843-…`, south-east `a3f56a3b-…`,
+      east `f8330ff2-…`, north-east `5a834056-…`, north `c4f391c0-…`). Inspected all
+      30 resulting frames inline (contact sheet) — consistent black outline, no
+      off-palette speckling, walk cycle motion (leg swing, arm swing) intact and
+      matching the base character's cadence. **ACCEPTED by my own visual QA and
+      confirmed by the user on 2026-09-18.**
+  - Files saved (idle + walk combined into one sheet, replacing the idle-only
+    files from the previous step): `assets/characters/forest_goblin_archer/
+    forest_goblin_archer_Idle.{png,json}`. Layout: row 0 = idle rotations (8 dir),
+    rows 1-8 = walk animation, one row per direction in the order south,
+    south-east, east, north-east, north, north-west, west, south-west (6 frames
+    each, columns 6-7 of those rows are empty since the grid is 8 columns wide).
+    Verified the JSON's `sheet_size` matches the PNG's actual dimensions
+    (736×828) before committing. This is the first enemy to complete the full
+    ТЗ pipeline (idle + walk, both user-confirmed) for this iteration.
+  - **Not done in this iteration** (out of scope per the ТЗ): attack animation,
+    death animation, in-engine wiring/testing via `SpriteSheetLoader` beyond the
+    dimension sanity check above, `enemies.json` gameplay-id linkage.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
