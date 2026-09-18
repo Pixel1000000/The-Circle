@@ -22,11 +22,18 @@ via `reduce_colors` against `assets/palettes/db32.png`).
 ## Enemies (in progress — see `enemies.json` for gameplay ids)
 
 ### forest_goblin_archer — GDD "Гоблин-лучник" (Биом 1 — Лес)
-- `character_id`: `0c04b266-c271-4d8a-92d4-bb0d9df84361`
-- Status: idle rotations generating — QA pending
-- Idle rotations (8 dir): not yet accepted
+- Attempt 1: `character_id` `0c04b266-c271-4d8a-92d4-bb0d9df84361` — **REJECTED and deleted**
+  at idle-rotation QA. Prompt: "поджарый лесной гоблин-дозорный с остроконечными ушами,
+  кривым коротким луком и колчаном стрел за спиной, землисто-зелёная шершавая кожа,
+  рваная кожаная безрукавка". Generated at 92x92 canvas (standard mode auto-expanded
+  from the requested 64px) instead of the base character's flat 64x64. Visually reads
+  as a plain pale-skinned human in a dark vest and blue jeans — no green goblin skin,
+  no visible pointed ears, no bow/quiver came through at this size. Does not read as
+  a goblin at all next to the base dead_swordsman.
+- Status: awaiting go-ahead on a retry prompt before spending more generations
+- Idle rotations (8 dir): not accepted
 - Walk `animation_group_id`: not started
-- Files: not yet saved to `assets/characters/forest_goblin_archer/`
+- Files: nothing saved to `assets/characters/forest_goblin_archer/` yet
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
