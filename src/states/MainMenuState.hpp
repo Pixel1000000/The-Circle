@@ -31,6 +31,11 @@ private:
 
     sf::Text langRuText;
     sf::Text langEnText;
+
+#ifdef TC_DEBUG
+    sf::RectangleShape spriteDebugButton;
+    sf::Text spriteDebugText;
+#endif
 };
 
 } // namespace tc

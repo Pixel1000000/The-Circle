@@ -4,6 +4,10 @@
 #include "core/TextUtils.hpp"
 #include "states/PlayState.hpp"
 
+#ifdef TC_DEBUG
+#include "states/SpriteDebugState.hpp"
+#endif
+
 namespace tc {
 
 namespace {
@@ -36,6 +40,12 @@ MainMenuState::MainMenuState(Game& game)
     langEnButton.setPosition(1200.0f, 20.0f);
     langEnButton.setFillColor(sf::Color(60, 90, 160));
 
+#ifdef TC_DEBUG
+    spriteDebugButton.setSize({220.0f, 44.0f});
+    spriteDebugButton.setPosition(30.0f, 650.0f);
+    spriteDebugButton.setFillColor(sf::Color(90, 90, 60));
+#endif
+
     if (fontLoaded) {
         titleText.setCharacterSize(64);
         newGameText.setCharacterSize(28);
@@ -52,6 +62,12 @@ MainMenuState::MainMenuState(Game& game)
         titleText.setString("The Circle");
         langRuText.setString("RU");
         langEnText.setString("EN");
+
+#ifdef TC_DEBUG
+        spriteDebugText.setCharacterSize(18);
+        spriteDebugText.setFillColor(sf::Color::White);
+        spriteDebugText.setString("Sprite Debug");
+#endif
     }
 
     refreshTexts();
@@ -69,6 +85,9 @@ void MainMenuState::refreshTexts()
     quitText.setFont(font);
     langRuText.setFont(font);
     langEnText.setFont(font);
+#ifdef TC_DEBUG
+    spriteDebugText.setFont(font);
+#endif
 
     newGameText.setString(toSfString(localization.get("menu.newgame")));
     quitText.setString(toSfString(localization.get("menu.quit")));
@@ -81,6 +100,9 @@ void MainMenuState::refreshTexts()
     centerTextInRect(quitText, quitButton);
     centerTextInRect(langRuText, langRuButton);
     centerTextInRect(langEnText, langEnButton);
+#ifdef TC_DEBUG
+    centerTextInRect(spriteDebugText, spriteDebugButton);
+#endif
 }
 
 void MainMenuState::handleInput(const sf::Event& event)
@@ -102,6 +124,11 @@ void MainMenuState::handleInput(const sf::Event& event)
         game.getLocalization().load("en");
         refreshTexts();
     }
+#ifdef TC_DEBUG
+    else if (spriteDebugButton.getGlobalBounds().contains(point)) {
+        game.pushState(std::make_unique<SpriteDebugState>(game));
+    }
+#endif
 }
 
 void MainMenuState::update(float dt)
@@ -117,6 +144,9 @@ void MainMenuState::render(sf::RenderWindow& window)
     window.draw(quitButton);
     window.draw(langRuButton);
     window.draw(langEnButton);
+#ifdef TC_DEBUG
+    window.draw(spriteDebugButton);
+#endif
 
     if (fontLoaded) {
         window.draw(titleText);
@@ -124,6 +154,9 @@ void MainMenuState::render(sf::RenderWindow& window)
         window.draw(quitText);
         window.draw(langRuText);
         window.draw(langEnText);
+#ifdef TC_DEBUG
+        window.draw(spriteDebugText);
+#endif
     }
 }
 
