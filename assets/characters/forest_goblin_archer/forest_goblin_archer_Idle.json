@@ -1,0 +1,45 @@
+{
+  "character": {
+    "id": "5ed0c9d2-bf5e-45c1-b959-6c6306339612",
+    "name": "Idle",
+    "prompt": "\u0437\u0435\u043b\u0451\u043d\u044b\u0439 \u043b\u0435\u0441\u043d\u043e\u0439 \u0433\u043e\u0431\u043b\u0438\u043d-\u0434\u043e\u0437\u043e\u0440\u043d\u044b\u0439 \u0441 \u043e\u0441\u0442\u0440\u044b\u043c\u0438 \u043a\u043b\u044b\u043a\u0430\u043c\u0438 \u0438 \u043e\u0441\u0442\u0440\u043e\u043a\u043e\u043d\u0435\u0447\u043d\u044b\u043c\u0438 \u0443\u0448\u0430\u043c\u0438, \u044f\u0440\u043a\u043e-\u0437\u0435\u043b\u0451\u043d\u0430\u044f \u0448\u0435\u0440\u0448\u0430\u0432\u0430\u044f \u043a\u043e\u0436\u0430, \u043d\u0430\u0442\u044f\u0433\u0438\u0432\u0430\u0435\u0442 \u043a\u043e\u0440\u043e\u0442\u043a\u0438\u0439 \u0441\u043e\u0441\u0442\u0430\u0432\u043d\u043e\u0439 \u043b\u0443\u043a, \u043a\u043e\u043b\u0447\u0430\u043d \u0441\u043e \u0441\u0442\u0440\u0435\u043b\u0430\u043c\u0438 \u0437\u0430 \u0441\u043f\u0438\u043d\u043e\u0439, \u0440\u0432\u0430\u043d\u0430\u044f \u0442\u0451\u043c\u043d\u043e-\u043a\u043e\u0440\u0438\u0447\u043d\u0435\u0432\u0430\u044f \u043a\u043e\u0436\u0430\u043d\u0430\u044f \u0431\u0435\u0437\u0440\u0443\u043a\u0430\u0432\u043a\u0430",
+    "size": {
+      "width": 92,
+      "height": 92
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "forest_goblin_archer_Idle.png",
+    "cell_size": {
+      "width": 92,
+      "height": 92
+    },
+    "sheet_size": {
+      "width": 736,
+      "height": 92
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-18T18:00:36.563212+00:00"
+}

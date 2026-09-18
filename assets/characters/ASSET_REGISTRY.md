@@ -40,24 +40,19 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     brown boots, black outline), no stray off-palette speckling visible at this
     resolution. **ACCEPTED by my own visual QA**, pending the user's confirmation
     per the ТЗ's requirement not to self-approve on this iteration.
-  - Walk `animation_group_id`: not started — waiting on go-ahead before spending more
-    generations on animation.
-  - **Files: NOT saved to `assets/characters/forest_goblin_archer/` yet.** This
-    session's outbound network is restricted to an allowlist that does not include
-    PixelLab's asset hosts (`backblaze.pixellab.ai`, `api.pixellab.ai`) - direct
-    `curl` downloads were rejected by the org's egress proxy with 403 (policy
-    denial, not a transient error - see `/root/.ccr/README.md`). The MCP server's
-    own image previews rendered fine (that's how the QA above was done), but there
-    is currently no tool available in this session that returns raw file bytes I
-    can write to disk, or a way to push binary content through the GitHub file-write
-    tool (it only accepts UTF-8 text). **Needs a session with PixelLab network
-    access, or the user downloading the PNGs from the URLs below and committing
-    them manually.**
-  - Rotation URLs (post-`reduce_colors`, via `get_image` download links, index 0-7 =
-    south, east, north, west, south-east, north-east, north-west, south-west):
-    `https://api.pixellab.ai/mcp/images/de16f191-eed6-4346-893e-d3720081b242/download?index=<0-7>`
-  - Pre-`reduce_colors` rotation URLs (raw generation output) are on
-    `get_character(character_id="5ed0c9d2-bf5e-45c1-b959-6c6306339612")`.
+  - **User confirmed the idle QA on 2026-09-18** (this session ran locally, not in
+    the network-restricted cloud sandbox, so the PixelLab asset hosts were
+    reachable — the attempt 2 blocker above no longer applies here).
+  - Files saved: `assets/characters/forest_goblin_archer/forest_goblin_archer_Idle.{png,json}`.
+    PNG is the DB32-corrected atlas (job `de16f191-eed6-4346-893e-d3720081b242`,
+    8 columns × 92px, `south, south-east, east, north-east, north, north-west,
+    west, south-west` — same row layout as `dead_swordsman`'s sheet), assembled
+    from the 8 individual `reduce_colors` output frames since PixelLab's own
+    `spritesheet` export endpoint only atlases the *raw* (pre-`reduce_colors`)
+    rotations. JSON layout metadata copied from that same export endpoint with
+    `path` repointed at the corrected PNG.
+  - Walk `animation_group_id`: not started — next step now that idle is
+    committed and confirmed.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
