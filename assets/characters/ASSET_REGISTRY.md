@@ -124,7 +124,14 @@ via `reduce_colors` against `assets/palettes/db32.png`).
 - Attempt 6 (current): `character_id` `e137f92a-784b-4bc7-bd49-e62f51a82a50`. Same
   accepted anatomy description, equipment clause changed to "gripping a wooden
   longbow firmly in one clawed hand, bow held out and clearly visible, tattered
-  dark leather vest, quiver of arrows on back". QA pending.
+  dark leather vest, quiver of arrows on back".
+  - Idle rotations (8 dir): generated, inspected all 8 directions. Anatomy holds
+    up (elongated jaw, hunch, pointed ears preserved). A dark curved bow shape is
+    now visible across the front of the body in every direction — a clear
+    improvement over attempt 5 (no bow was visible at all) — but at 92x92 it's
+    ambiguous whether it reads as gripped in a raised hand vs. slung across the
+    chest/shoulder. **Sent to the user for a call on whether this is "in hand"
+    enough, rather than guessing.**
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
