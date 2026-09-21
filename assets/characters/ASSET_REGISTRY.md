@@ -116,8 +116,15 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     reads as a distinct creature — elongated/pointed skull-and-jaw shape unlike a
     human head, visible hunch in the side profiles (east/north-east/south-west),
     dark leather archer gear with quiver on back. My own visual read: passes the
-    "not a human painted green" bar. **Awaiting user confirmation before
-    `reduce_colors`/walk, per the ТЗ's no-self-approval requirement.**
+    "not a human painted green" bar.
+  - **User feedback**: anatomy accepted ("принимаю частично"), but the bow needs
+    to be visibly held in hand — the "drawing a short recurve bow" wording didn't
+    render a clearly visible bow in any direction. Character deleted, redone as
+    attempt 6.
+- Attempt 6 (current): `character_id` `e137f92a-784b-4bc7-bd49-e62f51a82a50`. Same
+  accepted anatomy description, equipment clause changed to "gripping a wooden
+  longbow firmly in one clawed hand, bow held out and clearly visible, tattered
+  dark leather vest, quiver of arrows on back". QA pending.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
