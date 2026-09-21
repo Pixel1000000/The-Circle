@@ -92,6 +92,26 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     directions' frame-0 dominant color matches `(75,105,47)`. Re-verified all 56
     frames still have zero off-palette pixels, rebuilt the atlas with the fixed
     frames, and re-ran it through `SpriteSheetLoader` (still parses correctly).
+- Attempt 4 **fully superseded** per an updated ТЗ: the new spec explicitly calls
+  out that a goblin generated from a human-anatomy base reads as "a human painted
+  green" and requires the classic-fantasy anatomical traits to be spelled out in
+  the prompt, not just color/clothing — pointed ears, elongated jaw/fangs, hunched
+  posture, and **disproportionately large hands/feet** (this last one was missing
+  from attempt 4's prompt). Character `f6214c67-...` deleted, files removed;
+  redoing from scratch as attempt 5. (GDD gives no anatomical detail for this
+  enemy beyond the name "Гоблин-лучник" — per the ТЗ, that would normally mean
+  stopping to ask, but the ТЗ text itself already spells out the required goblin
+  anatomy, so no clarification was needed here.)
+- Attempt 5 (current): `character_id` `20e07abe-4db8-4295-932c-dfc3ce09844b`.
+  Prompt: "green-skinned fantasy goblin monster, emphatically not human, distinct
+  inhuman creature anatomy: large pointed bat-like ears, elongated protruding
+  lower jaw with jutting fangs, hunched stooped posture with a curved spine,
+  disproportionately large gnarled hands with long clawed fingers, oversized bare
+  feet, skinny wiry hunched body, warty wrinkled bright green skin, sunken yellow
+  eyes, bald knobby head; dressed as a forest archer: tattered dark leather vest,
+  drawing a short recurve bow, quiver of arrows on back" (text_guidance_scale=10,
+  default proportions, standard mode — no reference_image/style_character_id to
+  the human base character). QA pending.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
