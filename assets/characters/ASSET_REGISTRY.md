@@ -41,7 +41,17 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   колчан со стрелами за спиной" (text_guidance_scale=16, custom proportions:
   head_size 1.3, arms_length 1.1, legs_length 0.85, shoulder_width 0.7, hip_width
   0.75, to push a hunched/goblin-like silhouette away from the default human build).
-  QA pending.
+  **REJECTED**: lost the green skin entirely — came back as a pale/grey bald human
+  in a t-shirt and shorts, no bow/quiver visible. Deleted.
+- Attempt 4 (current): `character_id` `f6214c67-9111-4f79-9574-715fdfd97cee`. Switched
+  to an English prompt (the underlying model likely has stronger "goblin" priors in
+  English than a Russian description built from individual anatomical terms) and
+  dropped the custom proportions (suspected of confusing attempt 3 rather than
+  helping). Prompt: "green-skinned fantasy goblin monster, bald head, huge pointed
+  bat-like ears, long hooked nose, small sharp fangs, hunched posture, skinny wiry
+  body, warty wrinkled bright green skin, yellow eyes, dressed as a forest archer:
+  tattered dark leather vest, drawing a short recurve bow, quiver of arrows on back"
+  (text_guidance_scale=10, default proportions). QA pending.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
