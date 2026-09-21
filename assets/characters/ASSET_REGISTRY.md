@@ -171,6 +171,18 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     the other 6 directions' top colors, even after `reduce_colors` against the
     same fixed DB32 palette. Deleted just `east`/`west` from the walk group and
     re-queued them into the same `animation_group_id`.
+  - **Fixed**: re-generated east/west now share the same base tones as the other
+    6 directions (verified pre- and post-`reduce_colors`, e.g. `(38,60,40)`/
+    `(62,86,42)` common across all). All 56 final frames (8 idle + 8×6 walk)
+    re-verified with Pillow: **zero off-palette pixels**, all at a literal 64x64.
+  - Atlas assembled: `forest_goblin_archer_Idle.png` (512x576, 64x64 cells, same
+    layout convention as `dead_swordsman`/earlier attempts) + matching JSON.
+    Loaded end-to-end through `SpriteSheetLoader::load()` — 8 idle rotations and
+    the 8-direction × 6-frame walk table all parse at the correct 64x64, texture
+    512x576. **Files saved:**
+    `assets/characters/forest_goblin_archer/forest_goblin_archer_Idle.{png,json}`.
+  - Not done in this iteration: attack/other animations (out of scope per the
+    ТЗ). This is the accepted, final asset for `forest_goblin_archer`.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
