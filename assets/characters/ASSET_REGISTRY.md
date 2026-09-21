@@ -163,7 +163,14 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   - Walk `animation_group_id`: `594a5c1e-1a66-4b83-909c-995a7e8aa884` — all 8
     directions queued via `animate_character` (template mode, builds off the
     character's own existing 64x64 body/rotations, so no v3 needed here and no
-    canvas-size risk), ETA ~8 min.
+    canvas-size risk).
+  - All 8 walk directions generated and downloaded, all confirmed literal 64x64.
+    Same East/West brightness-mismatch pattern as forest_goblin_archer attempt 4
+    turned up again pre-emptively caught before showing the user: `east`/`west`
+    frames carried an extra, more saturated green `(106,190,48)` not present in
+    the other 6 directions' top colors, even after `reduce_colors` against the
+    same fixed DB32 palette. Deleted just `east`/`west` from the walk group and
+    re-queued them into the same `animation_group_id`.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
