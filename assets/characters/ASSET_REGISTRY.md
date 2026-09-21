@@ -16,8 +16,7 @@ via `reduce_colors` against `assets/palettes/db32.png`).
 - State: `Idle` (8-direction idle rotations)
 - Walk animation `animation_group_id`: `5c45dd2e-949d-4abd-9083-36835d61c410` (6 frames × 8 directions)
 - Files: `assets/characters/dead_swordsman/dead_swordsman_Idle.{png,json}`
-  (PNG is currently a hand-generated placeholder matching the real JSON
-  layout — swap in the real PixelLab export when available)
+  (the real PixelLab export, replacing the earlier hand-generated placeholder)
 
 ## Enemies (in progress — see `enemies.json` for gameplay ids)
 
