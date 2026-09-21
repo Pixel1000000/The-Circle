@@ -156,6 +156,14 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     particular shows it held straight out to the side). **My own visual QA:
     passes on anatomy, size, and bow visibility. Awaiting user confirmation
     before `reduce_colors`/walk, per the ТЗ's no-self-approval requirement.**
+  - **User accepted** ("всё супер, сгенерировано хорошо") and asked to use v3
+    mode for character generation going forward (budget allows it).
+  - `reduce_colors` against DB32: job `a2975e32-e7f9-4323-93da-ad7bf8b1d4f2`, all 8
+    idle frames at the literal 64x64 size, downloaded to `idle_db32/`.
+  - Walk `animation_group_id`: `594a5c1e-1a66-4b83-909c-995a7e8aa884` — all 8
+    directions queued via `animate_character` (template mode, builds off the
+    character's own existing 64x64 body/rotations, so no v3 needed here and no
+    canvas-size risk), ETA ~8 min.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
