@@ -75,6 +75,17 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     (736x828 atlas, same layout convention as dead_swordsman/attempt 2 — built from
     the actual PixelLab-generated + DB32-quantized frames, not a placeholder).
   - Not done in this iteration: attack/other animations (out of scope per the ТЗ).
+  - **User-reported defect (post-merge):** walk east/south-east frames' base skin
+    color was visibly brighter/more saturated than the other 6 directions even
+    after DB32 quantization — confirmed by comparing pre-quantization pixel values:
+    east/south-east's own `animate_character` jobs rendered a more saturated green
+    (~(67,153,29)/(70,139,34)) than the other directions' (~(64,107,33)), so
+    `reduce_colors` (correctly, given a fixed external palette) mapped them onto
+    different DB32 slots than the rest — a genuine per-job generation variance, not
+    a quantization bug. Fix: deleted just the `east`/`south-east` directions from
+    the walk group (`delete_animation(..., direction=...)`) and re-queued them via
+    `animate_character` into the same `animation_group_id`, hoping for a closer
+    color match on retry.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
