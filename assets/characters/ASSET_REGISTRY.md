@@ -25,39 +25,33 @@ via `reduce_colors` against `assets/palettes/db32.png`).
 - Attempt 1: `character_id` `0c04b266-c271-4d8a-92d4-bb0d9df84361` — **REJECTED and deleted**
   at idle-rotation QA (didn't read as a goblin at all; see prior git history for the
   prompt and notes).
-- Attempt 2 (current): `character_id` `5ed0c9d2-bf5e-45c1-b959-6c6306339612`. Prompt:
+- Attempt 2 (ACCEPTED): `character_id` `5ed0c9d2-bf5e-45c1-b959-6c6306339612`. Prompt:
   "зелёный лесной гоблин-дозорный с острыми клыками и остроконечными ушами,
   ярко-зелёная шершавая кожа, натягивает короткий составной лук, колчан со стрелами
   за спиной, рваная тёмно-коричневая кожаная безрукавка" (text_guidance_scale=12).
-  Canvas 92x92 (standard-mode auto-expansion, same as attempt 1).
-  - Idle rotations (8 dir): generated, visually inspected via inline previews for all
-    8 directions — consistent green skin, hooded/capped green outfit, dark boots,
-    single-color black outline, no visible seams or off-model direction. **ACCEPTED
-    by my own visual QA.**
-  - `reduce_colors` against `assets/palettes/db32.png`: job `de16f191-eed6-4346-893e-d3720081b242`,
-    ran on all 8 rotation frames together (shared palette). Inspected all 8 resulting
-    frames inline — colors consolidated to a small consistent set (dark green skin/cap,
-    brown boots, black outline), no stray off-palette speckling visible at this
-    resolution. **ACCEPTED by my own visual QA**, pending the user's confirmation
-    per the ТЗ's requirement not to self-approve on this iteration.
-  - Walk `animation_group_id`: not started — waiting on go-ahead before spending more
-    generations on animation.
-  - **Files: NOT saved to `assets/characters/forest_goblin_archer/` yet.** This
-    session's outbound network is restricted to an allowlist that does not include
-    PixelLab's asset hosts (`backblaze.pixellab.ai`, `api.pixellab.ai`) - direct
-    `curl` downloads were rejected by the org's egress proxy with 403 (policy
-    denial, not a transient error - see `/root/.ccr/README.md`). The MCP server's
-    own image previews rendered fine (that's how the QA above was done), but there
-    is currently no tool available in this session that returns raw file bytes I
-    can write to disk, or a way to push binary content through the GitHub file-write
-    tool (it only accepts UTF-8 text). **Needs a session with PixelLab network
-    access, or the user downloading the PNGs from the URLs below and committing
-    them manually.**
-  - Rotation URLs (post-`reduce_colors`, via `get_image` download links, index 0-7 =
-    south, east, north, west, south-east, north-east, north-west, south-west):
-    `https://api.pixellab.ai/mcp/images/de16f191-eed6-4346-893e-d3720081b242/download?index=<0-7>`
-  - Pre-`reduce_colors` rotation URLs (raw generation output) are on
-    `get_character(character_id="5ed0c9d2-bf5e-45c1-b959-6c6306339612")`.
+  Canvas 92x92 (standard-mode auto-expansion from the requested 64px).
+  - Idle rotations (8 dir): generated and visually inspected — consistent green skin,
+    hooded/capped green outfit, dark boots, single-color black outline, no seams or
+    off-model direction. **ACCEPTED.**
+  - Walk `animation_group_id`: `8c942d58-adea-4aff-beed-58d13a1e5b46` — full 8/8
+    directions generated via `animate_character` (template `walk`, 6 frames/direction):
+    5 directions (south, south-east, east, north-east, north) generated first, then
+    the remaining 3 (west, north-west, south-west) appended to the same group.
+    Visually inspected sample frames per direction — consistent with idle art and
+    with each other. **ACCEPTED.**
+  - `reduce_colors` against `assets/palettes/db32.png`: run in 7 batches (1 for the
+    8 idle frames, 6 for the 8×6 walk frames — batched to stay under reduce_colors'
+    per-call pixel budget), all against the same fixed DB32 palette image so every
+    batch quantizes onto identical colors. Verified programmatically with Pillow: all
+    56 final frames (8 idle + 8×6 walk) have **zero** off-palette opaque pixels.
+  - Loader check: `SpriteSheetLoader::load()` against the real files parses correctly
+    — 8 idle rotations at 92x92, walk table with all 8 directions × 6 frames each.
+  - **Files saved:**
+    `assets/characters/forest_goblin_archer/forest_goblin_archer_Idle.{png,json}`
+    (736x828 atlas: row 0 = 8 idle rotations, rows 1-8 = walk per direction, 92x92
+    cells, built from the actual PixelLab-generated + DB32-quantized frames — not a
+    placeholder).
+  - Not done in this iteration: attack/other animations (out of scope per the ТЗ).
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
