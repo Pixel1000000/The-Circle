@@ -51,7 +51,18 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   bat-like ears, long hooked nose, small sharp fangs, hunched posture, skinny wiry
   body, warty wrinkled bright green skin, yellow eyes, dressed as a forest archer:
   tattered dark leather vest, drawing a short recurve bow, quiver of arrows on back"
-  (text_guidance_scale=10, default proportions). QA pending.
+  (text_guidance_scale=10, default proportions).
+  - Idle rotations (8 dir): **ACCEPTED.** English "goblin" wording worked — bald
+    head, pointed ears, green wrinkled skin, dark leather archer gear with visible
+    quiver straps, consistent across all 8 directions and consistent with the
+    reference image the user supplied.
+  - `reduce_colors` against DB32: job `6a0471fa-6b3c-4984-b48d-58b21665af96`, all 8
+    idle frames, downloaded to `idle_db32/`.
+  - Walk `animation_group_id`: `c900ea1e-efe9-4d6a-ab6b-2b8714b481c3` — all 8
+    directions queued in one call (template `walk`, 6 frames/direction), ETA ~8 min.
+  - Files: not yet assembled/saved — waiting on the walk animation to finish, then
+    `reduce_colors` on the walk frames and atlas assembly, same as attempt 2's
+    (rejected) pipeline.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
