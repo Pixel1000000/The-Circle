@@ -132,6 +132,21 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     ambiguous whether it reads as gripped in a raised hand vs. slung across the
     chest/shoulder. **Sent to the user for a call on whether this is "in hand"
     enough, rather than guessing.**
+  - **User caught a technical-standard violation**: canvas came back 92x92, not
+    the ТЗ's mandated 64x64 (matching the base character). Root cause: PixelLab's
+    `standard` mode auto-expands the generation canvas past the requested `size`
+    when the pose doesn't fit — confirmed with Pillow that the actual content
+    height was ~63px either way (32x63 bbox on this goblin vs. 30x61 on the
+    swordsman), just sitting in more transparent padding. Cropping to force 64x64
+    risked clipping exactly the traits the ТЗ asked for (oversized hands/feet,
+    outstretched bow-holding arm), so instead switching generation mode.
+- Attempt 7 (current): `character_id` `6cdc038b-507e-4f5f-a738-dd0814ddce2c`. Same
+  attempt 6 prompt (anatomy + visible bow), but `mode="v3"` instead of `standard`
+  — v3 sends `size` as the literal requested square canvas with no auto-expansion,
+  at the cost of 2 generations instead of 1 and ignoring `shading`/
+  `text_guidance_scale`/`proportions` (outline/detail remain soft guidance). QA
+  pending — need to re-check anatomy AND bow visibility again since v3 is a
+  different generation path from standard mode.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
