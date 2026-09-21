@@ -111,7 +111,13 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   eyes, bald knobby head; dressed as a forest archer: tattered dark leather vest,
   drawing a short recurve bow, quiver of arrows on back" (text_guidance_scale=10,
   default proportions, standard mode — no reference_image/style_character_id to
-  the human base character). QA pending.
+  the human base character).
+  - Idle rotations (8 dir): generated, inspected all 8 directions. Silhouette now
+    reads as a distinct creature — elongated/pointed skull-and-jaw shape unlike a
+    human head, visible hunch in the side profiles (east/north-east/south-west),
+    dark leather archer gear with quiver on back. My own visual read: passes the
+    "not a human painted green" bar. **Awaiting user confirmation before
+    `reduce_colors`/walk, per the ТЗ's no-self-approval requirement.**
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
