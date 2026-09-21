@@ -86,6 +86,12 @@ via `reduce_colors` against `assets/palettes/db32.png`).
     the walk group (`delete_animation(..., direction=...)`) and re-queued them via
     `animate_character` into the same `animation_group_id`, hoping for a closer
     color match on retry.
+    **Fixed**: the re-generated east/south-east now share the same base skin
+    color `(64,107,33)` pre-quantization as every other direction (vs. the
+    original `(67,153,29)`/`(70,139,34)`), and after `reduce_colors` all 8
+    directions' frame-0 dominant color matches `(75,105,47)`. Re-verified all 56
+    frames still have zero off-palette pixels, rebuilt the atlas with the fixed
+    frames, and re-ran it through `SpriteSheetLoader` (still parses correctly).
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
