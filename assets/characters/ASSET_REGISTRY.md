@@ -59,10 +59,22 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   - `reduce_colors` against DB32: job `6a0471fa-6b3c-4984-b48d-58b21665af96`, all 8
     idle frames, downloaded to `idle_db32/`.
   - Walk `animation_group_id`: `c900ea1e-efe9-4d6a-ab6b-2b8714b481c3` — all 8
-    directions queued in one call (template `walk`, 6 frames/direction), ETA ~8 min.
-  - Files: not yet assembled/saved — waiting on the walk animation to finish, then
-    `reduce_colors` on the walk frames and atlas assembly, same as attempt 2's
-    (rejected) pipeline.
+    directions generated in one call (template `walk`, 6 frames/direction).
+    Visually inspected sample frames per direction — consistent goblin anatomy and
+    archer gear, matches the idle art. **ACCEPTED.**
+  - `reduce_colors` against DB32: 8 idle frames (job `6a0471fa-...`) + 8 walk
+    directions × 6 frames each, one `reduce_colors` batch per direction (7 more
+    jobs), all against the same fixed DB32 palette. Verified programmatically with
+    Pillow: all 56 final frames (8 idle + 8×6 walk) have **zero** off-palette
+    opaque pixels.
+  - Loader check: `SpriteSheetLoader::load()` against the real files parses
+    correctly — 8 idle rotations at 92x92, walk table with all 8 directions × 6
+    frames each.
+  - **Files saved:**
+    `assets/characters/forest_goblin_archer/forest_goblin_archer_Idle.{png,json}`
+    (736x828 atlas, same layout convention as dead_swordsman/attempt 2 — built from
+    the actual PixelLab-generated + DB32-quantized frames, not a placeholder).
+  - Not done in this iteration: attack/other animations (out of scope per the ТЗ).
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
