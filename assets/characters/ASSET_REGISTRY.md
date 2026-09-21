@@ -147,6 +147,15 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   `text_guidance_scale`/`proportions` (outline/detail remain soft guidance). QA
   pending — need to re-check anatomy AND bow visibility again since v3 is a
   different generation path from standard mode.
+  - **Size fixed**: canvas is a literal 64x64 for all 8 directions (verified with
+    Pillow), content bboxes fit within the canvas with no evidence of clipping.
+  - Idle rotations (8 dir): inspected all 8 directions. Hunched/crouched creature
+    silhouette reads even more strongly non-human than attempts 5/6 (pointed
+    ears, green wrinkled skin, stooped stance). The bow is now unambiguous —
+    clearly gripped and held outward in a raised hand in every direction (east in
+    particular shows it held straight out to the side). **My own visual QA:
+    passes on anatomy, size, and bow visibility. Awaiting user confirmation
+    before `reduce_colors`/walk, per the ТЗ's no-self-approval requirement.**
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
