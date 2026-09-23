@@ -268,11 +268,18 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   clearly visible in every direction** (same weapon-visibility risk flagged for the archer in
   earlier attempts) — needs explicit user check, may need a prompt tweak like the archer's bow
   fix if rejected.
-- Walk `animation_group_id`: `e9500689-0796-4276-ac74-9b2710416fd0` (template `walk`, all 8
-  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
-  **0 off-palette opaque pixels**. Atlas saved:
+- Walk (superseded): template `walk` group `e9500689-...` — shrank the hunched goblin onto a
+  human skeleton; deleted.
+- Walk (current): `animation_group_id` `a4c2f53e-d691-4cb7-b2b4-a053724b1672`, `mode="v3"` custom,
+  `frame_count=6`, `keep_first_frame=false`, all 8 directions, action "hunched sneaking goblin
+  walk, clawed hands low, gripping the jagged ice shortsword firmly and keeping it clearly
+  visible, body keeps the same size and proportions as the standing pose". Cropped to 64x64
+  with one offset per direction (13 opaque px clipped over 48 frames). walk/idle ratio **0.99**.
+  DB32 0 off-palette. Rebuilt via `tools/process_pixellab_zip.py`. My QA: every walk row keeps
+  its idle facing; the sword stays visible in all front/side directions (hidden only behind
+  the body in N/NW, as in idle). Atlas:
   `assets/characters/winter_ice_goblin/winter_ice_goblin_Idle.{png,json}`. **Sword-visibility
-  flag from idle QA still applies — needs explicit user check.**
+  still needs explicit user check.**
 
 ### winter_yeti — GDD "Йети" (Биом 3 — Зима)
 - Attempt 1 (current): `character_id` `6e183d54-c864-4844-8268-32069e056a15`, `mode="v3"`,
@@ -408,19 +415,16 @@ walk/idle ratio, builds the atlas). Target ratio ~0.9-1.05.
 
 Done with v3 walk (atlas on disk is final): forest_ant (0.97), deadlands_bone_golem (0.95),
 deadlands_skeleton (1.03, NW re-rolled for a flipping shield), winter_ice_spirit (0.98, NE
-re-rolled for a darkening core), desert_mummy (1.03), deadlands_ghost (1.03).
+re-rolled for a darkening core), desert_mummy (1.03), deadlands_ghost (1.03), winter_ice_goblin
+(0.99, 13 px clipped, all 8 dirs match idle facing, sword visible in every direction).
 
 Still to finish (atlases on disk are the OLD shrunken template-walk versions):
-- winter_ice_goblin `fc396b48-d8a3-4620-8e5c-5f78e10e7a56`, v3 group `a4c2f53e-d691-4cb7-b2b4-a053724b1672`,
-  all 8 directions queued. Action: "hunched sneaking goblin walk, clawed hands low, gripping the
-  jagged ice shortsword firmly and keeping it clearly visible, body keeps the same size and
-  proportions as the standing pose".
 - winter_snow_witch `7f896095-bfc7-4657-a29d-4623aa5d4497`, v3 group `f9189508-8db5-4ddf-8f3a-d7f954176918`,
-  7/8 queued — **south-west NOT queued yet**. Action: "slow gliding walk with long flowing frozen
+  all 8 directions queued (south-west appended to the same group). Action: "slow gliding walk with long flowing frozen
   robes swaying, gripping the ice-crystal staff firmly and keeping it clearly visible, body keeps
   the same size and proportions as the standing pose".
-- desert_sand_spirit `843a2b88-7d00-479d-bb1a-30e2d80bfe3f`: old template walk deleted, **no v3
-  walk queued yet** (all 8 directions). Use a floating action like the ghost/ice spirit:
+- desert_sand_spirit `843a2b88-7d00-479d-bb1a-30e2d80bfe3f`, v3 group `ba88e9fc-4dfd-4b6e-b508-8a1276d5921e`,
+  5/8 queued (S, SE, E, NE, N) — **NW, W, SW not queued yet** (job-slot limit). Action:
   "drifting forward while hovering, sand vortex swirling and spinning, no legs, no walking, no
   steps, keeps the same size as the idle pose".
 - winter_yeti (0.87) and forest_wolf (dog template, 0.89) left on template walk — within range.
