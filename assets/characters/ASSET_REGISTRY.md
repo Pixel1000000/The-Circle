@@ -16,8 +16,7 @@ via `reduce_colors` against `assets/palettes/db32.png`).
 - State: `Idle` (8-direction idle rotations)
 - Walk animation `animation_group_id`: `5c45dd2e-949d-4abd-9083-36835d61c410` (6 frames × 8 directions)
 - Files: `assets/characters/dead_swordsman/dead_swordsman_Idle.{png,json}`
-  (PNG is currently a hand-generated placeholder matching the real JSON
-  layout — swap in the real PixelLab export when available)
+  (the real PixelLab export, replacing the earlier hand-generated placeholder)
 
 ## Enemies (in progress — see `enemies.json` for gameplay ids)
 
@@ -25,56 +24,165 @@ via `reduce_colors` against `assets/palettes/db32.png`).
 - Attempt 1: `character_id` `0c04b266-c271-4d8a-92d4-bb0d9df84361` — **REJECTED and deleted**
   at idle-rotation QA (didn't read as a goblin at all; see prior git history for the
   prompt and notes).
-- Attempt 2 (current): `character_id` `5ed0c9d2-bf5e-45c1-b959-6c6306339612`. Prompt:
-  "зелёный лесной гоблин-дозорный с острыми клыками и остроконечными ушами,
-  ярко-зелёная шершавая кожа, натягивает короткий составной лук, колчан со стрелами
-  за спиной, рваная тёмно-коричневая кожаная безрукавка" (text_guidance_scale=12).
-  Canvas 92x92 (standard-mode auto-expansion, same as attempt 1).
-  - Idle rotations (8 dir): generated, visually inspected via inline previews for all
-    8 directions — consistent green skin, hooded/capped green outfit, dark boots,
-    single-color black outline, no visible seams or off-model direction. **ACCEPTED
-    by my own visual QA.**
-  - `reduce_colors` against `assets/palettes/db32.png`: job `de16f191-eed6-4346-893e-d3720081b242`,
-    ran on all 8 rotation frames together (shared palette). Inspected all 8 resulting
-    frames inline — colors consolidated to a small consistent set (dark green skin/cap,
-    brown boots, black outline), no stray off-palette speckling visible at this
-    resolution. **ACCEPTED by my own visual QA**, pending the user's confirmation
-    per the ТЗ's requirement not to self-approve on this iteration.
-  - **User confirmed the idle QA on 2026-09-18** (this session ran locally, not in
-    the network-restricted cloud sandbox, so the PixelLab asset hosts were
-    reachable — the attempt 2 blocker above no longer applies here).
-  - Files saved: `assets/characters/forest_goblin_archer/forest_goblin_archer_Idle.{png,json}`.
-    PNG is the DB32-corrected atlas (job `de16f191-eed6-4346-893e-d3720081b242`,
-    8 columns × 92px, `south, south-east, east, north-east, north, north-west,
-    west, south-west` — same row layout as `dead_swordsman`'s sheet), assembled
-    from the 8 individual `reduce_colors` output frames since PixelLab's own
-    `spritesheet` export endpoint only atlases the *raw* (pre-`reduce_colors`)
-    rotations. JSON layout metadata copied from that same export endpoint with
-    `path` repointed at the corrected PNG.
-  - Walk `animation_group_id`: `8c942d58-adea-4aff-beed-58d13a1e5b46`, `template_animation_id="walk"`,
-    6 frames × 5 authored directions (south, south-east, east, north-east, north).
-    West/south-west/north-west are horizontal mirrors of east/south-east/north-east
-    respectively (same convention as `dead_swordsman`'s walk row layout), produced
-    locally with Pillow rather than a 6th/7th/8th PixelLab generation.
-    - Each authored direction's 6 raw frames ran through `reduce_colors` against
-      `assets/palettes/db32.png` (jobs: south `c7f57843-…`, south-east `a3f56a3b-…`,
-      east `f8330ff2-…`, north-east `5a834056-…`, north `c4f391c0-…`). Inspected all
-      30 resulting frames inline (contact sheet) — consistent black outline, no
-      off-palette speckling, walk cycle motion (leg swing, arm swing) intact and
-      matching the base character's cadence. **ACCEPTED by my own visual QA and
-      confirmed by the user on 2026-09-18.**
-  - Files saved (idle + walk combined into one sheet, replacing the idle-only
-    files from the previous step): `assets/characters/forest_goblin_archer/
-    forest_goblin_archer_Idle.{png,json}`. Layout: row 0 = idle rotations (8 dir),
-    rows 1-8 = walk animation, one row per direction in the order south,
-    south-east, east, north-east, north, north-west, west, south-west (6 frames
-    each, columns 6-7 of those rows are empty since the grid is 8 columns wide).
-    Verified the JSON's `sheet_size` matches the PNG's actual dimensions
-    (736×828) before committing. This is the first enemy to complete the full
-    ТЗ pipeline (idle + walk, both user-confirmed) for this iteration.
-  - **Not done in this iteration** (out of scope per the ТЗ): attack animation,
-    death animation, in-engine wiring/testing via `SpriteSheetLoader` beyond the
-    dimension sanity check above, `enemies.json` gameplay-id linkage.
+- Attempt 2: `character_id` `5ed0c9d2-bf5e-45c1-b959-6c6306339612` — idle rotations +
+  full 8-dir walk generated, DB32-quantized (0 off-palette pixels across all 56
+  frames), loader-verified, and saved to disk. **REJECTED by the user** after seeing
+  the actual files: reads as a human in a green hood/cap, not a goblin creature at
+  all — no goblin facial/body anatomy came through despite the green skin. Character
+  deleted from PixelLab, files removed from `assets/characters/forest_goblin_archer/`.
+- Attempt 3 (current): `character_id` `119548ec-a641-44fb-9cfd-6f31af188ebc`. User
+  supplied a reference image of a classic fantasy goblin (bald, huge pointed ears,
+  hooked nose, hunched, wrinkled green skin) and asked for that creature dressed as
+  an archer. Prompt: "лысый зеленокожий гоблин-монстр, не человек, нечеловеческое
+  существо: сутулая спина, тощее жилистое тело, огромная лысая голова, гигантские
+  остроконечные уши торчком, длинный крючковатый нос, маленькие острые клыки,
+  морщинистая бугристая ярко-зелёная кожа, глубоко посаженные жёлтые глаза; одет как
+  лесной лучник — рваная кожаная безрукавка, натягивает короткий составной лук,
+  колчан со стрелами за спиной" (text_guidance_scale=16, custom proportions:
+  head_size 1.3, arms_length 1.1, legs_length 0.85, shoulder_width 0.7, hip_width
+  0.75, to push a hunched/goblin-like silhouette away from the default human build).
+  **REJECTED**: lost the green skin entirely — came back as a pale/grey bald human
+  in a t-shirt and shorts, no bow/quiver visible. Deleted.
+- Attempt 4 (current): `character_id` `f6214c67-9111-4f79-9574-715fdfd97cee`. Switched
+  to an English prompt (the underlying model likely has stronger "goblin" priors in
+  English than a Russian description built from individual anatomical terms) and
+  dropped the custom proportions (suspected of confusing attempt 3 rather than
+  helping). Prompt: "green-skinned fantasy goblin monster, bald head, huge pointed
+  bat-like ears, long hooked nose, small sharp fangs, hunched posture, skinny wiry
+  body, warty wrinkled bright green skin, yellow eyes, dressed as a forest archer:
+  tattered dark leather vest, drawing a short recurve bow, quiver of arrows on back"
+  (text_guidance_scale=10, default proportions).
+  - Idle rotations (8 dir): **ACCEPTED.** English "goblin" wording worked — bald
+    head, pointed ears, green wrinkled skin, dark leather archer gear with visible
+    quiver straps, consistent across all 8 directions and consistent with the
+    reference image the user supplied.
+  - `reduce_colors` against DB32: job `6a0471fa-6b3c-4984-b48d-58b21665af96`, all 8
+    idle frames, downloaded to `idle_db32/`.
+  - Walk `animation_group_id`: `c900ea1e-efe9-4d6a-ab6b-2b8714b481c3` — all 8
+    directions generated in one call (template `walk`, 6 frames/direction).
+    Visually inspected sample frames per direction — consistent goblin anatomy and
+    archer gear, matches the idle art. **ACCEPTED.**
+  - `reduce_colors` against DB32: 8 idle frames (job `6a0471fa-...`) + 8 walk
+    directions × 6 frames each, one `reduce_colors` batch per direction (7 more
+    jobs), all against the same fixed DB32 palette. Verified programmatically with
+    Pillow: all 56 final frames (8 idle + 8×6 walk) have **zero** off-palette
+    opaque pixels.
+  - Loader check: `SpriteSheetLoader::load()` against the real files parses
+    correctly — 8 idle rotations at 92x92, walk table with all 8 directions × 6
+    frames each.
+  - **Files saved:**
+    `assets/characters/forest_goblin_archer/forest_goblin_archer_Idle.{png,json}`
+    (736x828 atlas, same layout convention as dead_swordsman/attempt 2 — built from
+    the actual PixelLab-generated + DB32-quantized frames, not a placeholder).
+  - Not done in this iteration: attack/other animations (out of scope per the ТЗ).
+  - **User-reported defect (post-merge):** walk east/south-east frames' base skin
+    color was visibly brighter/more saturated than the other 6 directions even
+    after DB32 quantization — confirmed by comparing pre-quantization pixel values:
+    east/south-east's own `animate_character` jobs rendered a more saturated green
+    (~(67,153,29)/(70,139,34)) than the other directions' (~(64,107,33)), so
+    `reduce_colors` (correctly, given a fixed external palette) mapped them onto
+    different DB32 slots than the rest — a genuine per-job generation variance, not
+    a quantization bug. Fix: deleted just the `east`/`south-east` directions from
+    the walk group (`delete_animation(..., direction=...)`) and re-queued them via
+    `animate_character` into the same `animation_group_id`, hoping for a closer
+    color match on retry.
+    **Fixed**: the re-generated east/south-east now share the same base skin
+    color `(64,107,33)` pre-quantization as every other direction (vs. the
+    original `(67,153,29)`/`(70,139,34)`), and after `reduce_colors` all 8
+    directions' frame-0 dominant color matches `(75,105,47)`. Re-verified all 56
+    frames still have zero off-palette pixels, rebuilt the atlas with the fixed
+    frames, and re-ran it through `SpriteSheetLoader` (still parses correctly).
+- Attempt 4 **fully superseded** per an updated ТЗ: the new spec explicitly calls
+  out that a goblin generated from a human-anatomy base reads as "a human painted
+  green" and requires the classic-fantasy anatomical traits to be spelled out in
+  the prompt, not just color/clothing — pointed ears, elongated jaw/fangs, hunched
+  posture, and **disproportionately large hands/feet** (this last one was missing
+  from attempt 4's prompt). Character `f6214c67-...` deleted, files removed;
+  redoing from scratch as attempt 5. (GDD gives no anatomical detail for this
+  enemy beyond the name "Гоблин-лучник" — per the ТЗ, that would normally mean
+  stopping to ask, but the ТЗ text itself already spells out the required goblin
+  anatomy, so no clarification was needed here.)
+- Attempt 5 (current): `character_id` `20e07abe-4db8-4295-932c-dfc3ce09844b`.
+  Prompt: "green-skinned fantasy goblin monster, emphatically not human, distinct
+  inhuman creature anatomy: large pointed bat-like ears, elongated protruding
+  lower jaw with jutting fangs, hunched stooped posture with a curved spine,
+  disproportionately large gnarled hands with long clawed fingers, oversized bare
+  feet, skinny wiry hunched body, warty wrinkled bright green skin, sunken yellow
+  eyes, bald knobby head; dressed as a forest archer: tattered dark leather vest,
+  drawing a short recurve bow, quiver of arrows on back" (text_guidance_scale=10,
+  default proportions, standard mode — no reference_image/style_character_id to
+  the human base character).
+  - Idle rotations (8 dir): generated, inspected all 8 directions. Silhouette now
+    reads as a distinct creature — elongated/pointed skull-and-jaw shape unlike a
+    human head, visible hunch in the side profiles (east/north-east/south-west),
+    dark leather archer gear with quiver on back. My own visual read: passes the
+    "not a human painted green" bar.
+  - **User feedback**: anatomy accepted ("принимаю частично"), but the bow needs
+    to be visibly held in hand — the "drawing a short recurve bow" wording didn't
+    render a clearly visible bow in any direction. Character deleted, redone as
+    attempt 6.
+- Attempt 6 (current): `character_id` `e137f92a-784b-4bc7-bd49-e62f51a82a50`. Same
+  accepted anatomy description, equipment clause changed to "gripping a wooden
+  longbow firmly in one clawed hand, bow held out and clearly visible, tattered
+  dark leather vest, quiver of arrows on back".
+  - Idle rotations (8 dir): generated, inspected all 8 directions. Anatomy holds
+    up (elongated jaw, hunch, pointed ears preserved). A dark curved bow shape is
+    now visible across the front of the body in every direction — a clear
+    improvement over attempt 5 (no bow was visible at all) — but at 92x92 it's
+    ambiguous whether it reads as gripped in a raised hand vs. slung across the
+    chest/shoulder. **Sent to the user for a call on whether this is "in hand"
+    enough, rather than guessing.**
+  - **User caught a technical-standard violation**: canvas came back 92x92, not
+    the ТЗ's mandated 64x64 (matching the base character). Root cause: PixelLab's
+    `standard` mode auto-expands the generation canvas past the requested `size`
+    when the pose doesn't fit — confirmed with Pillow that the actual content
+    height was ~63px either way (32x63 bbox on this goblin vs. 30x61 on the
+    swordsman), just sitting in more transparent padding. Cropping to force 64x64
+    risked clipping exactly the traits the ТЗ asked for (oversized hands/feet,
+    outstretched bow-holding arm), so instead switching generation mode.
+- Attempt 7 (current): `character_id` `6cdc038b-507e-4f5f-a738-dd0814ddce2c`. Same
+  attempt 6 prompt (anatomy + visible bow), but `mode="v3"` instead of `standard`
+  — v3 sends `size` as the literal requested square canvas with no auto-expansion,
+  at the cost of 2 generations instead of 1 and ignoring `shading`/
+  `text_guidance_scale`/`proportions` (outline/detail remain soft guidance). QA
+  pending — need to re-check anatomy AND bow visibility again since v3 is a
+  different generation path from standard mode.
+  - **Size fixed**: canvas is a literal 64x64 for all 8 directions (verified with
+    Pillow), content bboxes fit within the canvas with no evidence of clipping.
+  - Idle rotations (8 dir): inspected all 8 directions. Hunched/crouched creature
+    silhouette reads even more strongly non-human than attempts 5/6 (pointed
+    ears, green wrinkled skin, stooped stance). The bow is now unambiguous —
+    clearly gripped and held outward in a raised hand in every direction (east in
+    particular shows it held straight out to the side). **My own visual QA:
+    passes on anatomy, size, and bow visibility. Awaiting user confirmation
+    before `reduce_colors`/walk, per the ТЗ's no-self-approval requirement.**
+  - **User accepted** ("всё супер, сгенерировано хорошо") and asked to use v3
+    mode for character generation going forward (budget allows it).
+  - `reduce_colors` against DB32: job `a2975e32-e7f9-4323-93da-ad7bf8b1d4f2`, all 8
+    idle frames at the literal 64x64 size, downloaded to `idle_db32/`.
+  - Walk `animation_group_id`: `594a5c1e-1a66-4b83-909c-995a7e8aa884` — all 8
+    directions queued via `animate_character` (template mode, builds off the
+    character's own existing 64x64 body/rotations, so no v3 needed here and no
+    canvas-size risk).
+  - All 8 walk directions generated and downloaded, all confirmed literal 64x64.
+    Same East/West brightness-mismatch pattern as forest_goblin_archer attempt 4
+    turned up again pre-emptively caught before showing the user: `east`/`west`
+    frames carried an extra, more saturated green `(106,190,48)` not present in
+    the other 6 directions' top colors, even after `reduce_colors` against the
+    same fixed DB32 palette. Deleted just `east`/`west` from the walk group and
+    re-queued them into the same `animation_group_id`.
+  - **Fixed**: re-generated east/west now share the same base tones as the other
+    6 directions (verified pre- and post-`reduce_colors`, e.g. `(38,60,40)`/
+    `(62,86,42)` common across all). All 56 final frames (8 idle + 8×6 walk)
+    re-verified with Pillow: **zero off-palette pixels**, all at a literal 64x64.
+  - Atlas assembled: `forest_goblin_archer_Idle.png` (512x576, 64x64 cells, same
+    layout convention as `dead_swordsman`/earlier attempts) + matching JSON.
+    Loaded end-to-end through `SpriteSheetLoader::load()` — 8 idle rotations and
+    the 8-direction × 6-frame walk table all parse at the correct 64x64, texture
+    512x576. **Files saved:**
+    `assets/characters/forest_goblin_archer/forest_goblin_archer_Idle.{png,json}`.
+  - Not done in this iteration: attack/other animations (out of scope per the
+    ТЗ). This is the accepted, final asset for `forest_goblin_archer`.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
 - `character_id`: not started
