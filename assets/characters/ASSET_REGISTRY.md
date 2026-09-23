@@ -255,9 +255,16 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   trailing tendrils split into two vertical shapes that could read as legs at a glance** — flagging
   for explicit user check on that one direction specifically. Overall a large improvement over
   attempt 1. **User accepted** the rewritten amorphous version (batch review).
-- Walk `animation_group_id`: `f7f9c8a8-65ff-426e-9116-ec0e57a87d86` (template `walk`, all 8
-  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
-  **0 off-palette opaque pixels**. Atlas saved:
+- Walk (superseded): template `walk` group `f7f9c8a8-...` — grew walking legs on the limbless
+  vortex; deleted.
+- Walk (current): `animation_group_id` `ba88e9fc-4dfd-4b6e-b508-8a1276d5921e`, `mode="v3"` custom,
+  `frame_count=6`, `keep_first_frame=false`, all 8 directions, action "drifting forward while
+  hovering, sand vortex swirling and spinning, no legs, no walking, no steps, keeps the same size
+  as the idle pose". Cropped to 64x64 with one offset per direction (4 opaque px clipped).
+  walk/idle ratio **1.00**. DB32 0 off-palette. Rebuilt via `tools/process_pixellab_zip.py`.
+  My QA: funnel spins and keeps its idle facing in every direction; **in S/SE/SW the two lower
+  sand tendrils (already leg-like in the accepted idle) swing alternately and can read as small
+  steps** — needs explicit user check; re-roll those directions if rejected. Atlas:
   `assets/characters/desert_sand_spirit/desert_sand_spirit_Idle.{png,json}`.
 
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
@@ -416,17 +423,19 @@ walk/idle ratio, builds the atlas). Target ratio ~0.9-1.05.
 Done with v3 walk (atlas on disk is final): forest_ant (0.97), deadlands_bone_golem (0.95),
 deadlands_skeleton (1.03, NW re-rolled for a flipping shield), winter_ice_spirit (0.98, NE
 re-rolled for a darkening core), desert_mummy (1.03), deadlands_ghost (1.03), winter_ice_goblin
-(0.99, 13 px clipped, all 8 dirs match idle facing, sword visible in every direction).
+(0.99, 13 px clipped, all 8 dirs match idle facing, sword visible in every direction),
+desert_sand_spirit (1.00; S/SE/SW tendril sway flagged for user check).
 
 Still to finish (atlases on disk are the OLD shrunken template-walk versions):
 - winter_snow_witch `7f896095-bfc7-4657-a29d-4623aa5d4497`, v3 group `f9189508-8db5-4ddf-8f3a-d7f954176918`,
-  all 8 directions queued (south-west appended to the same group). Action: "slow gliding walk with long flowing frozen
-  robes swaying, gripping the ice-crystal staff firmly and keeping it clearly visible, body keeps
-  the same size and proportions as the standing pose".
-- desert_sand_spirit `843a2b88-7d00-479d-bb1a-30e2d80bfe3f`, v3 group `ba88e9fc-4dfd-4b6e-b508-8a1276d5921e`,
-  5/8 queued (S, SE, E, NE, N) — **NW, W, SW not queued yet** (job-slot limit). Action:
-  "drifting forward while hovering, sand vortex swirling and spinning, no legs, no walking, no
-  steps, keeps the same size as the idle pose".
+  7/8 directions done and good (ratio 1.06, 0 px clipped). Action: "slow gliding walk with long
+  flowing frozen robes swaying, gripping the ice-crystal staff firmly and keeping it clearly
+  visible, body keeps the same size and proportions as the standing pose". **East re-rolled
+  twice**: idle east hides the staff behind the body and v3 kept making it pop in mid-cycle;
+  third try uses "the staff stays on the far side hidden behind the body in every frame exactly
+  as in the standing pose, no new objects appear" (delete one direction with
+  `delete_animation(..., animation_group_id=..., direction="east")`, then re-animate into the
+  same group).
 - winter_yeti (0.87) and forest_wolf (dog template, 0.89) left on template walk — within range.
 After each finishes: run process_pixellab_zip.py, eyeball the preview for per-direction
 glitches, update the entry above.
