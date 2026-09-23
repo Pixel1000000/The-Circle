@@ -1,0 +1,108 @@
+{
+  "character": {
+    "id": "6936c354-1971-46cd-9506-afbbd3285e9e",
+    "name": "Winter Ice Spirit",
+    "prompt": "amorphous floating ice spirit, drifting cluster of ice shards around a glowing cyan core, no limbs",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "winter_ice_spirit_Idle.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 512,
+      "height": 576
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9b451aee-6343-45a5-a640-8bdcf786cb27",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9b451aee-6343-45a5-a640-8bdcf786cb27",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9b451aee-6343-45a5-a640-8bdcf786cb27",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9b451aee-6343-45a5-a640-8bdcf786cb27",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9b451aee-6343-45a5-a640-8bdcf786cb27",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9b451aee-6343-45a5-a640-8bdcf786cb27",
+        "direction": "north-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9b451aee-6343-45a5-a640-8bdcf786cb27",
+        "direction": "west"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9b451aee-6343-45a5-a640-8bdcf786cb27",
+        "direction": "south-west"
+      }
+    ]
+  },
+  "export_version": "1.0"
+}

@@ -1,0 +1,108 @@
+{
+  "character": {
+    "id": "3dc646fb-59a5-4f58-b9ed-b96aa380db11",
+    "name": "Forest Wolf",
+    "prompt": "lean grey-brown wild wolf, not a domestic dog, visible ribs, sharp narrow muzzle with bared fangs, upright pointed ears, bristled spine fur, low bushy tail, yellow eyes, no gear",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "forest_wolf_Idle.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 512,
+      "height": 576
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "f5370bfc-8b17-4765-bad9-4d70473880c6",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "f5370bfc-8b17-4765-bad9-4d70473880c6",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "f5370bfc-8b17-4765-bad9-4d70473880c6",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "f5370bfc-8b17-4765-bad9-4d70473880c6",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "f5370bfc-8b17-4765-bad9-4d70473880c6",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "f5370bfc-8b17-4765-bad9-4d70473880c6",
+        "direction": "north-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "f5370bfc-8b17-4765-bad9-4d70473880c6",
+        "direction": "west"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "f5370bfc-8b17-4765-bad9-4d70473880c6",
+        "direction": "south-west"
+      }
+    ]
+  },
+  "export_version": "1.0"
+}

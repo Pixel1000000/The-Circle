@@ -1,0 +1,108 @@
+{
+  "character": {
+    "id": "8699051e-1a21-4963-9c7a-e792a51fe73d",
+    "name": "Deadlands Bone Golem",
+    "prompt": "hulking bone golem, mismatched bones and skulls, glowing rune-marked skull core, oversized bone-club fists",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "deadlands_bone_golem_Idle.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 512,
+      "height": 576
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "fcff161e-9e9f-4bc7-a659-addf858858a8",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "fcff161e-9e9f-4bc7-a659-addf858858a8",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "fcff161e-9e9f-4bc7-a659-addf858858a8",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "fcff161e-9e9f-4bc7-a659-addf858858a8",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "fcff161e-9e9f-4bc7-a659-addf858858a8",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "fcff161e-9e9f-4bc7-a659-addf858858a8",
+        "direction": "north-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "fcff161e-9e9f-4bc7-a659-addf858858a8",
+        "direction": "west"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "fcff161e-9e9f-4bc7-a659-addf858858a8",
+        "direction": "south-west"
+      }
+    ]
+  },
+  "export_version": "1.0"
+}

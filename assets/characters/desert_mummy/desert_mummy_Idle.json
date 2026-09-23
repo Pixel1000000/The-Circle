@@ -1,0 +1,108 @@
+{
+  "character": {
+    "id": "4f6e5f54-0d08-4f1d-90f1-dc93e3cdba83",
+    "name": "Desert Mummy",
+    "prompt": "desiccated undead mummy, withered bandaged body, hollow sunken eye sockets, one arm unwrapped showing bone, no weapon",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "desert_mummy_Idle.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 512,
+      "height": 576
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "cfd471d3-ceaf-414e-bd64-ba0694adcef8",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "cfd471d3-ceaf-414e-bd64-ba0694adcef8",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "cfd471d3-ceaf-414e-bd64-ba0694adcef8",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "cfd471d3-ceaf-414e-bd64-ba0694adcef8",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "cfd471d3-ceaf-414e-bd64-ba0694adcef8",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "cfd471d3-ceaf-414e-bd64-ba0694adcef8",
+        "direction": "north-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "cfd471d3-ceaf-414e-bd64-ba0694adcef8",
+        "direction": "west"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "cfd471d3-ceaf-414e-bd64-ba0694adcef8",
+        "direction": "south-west"
+      }
+    ]
+  },
+  "export_version": "1.0"
+}

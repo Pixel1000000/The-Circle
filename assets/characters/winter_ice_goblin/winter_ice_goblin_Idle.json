@@ -1,0 +1,108 @@
+{
+  "character": {
+    "id": "fc396b48-d8a3-4620-8e5c-5f78e10e7a56",
+    "name": "Winter Ice Goblin",
+    "prompt": "pale blue-white frost goblin, inhuman goblin anatomy, ice-shard spikes, gripping a jagged ice shortsword",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "winter_ice_goblin_Idle.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 512,
+      "height": 576
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "e9500689-0796-4276-ac74-9b2710416fd0",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "e9500689-0796-4276-ac74-9b2710416fd0",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "e9500689-0796-4276-ac74-9b2710416fd0",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "e9500689-0796-4276-ac74-9b2710416fd0",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "e9500689-0796-4276-ac74-9b2710416fd0",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "e9500689-0796-4276-ac74-9b2710416fd0",
+        "direction": "north-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "e9500689-0796-4276-ac74-9b2710416fd0",
+        "direction": "west"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "e9500689-0796-4276-ac74-9b2710416fd0",
+        "direction": "south-west"
+      }
+    ]
+  },
+  "export_version": "1.0"
+}

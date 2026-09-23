@@ -184,7 +184,245 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   - Not done in this iteration: attack/other animations (out of scope per the
     ТЗ). This is the accepted, final asset for `forest_goblin_archer`.
 
+### forest_wolf — GDD "Волк" (Биом 1 — Лес)
+- Attempt 1 (current): `character_id` `3dc646fb-59a5-4f58-b9ed-b96aa380db11`. `mode="v3"` rejects
+  quadrupeds ("pixen generator only produces humanoid"), so used `create_character_pro_flash`
+  (`template_id="dog"`, 64x64 native, low top-down) — literal 64x64 canvas, no auto-expansion.
+  Prompt: lean grey-brown wild wolf, not a domestic dog, visible ribs, sharp narrow muzzle with
+  bared fangs, upright pointed ears, bristled spine fur, low bushy tail, yellow eyes, no gear.
+  - Idle rotations (8 dir): all 8 downloaded to `forest_wolf/raw/`, verified 64x64 RGBA. My own
+    visual QA: reads clearly as a wolf (narrow muzzle, pointed ears, grey-brown fur), consistent
+    across directions. **User accepted.**
+  - `reduce_colors` against DB32: idle job `264b1ba5-1faa-40f6-b25f-3c65ddc46399` (8 frames);
+    the DB32 mapping shifts the fur to a slightly bluer grey — accepted as still wolf-like.
+  - Walk `animation_group_id`: `f5370bfc-8b17-4765-bad9-4d70473880c6` — template `walk-6-frames`
+    (the dog template has no plain `walk`), all 8 directions, 6 frames each, all 64x64.
+    Pre-quantization dominant colours matched across all 8 directions (no East/West drift).
+    Quantized in 4 batches of 12 frames against the same fixed DB32 palette.
+  - All 56 frames: **0 off-palette opaque pixels** (Pillow). Atlas built with
+    `tools/build_enemy_atlas.py` (512x576, same layout/JSON schema as `forest_goblin_archer`;
+    schema keys verified identical).
+  - **Files saved:** `assets/characters/forest_wolf/forest_wolf_Idle.{png,json}`.
+  - **Not done:** `SpriteSheetLoader::load()` run — no C++ compiler in this shell's PATH
+    (MSVC env not loaded); JSON only structurally compared against the goblin's.
+
+### forest_ant — GDD "Энт (древесный страж)" (Биом 1 — Лес; NOT an insect despite the id)
+- Attempt 1 (current): `character_id` `8cd350db-23cb-4e15-88c7-738c1785eafa`, `mode="v3"`,
+  humanoid, 64x64, low top-down. Prompt: living tree guardian Ent, not human and not an insect,
+  bark-textured limbs of fused roots/branches, no human face, knotted hollow head with two glowing
+  amber eyes, moss and leaves on shoulders, root feet/hands, no clothing, no weapon.
+  - Idle rotations (8 dir): all 64x64. My own visual QA: reads clearly as a tree creature (bark
+    body, root limbs, leafy crown, glowing eyes), consistent across all 8 directions.
+    **User accepted.**
+  - Walk `animation_group_id`: `55247c94-9306-4c1c-a5dc-383fb217b06f` (template `walk`, all 8
+    directions). `reduce_colors` against DB32 done locally (nearest-color quantization against
+    `assets/palettes/db32.png`, replicating the MCP `reduce_colors` tool exactly — used for all
+    10 enemies below since typing 40+ MCP calls of raw URLs was the bottleneck, not the palette
+    logic). All 56 frames: **0 off-palette opaque pixels** (Pillow-verified).
+  - Atlas built via `tools/build_enemy_atlas.py` (512x576, same schema as `forest_wolf`).
+    **Files saved:** `assets/characters/forest_ant/forest_ant_Idle.{png,json}`.
+  - **User-reported defect:** in every walk direction the Ent was far smaller than its idle
+    (walk/idle bbox-area ratio 0.55) — template `walk` re-poses the character onto a standard
+    human-proportion skeleton, so the hulking frame collapsed into a thin humanoid. Group
+    `55247c94-...` deleted.
+  - Walk (current): `animation_group_id` `9be707cb-ad2d-4e8f-8e81-013a5c814b2f`, `mode="v3"`
+    custom, `frame_count=6`, `keep_first_frame=false`, all 8 directions, action "slow heavy
+    lumbering walk, massive hulking body keeps its full bulk and size, thick root-like legs
+    taking short ponderous stomping steps...". v3 grows the canvas, so frames cropped back to
+    64x64 with **one offset per direction** (no jitter), 16 opaque px clipped across all 48
+    frames. walk/idle ratio now **0.97**. DB32 0 off-palette. Rebuilt via
+    `tools/process_pixellab_zip.py` (pulls the no-auth character zip instead of per-frame URLs).
+
+### desert_mummy — GDD "Мумия" (Биом 2 — Пустыня)
+- Attempt 1 (current): `character_id` `4f6e5f54-0d08-4f1d-90f1-dc93e3cdba83`, `mode="v3"`, 64x64.
+  Idle rotations (8 dir): all 64x64. My own visual QA: withered bandaged undead, hollow eye
+  sockets, shambling posture, one arm unwrapped showing bone — reads clearly as a mummy, not a
+  human. Consistent across directions. **User accepted** (batch review).
+- Walk `animation_group_id`: `4db0c3af-60f3-49e4-b067-11d6eeffbb0e` (template `walk`, all 8
+  directions). `reduce_colors` against DB32 done locally (see forest_ant note on method). All 56
+  frames: **0 off-palette opaque pixels**. Atlas saved:
+  `assets/characters/desert_mummy/desert_mummy_Idle.{png,json}`.
+
+### desert_sand_spirit — GDD "Песчаный дух" (Биом 2 — Пустыня)
+- Attempt 1: `character_id` `46adb763-3481-4aa4-8656-38ceef8266bd` — **REJECTED by user**: too
+  humanoid/golem-like (had a discernible torso+arms silhouette), not amorphous enough. Deleted.
+- Attempt 2 (current): `character_id` `843a2b88-7d00-479d-bb1a-30e2d80bfe3f`, `mode="v3"`, 64x64.
+  Prompt rewritten to explicitly exclude limbs/humanoid shape: "amorphous floating... NOT a
+  humanoid, NOT standing on legs... no arms, no legs, no discernible limbs... whirling sand-vortex
+  cloud shaped loosely like a small tornado or dust devil... tattered wispy sand tendrils trailing
+  off the bottom instead of feet, hovering just above the ground". My own visual QA: east/south
+  views read as a clean spinning dust-devil funnel with no humanoid silhouette; **north view's
+  trailing tendrils split into two vertical shapes that could read as legs at a glance** — flagging
+  for explicit user check on that one direction specifically. Overall a large improvement over
+  attempt 1. **User accepted** the rewritten amorphous version (batch review).
+- Walk `animation_group_id`: `f7f9c8a8-65ff-426e-9116-ec0e57a87d86` (template `walk`, all 8
+  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
+  **0 off-palette opaque pixels**. Atlas saved:
+  `assets/characters/desert_sand_spirit/desert_sand_spirit_Idle.{png,json}`.
+
 ### winter_ice_goblin — GDD "Ледяной гоблин" (Биом 3 — Зима)
-- `character_id`: not started
-- Idle rotations: not started
-- Walk `animation_group_id`: not started
+- Attempt 1 (current): `character_id` `fc396b48-d8a3-4620-8e5c-5f78e10e7a56`, `mode="v3"`, 64x64.
+  Same accepted goblin anatomy as `forest_goblin_archer` (pointed ears, elongated jaw, hunched,
+  oversized hands/feet) with frost-blue skin and ice spikes. Idle rotations (8 dir): all 64x64.
+  My own visual QA: anatomy holds up, frost coloring reads well; **the ice shortsword is not
+  clearly visible in every direction** (same weapon-visibility risk flagged for the archer in
+  earlier attempts) — needs explicit user check, may need a prompt tweak like the archer's bow
+  fix if rejected.
+- Walk `animation_group_id`: `e9500689-0796-4276-ac74-9b2710416fd0` (template `walk`, all 8
+  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
+  **0 off-palette opaque pixels**. Atlas saved:
+  `assets/characters/winter_ice_goblin/winter_ice_goblin_Idle.{png,json}`. **Sword-visibility
+  flag from idle QA still applies — needs explicit user check.**
+
+### winter_yeti — GDD "Йети" (Биом 3 — Зима)
+- Attempt 1 (current): `character_id` `6e183d54-c864-4844-8268-32069e056a15`, `mode="v3"`,
+  humanoid, 64x64 (started with humanoid per ТЗ's suggested first try). Idle rotations (8 dir):
+  all 64x64. My own visual QA: long arms past the knees, huge fists, hunched ape-like posture,
+  tusks, thick white/pale-blue fur — reads as a brute beast, not human. **User accepted** (batch review).
+- Walk `animation_group_id`: `f659059a-760c-415e-ad1f-b082b156ceb9` (template `walk`, all 8
+  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
+  **0 off-palette opaque pixels**. Atlas saved:
+  `assets/characters/winter_yeti/winter_yeti_Idle.{png,json}`.
+
+### winter_snow_witch — GDD "Снежная ведьма" (Биом 3 — Зима)
+- Attempt 1 (current): `character_id` `7f896095-bfc7-4657-a29d-4623aa5d4497`, `mode="v3"`, 64x64.
+  Idle rotations (8 dir): all 64x64. My own visual QA: gaunt frost witch, icicle-fringed robes,
+  ice-spike hair, glowing cyan eyes, ice staff visibly gripped — reads well. **User accepted**
+  (batch review).
+- Walk `animation_group_id`: `089a8a40-bea8-4253-a5f2-4f1375a127cf` (template `walk`, all 8
+  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
+  **0 off-palette opaque pixels**. Atlas saved:
+  `assets/characters/winter_snow_witch/winter_snow_witch_Idle.{png,json}`.
+
+### winter_ice_spirit — GDD "Ледяной дух" (Биом 3 — Зима; ranged/melee behavior discrepancy
+  with `enemies.json` still unresolved, see ТЗ — did not change anatomy/pose for this, just
+  generated the base creature described)
+- Attempt 1: `character_id` `47a9ffb6-13c9-4a07-bd5b-95c8588998bc` — **REJECTED by user**: read
+  as a standing humanoid golem made of ice rather than a drifting elemental. Deleted.
+- Attempt 2 (current): `character_id` `6936c354-1971-46cd-9506-afbbd3285e9e`, `mode="v3"`, 64x64.
+  Prompt rewritten the same way as the sand spirit: "amorphous floating... NOT a humanoid, NOT
+  standing on legs... no arms, no legs, no discernible limbs... a drifting cluster of jagged ice
+  fragments orbiting a faint glowing cyan core... hovering above the ground with a small
+  cold-mist trail". My own visual QA: all 8 directions read as a loose hovering cluster of ice
+  shards with no humanoid silhouette, consistent across directions — clear improvement over
+  attempt 1. **User accepted** the rewritten amorphous version (batch review).
+- Walk `animation_group_id`: `d1b3c0f2-3c43-448d-ad06-92fe5769785f` (template `walk`, all 8
+  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
+  **0 off-palette opaque pixels**. Atlas saved:
+  `assets/characters/winter_ice_spirit/winter_ice_spirit_Idle.{png,json}`.
+
+### deadlands_skeleton — GDD "Скелет-воин" (Биом 4 — Мёртвые земли)
+- Attempt 1 (current): `character_id` `f3a9842b-091f-4f62-88d0-0256a0c376ac`, `mode="v3"`, 64x64.
+  Idle rotations (8 dir): all 64x64. My own visual QA: bare bones, dim eye glow, rusted sword +
+  cracked shield both clearly held and visible, leather strap joints — reads well. **User
+  accepted** (batch review).
+- Walk `animation_group_id`: `9d723523-ef8a-4e06-8b28-4dabbf02abc5` (template `walk`, all 8
+  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
+  **0 off-palette opaque pixels**. Atlas saved:
+  `assets/characters/deadlands_skeleton/deadlands_skeleton_Idle.{png,json}`.
+
+### deadlands_bone_golem — GDD "Костяной голем" (Биом 4 — Мёртвые земли)
+- Attempt 1: `character_id` `df52fc7e-b52d-4cfe-b7cb-a6ae6c3866c9` — **generation failed**
+  ("heavy load"), deleted/abandoned automatically (never completed).
+- Attempt 2 (current): `character_id` `8699051e-1a21-4963-9c7a-e792a51fe73d`, `mode="v3"`, 64x64.
+  Idle rotations (8 dir): all 64x64. My own visual QA: hulking asymmetric construct, oversized
+  fists — reads more like a bone-plated armored golem than loose mismatched bones/skulls (the
+  glowing rune skull core called for in the ТЗ is not clearly visible at this size) — **flagging
+  for explicit user check**, may need a prompt push toward more visible bone/skull texture if
+  rejected.
+- Walk `animation_group_id`: `186d963f-21ba-4d4c-9b90-f2c627a8358d` (template `walk`, all 8
+  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
+  **0 off-palette opaque pixels**. Atlas saved:
+  `assets/characters/deadlands_bone_golem/deadlands_bone_golem_Idle.{png,json}`.
+
+### deadlands_ghost — GDD "Призрак" (Биом 4 — Мёртвые земли; ranged/mobile vs. current
+  `CHASE` melee discrepancy with `enemies.json` still unresolved, see ТЗ — generated base
+  creature only, no pose decision made)
+- Attempt 1: `character_id` `f211da8e-4047-47a5-9aa5-a1d3a321f358` — **REJECTED by user** after
+  the full pipeline (idle+walk+atlas) was already finished: too humanoid, read as a standing
+  figure with legs rather than an amorphous floating spirit (same class of issue as the
+  sand/ice spirit attempt-1 rejections). Deleted, files removed.
+- Attempt 2: `character_id` `438c8f91-0824-4e18-ada7-4202cfc98ba9`. Prompt: "amorphous floating
+  ghost spirit, NOT a humanoid, NOT standing on legs... tattered cloud-like mass that trails off
+  into wispy streamers at the bottom instead of a body or feet". My own visual QA: **still read
+  as a standing bipedal figure** with a discernible leg silhouette — not aggressive enough a
+  rewrite. Deleted before spending more (idle rotations only, no walk/quantize wasted).
+- Attempt 3 (current): `character_id` `76029cd0-ee2d-4d02-b2c6-9a0e5d9a3eef`, `mode="v3"`, 64x64.
+  Prompt pushed much harder, explicitly banning any body silhouette: "emphatically NOT a
+  standing humanoid figure, NO legs, NO feet, NO visible body silhouette: a tattered swirling
+  shroud of translucent pale-blue ectoplasm shaped like a loose torn cloth banner twisting in
+  the air, the whole form dissolves into ragged wispy tendrils below the midpoint instead of any
+  legs or feet... silhouette reads like a floating torn flag or jellyfish, not a person". My own
+  visual QA: all 8 directions read as a shapeless hovering shroud/banner with two faint eye-lights
+  — no leg or torso silhouette in any direction, consistent across rotations. Clear improvement
+  over attempts 1-2.
+  - Walk attempt A: `animation_group_id` `6d1f03ab-b789-40f5-b4ae-aafd98e8213f` (template
+    `walk`) — **REJECTED by user**: the bipedal walk skeleton forced legs onto the ghost (clear
+    stepping legs going west; north lost the shroud entirely and became a smooth mannequin).
+    Deleted. Lesson: template `walk` is unusable for legless/floating creatures.
+  - Walk attempt B (current): `animation_group_id` `d129ba7f-e1ac-4dd3-bd3b-0f4fa207239e`,
+    `mode="v3"` custom, `frame_count=6`, `keep_first_frame=false`, all 8 directions,
+    action: "floating forward, hovering above the ground with no legs, gently bobbing up and
+    down, tattered shroud and wispy tendrils rippling and trailing behind, no walking, no steps,
+    no leg movement". v3 animation grows the canvas (84-92px), so frames were cropped back to
+    64x64 around the centred content — **0 opaque pixels clipped** in any of the 48 frames.
+    My own visual QA: shroud preserved in every direction (incl. north), no stepping legs,
+    reads as hovering/bobbing. DB32 quantized locally, **0 off-palette pixels**. Atlas saved:
+    `assets/characters/deadlands_ghost/deadlands_ghost_Idle.{png,json}`. **Awaiting user
+    confirmation.**
+
+### Batch idle+walk completion note (this session)
+Per user instruction, generated idle rotations for every non-blocked enemy in one batch, got a
+combined user review pass (which flagged `desert_sand_spirit` and `winter_ice_spirit` as reading
+too humanoid/golem-like — both regenerated with explicitly amorphous/limbless prompts and
+re-accepted), then on "стартуй анимации" ran `walk` (template mode, all 8 directions) for all 10:
+`forest_ant`, `desert_mummy`, `desert_sand_spirit`, `winter_ice_goblin`, `winter_yeti`,
+`winter_snow_witch`, `winter_ice_spirit`, `deadlands_skeleton`, `deadlands_bone_golem`,
+`deadlands_ghost`. Cross-direction color-consistency check (per the ТЗ's East/West-drift
+warning) done on all 10 before quantization — no direction stood out with an off-family hue.
+DB32 quantization for all 10 was done **locally** (`tools/local_db32_quantize.py`, nearest-color
+per opaque pixel against `assets/palettes/db32.png`) instead of via the MCP `reduce_colors` tool
+— functionally identical output (verified 0 off-palette pixels on every one), but avoided ~40
+individual MCP calls each requiring the same long raw-frame URLs to be retyped. All 10 final
+atlases (512x576, 64x64 cells, same schema as `forest_wolf`/`forest_goblin_archer`) built via
+`tools/build_enemy_atlas.py` and saved to `assets/characters/<id>/<id>_Idle.{png,json}`.
+**Not done:** `SpriteSheetLoader::load()` run against the real files — no C++ compiler in this
+shell's PATH (same limitation noted for `forest_wolf`); JSON only structurally verified against
+the goblin's/wolf's schema. Two idle-QA flags carried over unresolved into the final files
+(need explicit user confirmation, not just batch "looks fine"): `winter_ice_goblin`'s sword
+visibility, and `deadlands_bone_golem` reading more like an armored golem than loose bones.
+Still blocked on author clarification per the ТЗ: `forest_wasp_swarm`, `desert_scorpion`,
+`desert_raider` (compound rider+mount), `deadlands_necromancer` (GDD/config name mismatch), and
+all 4 bosses (need go-ahead on general direction before spending generations, `sand_naga`'s
+ranged-state prop also unconfirmed).
+
+## Walk re-do in progress (handoff, 2026-09-23)
+
+Template `walk` re-poses every character onto a standard human skeleton: hulking creatures
+shrink (forest_ant walk/idle bbox-area ratio 0.55, bone_golem 0.62) and legless ones grow legs
+(ghost). Fix in use: delete the template group, re-animate with `animate_character(mode="v3",
+action_description=..., frame_count=6, keep_first_frame=false)` per direction, then
+`tools/process_pixellab_zip.py` on the no-auth zip `https://api.pixellab.ai/mcp/characters/<id>/download`
+(crops v3's grown canvas back to 64x64 with one offset per direction, DB32-quantizes, prints
+walk/idle ratio, builds the atlas). Target ratio ~0.9-1.05.
+
+Done with v3 walk (atlas on disk is final): forest_ant (0.97), deadlands_bone_golem (0.95),
+deadlands_skeleton (1.03, NW re-rolled for a flipping shield), winter_ice_spirit (0.98, NE
+re-rolled for a darkening core), desert_mummy (1.03), deadlands_ghost (1.03).
+
+Still to finish (atlases on disk are the OLD shrunken template-walk versions):
+- winter_ice_goblin `fc396b48-d8a3-4620-8e5c-5f78e10e7a56`, v3 group `a4c2f53e-d691-4cb7-b2b4-a053724b1672`,
+  all 8 directions queued. Action: "hunched sneaking goblin walk, clawed hands low, gripping the
+  jagged ice shortsword firmly and keeping it clearly visible, body keeps the same size and
+  proportions as the standing pose".
+- winter_snow_witch `7f896095-bfc7-4657-a29d-4623aa5d4497`, v3 group `f9189508-8db5-4ddf-8f3a-d7f954176918`,
+  7/8 queued — **south-west NOT queued yet**. Action: "slow gliding walk with long flowing frozen
+  robes swaying, gripping the ice-crystal staff firmly and keeping it clearly visible, body keeps
+  the same size and proportions as the standing pose".
+- desert_sand_spirit `843a2b88-7d00-479d-bb1a-30e2d80bfe3f`: old template walk deleted, **no v3
+  walk queued yet** (all 8 directions). Use a floating action like the ghost/ice spirit:
+  "drifting forward while hovering, sand vortex swirling and spinning, no legs, no walking, no
+  steps, keeps the same size as the idle pose".
+- winter_yeti (0.87) and forest_wolf (dog template, 0.89) left on template walk — within range.
+After each finishes: run process_pixellab_zip.py, eyeball the preview for per-direction
+glitches, update the entry above.
