@@ -43,7 +43,7 @@
         "type": "animation",
         "frame_count": 6,
         "animation": "walk",
-        "animation_group_id": "089a8a40-bea8-4253-a5f2-4f1375a127cf",
+        "animation_group_id": "f9189508-8db5-4ddf-8f3a-d7f954176918",
         "direction": "south"
       },
       {
@@ -51,7 +51,7 @@
         "type": "animation",
         "frame_count": 6,
         "animation": "walk",
-        "animation_group_id": "089a8a40-bea8-4253-a5f2-4f1375a127cf",
+        "animation_group_id": "f9189508-8db5-4ddf-8f3a-d7f954176918",
         "direction": "south-east"
       },
       {
@@ -59,7 +59,7 @@
         "type": "animation",
         "frame_count": 6,
         "animation": "walk",
-        "animation_group_id": "089a8a40-bea8-4253-a5f2-4f1375a127cf",
+        "animation_group_id": "f9189508-8db5-4ddf-8f3a-d7f954176918",
         "direction": "east"
       },
       {
@@ -67,7 +67,7 @@
         "type": "animation",
         "frame_count": 6,
         "animation": "walk",
-        "animation_group_id": "089a8a40-bea8-4253-a5f2-4f1375a127cf",
+        "animation_group_id": "f9189508-8db5-4ddf-8f3a-d7f954176918",
         "direction": "north-east"
       },
       {
@@ -75,7 +75,7 @@
         "type": "animation",
         "frame_count": 6,
         "animation": "walk",
-        "animation_group_id": "089a8a40-bea8-4253-a5f2-4f1375a127cf",
+        "animation_group_id": "f9189508-8db5-4ddf-8f3a-d7f954176918",
         "direction": "north"
       },
       {
@@ -83,7 +83,7 @@
         "type": "animation",
         "frame_count": 6,
         "animation": "walk",
-        "animation_group_id": "089a8a40-bea8-4253-a5f2-4f1375a127cf",
+        "animation_group_id": "f9189508-8db5-4ddf-8f3a-d7f954176918",
         "direction": "north-west"
       },
       {
@@ -91,7 +91,7 @@
         "type": "animation",
         "frame_count": 6,
         "animation": "walk",
-        "animation_group_id": "089a8a40-bea8-4253-a5f2-4f1375a127cf",
+        "animation_group_id": "f9189508-8db5-4ddf-8f3a-d7f954176918",
         "direction": "west"
       },
       {
@@ -99,7 +99,7 @@
         "type": "animation",
         "frame_count": 6,
         "animation": "walk",
-        "animation_group_id": "089a8a40-bea8-4253-a5f2-4f1375a127cf",
+        "animation_group_id": "f9189508-8db5-4ddf-8f3a-d7f954176918",
         "direction": "south-west"
       }
     ]

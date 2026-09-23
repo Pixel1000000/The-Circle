@@ -303,9 +303,16 @@ via `reduce_colors` against `assets/palettes/db32.png`).
   Idle rotations (8 dir): all 64x64. My own visual QA: gaunt frost witch, icicle-fringed robes,
   ice-spike hair, glowing cyan eyes, ice staff visibly gripped — reads well. **User accepted**
   (batch review).
-- Walk `animation_group_id`: `089a8a40-bea8-4253-a5f2-4f1375a127cf` (template `walk`, all 8
-  directions). `reduce_colors` against DB32 done locally (see forest_ant note). All 56 frames:
-  **0 off-palette opaque pixels**. Atlas saved:
+- Walk (superseded): template `walk` group `089a8a40-...` — shrank the witch; deleted.
+- Walk (current): `animation_group_id` `f9189508-8db5-4ddf-8f3a-d7f954176918`, `mode="v3"` custom,
+  `frame_count=6`, `keep_first_frame=false`, all 8 directions, action "slow gliding walk with
+  long flowing frozen robes swaying, gripping the ice-crystal staff firmly and keeping it
+  clearly visible, body keeps the same size and proportions as the standing pose". **East
+  re-rolled twice**: idle east hides the staff behind the body and v3 kept making it pop in
+  mid-cycle; final east uses "...the staff stays on the far side hidden behind the body in every
+  frame exactly as in the standing pose, no new objects appear..." (one faint staff edge in a
+  single frame, acceptable). 0 px clipped, walk/idle ratio **1.04**, DB32 0 off-palette. Rebuilt
+  via `tools/process_pixellab_zip.py`. Atlas:
   `assets/characters/winter_snow_witch/winter_snow_witch_Idle.{png,json}`.
 
 ### winter_ice_spirit — GDD "Ледяной дух" (Биом 3 — Зима; ranged/melee behavior discrepancy
@@ -410,7 +417,7 @@ Still blocked on author clarification per the ТЗ: `forest_wasp_swarm`, `desert
 all 4 bosses (need go-ahead on general direction before spending generations, `sand_naga`'s
 ranged-state prop also unconfirmed).
 
-## Walk re-do in progress (handoff, 2026-09-23)
+## Walk re-do (handoff, 2026-09-23 — complete)
 
 Template `walk` re-poses every character onto a standard human skeleton: hulking creatures
 shrink (forest_ant walk/idle bbox-area ratio 0.55, bone_golem 0.62) and legless ones grow legs
@@ -423,19 +430,11 @@ walk/idle ratio, builds the atlas). Target ratio ~0.9-1.05.
 Done with v3 walk (atlas on disk is final): forest_ant (0.97), deadlands_bone_golem (0.95),
 deadlands_skeleton (1.03, NW re-rolled for a flipping shield), winter_ice_spirit (0.98, NE
 re-rolled for a darkening core), desert_mummy (1.03), deadlands_ghost (1.03), winter_ice_goblin
-(0.99, 13 px clipped, all 8 dirs match idle facing, sword visible in every direction),
-desert_sand_spirit (1.00; S/SE/SW tendril sway flagged for user check).
+(0.99, all 8 dirs match idle facing, sword visible), desert_sand_spirit (1.00; S/SE/SW tendril
+sway flagged for user check), winter_snow_witch (1.04, east re-rolled twice for a popping staff).
+To re-roll one direction: `delete_animation(character_id, animation_group_id=..., direction=...)`,
+then `animate_character` into the same group with `animation_name="walk"`.
 
-Still to finish (atlases on disk are the OLD shrunken template-walk versions):
-- winter_snow_witch `7f896095-bfc7-4657-a29d-4623aa5d4497`, v3 group `f9189508-8db5-4ddf-8f3a-d7f954176918`,
-  7/8 directions done and good (ratio 1.06, 0 px clipped). Action: "slow gliding walk with long
-  flowing frozen robes swaying, gripping the ice-crystal staff firmly and keeping it clearly
-  visible, body keeps the same size and proportions as the standing pose". **East re-rolled
-  twice**: idle east hides the staff behind the body and v3 kept making it pop in mid-cycle;
-  third try uses "the staff stays on the far side hidden behind the body in every frame exactly
-  as in the standing pose, no new objects appear" (delete one direction with
-  `delete_animation(..., animation_group_id=..., direction="east")`, then re-animate into the
-  same group).
+Walk re-do complete — no v3 jobs outstanding.
 - winter_yeti (0.87) and forest_wolf (dog template, 0.89) left on template walk — within range.
-After each finishes: run process_pixellab_zip.py, eyeball the preview for per-direction
-glitches, update the entry above.
+Pending user checks: winter_ice_goblin sword visibility, desert_sand_spirit S/SE/SW tendrils.
