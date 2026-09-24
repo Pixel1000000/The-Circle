@@ -1,0 +1,108 @@
+{
+  "character": {
+    "id": "8cd350db-23cb-4e15-88c7-738c1785eafa",
+    "name": "Forest Ant",
+    "prompt": "living tree guardian Ent, bark-textured limbs, knotted hollow trunk head with glowing amber eyes, moss and leaves, root feet/hands, no weapon",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "forest_ant_Idle.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 512,
+      "height": 576
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9be707cb-ad2d-4e8f-8e81-013a5c814b2f",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9be707cb-ad2d-4e8f-8e81-013a5c814b2f",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9be707cb-ad2d-4e8f-8e81-013a5c814b2f",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9be707cb-ad2d-4e8f-8e81-013a5c814b2f",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9be707cb-ad2d-4e8f-8e81-013a5c814b2f",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9be707cb-ad2d-4e8f-8e81-013a5c814b2f",
+        "direction": "north-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9be707cb-ad2d-4e8f-8e81-013a5c814b2f",
+        "direction": "west"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "9be707cb-ad2d-4e8f-8e81-013a5c814b2f",
+        "direction": "south-west"
+      }
+    ]
+  },
+  "export_version": "1.0"
+}

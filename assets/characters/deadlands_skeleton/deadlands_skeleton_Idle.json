@@ -1,0 +1,108 @@
+{
+  "character": {
+    "id": "f3a9842b-091f-4f62-88d0-0256a0c376ac",
+    "name": "Deadlands Skeleton",
+    "prompt": "bare bone skeletal warrior, notched rusted sword and cracked wooden shield, dim eye glow",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "deadlands_skeleton_Idle.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 512,
+      "height": 576
+    },
+    "columns": 8,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "144d3bd2-bc92-4c14-b40c-6ec73df235bd",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "144d3bd2-bc92-4c14-b40c-6ec73df235bd",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "144d3bd2-bc92-4c14-b40c-6ec73df235bd",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "144d3bd2-bc92-4c14-b40c-6ec73df235bd",
+        "direction": "north-east"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "144d3bd2-bc92-4c14-b40c-6ec73df235bd",
+        "direction": "north"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "144d3bd2-bc92-4c14-b40c-6ec73df235bd",
+        "direction": "north-west"
+      },
+      {
+        "row": 7,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "144d3bd2-bc92-4c14-b40c-6ec73df235bd",
+        "direction": "west"
+      },
+      {
+        "row": 8,
+        "type": "animation",
+        "frame_count": 6,
+        "animation": "walk",
+        "animation_group_id": "144d3bd2-bc92-4c14-b40c-6ec73df235bd",
+        "direction": "south-west"
+      }
+    ]
+  },
+  "export_version": "1.0"
+}
